@@ -1,5 +1,9 @@
 # Herramientas internas (no se sube)
 .claude/
+/.vscode/
+
+# Notas internas, no se comparten en el repo
+docs/todo/
 
 # Entorno local
 .env
