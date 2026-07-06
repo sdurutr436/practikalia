@@ -17,11 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtSecurityHandlers implements AuthenticationEntryPoint, AccessDeniedHandler {
 
-    private final ObjectMapper objectMapper;
-
-    public JwtSecurityHandlers(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
