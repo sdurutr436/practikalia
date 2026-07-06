@@ -31,11 +31,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        Usuario usuario = usuarioService.login(request, httpRequest.getRemoteAddr());
-        String token = usuarioService.emitirToken(usuario);
+        LoginResultado resultado = usuarioService.login(request, httpRequest.getRemoteAddr());
+        UsuarioDto usuario = resultado.usuario();
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, construirCookie(token, DURACION_COOKIE).toString())
-                .body(new LoginResponse(usuario.getRol(), usuario.isEsAdmin(), usuario.isDebeCambiarContrasena()));
+                .header(HttpHeaders.SET_COOKIE, construirCookie(resultado.token(), DURACION_COOKIE).toString())
+                .body(new LoginResponse(usuario.rol(), usuario.esAdmin(), usuario.debeCambiarContrasena()));
     }
 
     @PostMapping("/logout")
@@ -47,9 +47,9 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<MeResponse> me(Authentication authentication) {
-        Usuario usuario = usuarioService.buscarPorCorreo(authentication.getName());
+        UsuarioDto usuario = usuarioService.buscarPorCorreo(authentication.getName());
         return ResponseEntity.ok(
-                new MeResponse(usuario.getCorreo(), usuario.getRol(), usuario.isEsAdmin(), usuario.isDebeCambiarContrasena()));
+                new MeResponse(usuario.correo(), usuario.rol(), usuario.esAdmin(), usuario.debeCambiarContrasena()));
     }
 
     @PostMapping("/cambiar-contrasena")

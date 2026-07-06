@@ -41,10 +41,8 @@ class UsuarioServiceTest {
                 "iesejemplo.es");
     }
 
-    private Usuario profesor() {
-        Usuario profesor = new Usuario("prof@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.PROFESOR);
-        profesor.setId(1L);
-        return profesor;
+    private UsuarioDto profesor() {
+        return new UsuarioDto("prof@iesejemplo.es", Rol.PROFESOR, false, false);
     }
 
     @Test
@@ -92,8 +90,7 @@ class UsuarioServiceTest {
 
     @Test
     void esAdminSiPuedeCrearOtroProfesor() {
-        Usuario admin = profesor();
-        admin.setEsAdmin(true);
+        UsuarioDto admin = new UsuarioDto("prof@iesejemplo.es", Rol.PROFESOR, true, false);
         when(usuarioRepository.findByCorreo("otro@iesejemplo.es")).thenReturn(Optional.empty());
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -105,7 +102,8 @@ class UsuarioServiceTest {
 
     @Test
     void rechazaAltaConCorreoYaRegistrado() {
-        when(usuarioRepository.findByCorreo("ana@iesejemplo.es")).thenReturn(Optional.of(profesor()));
+        Usuario existente = new Usuario("ana@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO);
+        when(usuarioRepository.findByCorreo("ana@iesejemplo.es")).thenReturn(Optional.of(existente));
 
         assertThatThrownBy(() -> usuarioService.crearUsuario(
                 new CrearUsuarioRequest("ana@iesejemplo.es", Rol.ALUMNO), profesor()))
@@ -144,10 +142,10 @@ class UsuarioServiceTest {
         usuario.setIntentosFallidos(3);
         when(usuarioRepository.findByCorreo("ana@iesejemplo.es")).thenReturn(Optional.of(usuario));
 
-        Usuario resultado = usuarioService.login(new LoginRequest("ana@iesejemplo.es", "Correcta123!", ""), "127.0.0.1");
+        usuarioService.login(new LoginRequest("ana@iesejemplo.es", "Correcta123!", ""), "127.0.0.1");
 
-        assertThat(resultado.getIntentosFallidos()).isZero();
-        assertThat(resultado.getBloqueadoHasta()).isNull();
+        assertThat(usuario.getIntentosFallidos()).isZero();
+        assertThat(usuario.getBloqueadoHasta()).isNull();
     }
 
     @Test
@@ -158,22 +156,29 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void emitirTokenUsaTokenRestringidoSiDebeCambiarContrasena() {
-        Usuario usuario = profesor();
+    void loginConDebeCambiarContrasenaEmiteTokenRestringido() {
+        Usuario usuario = new Usuario("ana@iesejemplo.es", passwordEncoder.encode("Correcta123!"), Rol.ALUMNO);
         usuario.setDebeCambiarContrasena(true);
+        when(usuarioRepository.findByCorreo("ana@iesejemplo.es")).thenReturn(Optional.of(usuario));
         when(jwtService.generarTokenRestringido(usuario)).thenReturn("token-restringido");
 
-        assertThat(usuarioService.emitirToken(usuario)).isEqualTo("token-restringido");
+        LoginResultado resultado = usuarioService.login(new LoginRequest("ana@iesejemplo.es", "Correcta123!", ""), "127.0.0.1");
+
+        assertThat(resultado.token()).isEqualTo("token-restringido");
+        assertThat(resultado.usuario().debeCambiarContrasena()).isTrue();
         verify(jwtService, never()).generarTokenNormal(any());
     }
 
     @Test
-    void emitirTokenUsaTokenNormalSiNoDebeCambiarContrasena() {
-        Usuario usuario = profesor();
+    void loginSinDebeCambiarContrasenaEmiteTokenNormal() {
+        Usuario usuario = new Usuario("ana@iesejemplo.es", passwordEncoder.encode("Correcta123!"), Rol.ALUMNO);
         usuario.setDebeCambiarContrasena(false);
+        when(usuarioRepository.findByCorreo("ana@iesejemplo.es")).thenReturn(Optional.of(usuario));
         when(jwtService.generarTokenNormal(usuario)).thenReturn("token-normal");
 
-        assertThat(usuarioService.emitirToken(usuario)).isEqualTo("token-normal");
+        LoginResultado resultado = usuarioService.login(new LoginRequest("ana@iesejemplo.es", "Correcta123!", ""), "127.0.0.1");
+
+        assertThat(resultado.token()).isEqualTo("token-normal");
         verify(jwtService, never()).generarTokenRestringido(any());
     }
 

@@ -62,10 +62,10 @@ public class UsuarioService {
     }
 
     @Transactional
-    public CrearUsuarioResponse crearUsuario(CrearUsuarioRequest request, Usuario creador) {
+    public CrearUsuarioResponse crearUsuario(CrearUsuarioRequest request, UsuarioDto creador) {
         String correo = request.correo().toLowerCase();
 
-        if (request.rol() == Rol.PROFESOR && !creador.isEsAdmin()) {
+        if (request.rol() == Rol.PROFESOR && !creador.esAdmin()) {
             throw UsuarioException.accesoDenegado();
         }
         if (!correoPermitido(correo)) {
@@ -83,7 +83,7 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario login(LoginRequest request, String ipRemota) {
+    public LoginResultado login(LoginRequest request, String ipRemota) {
         String correo = request.correo().toLowerCase();
 
         if (!request.web().isBlank()) {
@@ -115,22 +115,20 @@ public class UsuarioService {
         usuario.setIntentosFallidos(0);
         usuario.setBloqueadoHasta(null);
         usuarioRepository.save(usuario);
-        return usuario;
-    }
 
-    public String emitirToken(Usuario usuario) {
-        return usuario.isDebeCambiarContrasena()
+        String token = usuario.isDebeCambiarContrasena()
                 ? jwtService.generarTokenRestringido(usuario)
                 : jwtService.generarTokenNormal(usuario);
+        return new LoginResultado(token, UsuarioDto.de(usuario));
     }
 
-    public Usuario buscarPorCorreo(String correo) {
-        return usuarioRepository.findByCorreo(correo).orElseThrow(UsuarioException::credencialesInvalidas);
+    public UsuarioDto buscarPorCorreo(String correo) {
+        return UsuarioDto.de(buscarUsuarioPorCorreo(correo));
     }
 
     @Transactional
     public void cambiarContrasena(String correo, CambiarContrasenaRequest request) {
-        Usuario usuario = buscarPorCorreo(correo);
+        Usuario usuario = buscarUsuarioPorCorreo(correo);
 
         if (!passwordEncoder.matches(request.contrasenaActual(), usuario.getContrasenaHash())) {
             throw UsuarioException.contrasenaActualIncorrecta();
@@ -150,6 +148,10 @@ public class UsuarioService {
             usuario.setBloqueadoHasta(Instant.now().plus(DURACION_BLOQUEO));
         }
         usuarioRepository.save(usuario);
+    }
+
+    private Usuario buscarUsuarioPorCorreo(String correo) {
+        return usuarioRepository.findByCorreo(correo).orElseThrow(UsuarioException::credencialesInvalidas);
     }
 
     private boolean correoPermitido(String correo) {

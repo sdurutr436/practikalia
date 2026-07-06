@@ -22,7 +22,7 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<CrearUsuarioResponse> crear(Authentication authentication, @Valid @RequestBody CrearUsuarioRequest request) {
-        Usuario creador = usuarioService.buscarPorCorreo(authentication.getName());
+        UsuarioDto creador = usuarioService.buscarPorCorreo(authentication.getName());
         CrearUsuarioResponse response = usuarioService.crearUsuario(request, creador);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
