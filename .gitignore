@@ -1,0 +1,64 @@
+# Herramientas internas (no se sube)
+.claude/
+
+# Entorno local
+.env
+
+# --- Backend (Maven / Spring Boot) ---
+backend/HELP.md
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+!backend/**/src/main/**/target/
+!backend/**/src/test/**/target/
+backend/build/
+!backend/**/src/main/**/build/
+!backend/**/src/test/**/build/
+backend/.vscode/
+backend/.factorypath
+backend/.springBeans
+backend/.sts4-cache
+backend/.apt_generated
+backend/.nb-gradle/
+backend/nbproject/private/
+backend/nbbuild/
+backend/nbdist/
+backend/dist/
+
+# --- Frontend (Angular) ---
+frontend/dist
+frontend/.angular/cache
+frontend/.sass-cache/
+frontend/connect.lock
+frontend/coverage
+frontend/libpeerconnection.log
+frontend/testem.log
+frontend/typings
+frontend/__screenshots__/
+frontend/npm-debug.log
+frontend/yarn-error.log
+frontend/.history/*
+frontend/.vscode/*
+!frontend/.vscode/settings.json
+!frontend/.vscode/tasks.json
+!frontend/.vscode/launch.json
+!frontend/.vscode/extensions.json
+!frontend/.vscode/mcp.json
+
+# --- Node ---
+node_modules/
+
+# --- Editores / IDEs (comunes) ---
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.c9/
+*.launch
+*.sublime-workspace
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
