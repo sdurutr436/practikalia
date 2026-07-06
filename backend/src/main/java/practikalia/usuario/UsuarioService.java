@@ -1,5 +1,8 @@
 package practikalia.usuario;
 
+import practikalia.usuario.correo.CorreoPermitidoRepository;
+import practikalia.usuario.jwt.JwtService;
+
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.ArrayList;

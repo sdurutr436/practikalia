@@ -1,5 +1,8 @@
 package practikalia.usuario;
 
+import practikalia.usuario.correo.CorreoPermitidoRepository;
+import practikalia.usuario.jwt.JwtService;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

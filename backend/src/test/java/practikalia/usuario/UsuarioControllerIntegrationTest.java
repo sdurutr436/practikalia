@@ -1,5 +1,8 @@
 package practikalia.usuario;
 
+import practikalia.usuario.correo.CorreoPermitido;
+import practikalia.usuario.correo.CorreoPermitidoRepository;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

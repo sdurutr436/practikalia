@@ -1,5 +1,7 @@
 package practikalia.usuario;
 
+import practikalia.usuario.jwt.JwtService;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;

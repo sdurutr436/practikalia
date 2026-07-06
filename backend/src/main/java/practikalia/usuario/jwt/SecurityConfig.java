@@ -1,4 +1,4 @@
-package practikalia.usuario;
+package practikalia.usuario.jwt;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

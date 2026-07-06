@@ -1,4 +1,6 @@
-package practikalia.usuario;
+package practikalia.usuario.jwt;
+
+import practikalia.usuario.Usuario;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

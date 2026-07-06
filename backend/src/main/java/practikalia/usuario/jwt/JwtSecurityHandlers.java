@@ -1,4 +1,6 @@
-package practikalia.usuario;
+package practikalia.usuario.jwt;
+
+import practikalia.usuario.ErrorBody;
 
 import java.io.IOException;
 

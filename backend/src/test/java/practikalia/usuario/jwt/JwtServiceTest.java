@@ -1,4 +1,7 @@
-package practikalia.usuario;
+package practikalia.usuario.jwt;
+
+import practikalia.usuario.Rol;
+import practikalia.usuario.Usuario;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

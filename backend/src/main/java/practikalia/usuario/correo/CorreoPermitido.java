@@ -1,4 +1,4 @@
-package practikalia.usuario;
+package practikalia.usuario.correo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

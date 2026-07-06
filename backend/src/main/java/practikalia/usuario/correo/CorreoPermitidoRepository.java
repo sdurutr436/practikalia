@@ -1,4 +1,4 @@
-package practikalia.usuario;
+package practikalia.usuario.correo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
