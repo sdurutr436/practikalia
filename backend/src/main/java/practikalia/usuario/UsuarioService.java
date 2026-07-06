@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +42,6 @@ public class UsuarioService {
     private final CorreoPermitidoRepository correoPermitidoRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final ApplicationEventPublisher eventPublisher;
     private final Set<String> dominiosPermitidos;
 
     public UsuarioService(
@@ -51,13 +49,11 @@ public class UsuarioService {
             CorreoPermitidoRepository correoPermitidoRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            ApplicationEventPublisher eventPublisher,
             @Value("${allowed.domains:}") String dominiosPermitidosCsv) {
         this.usuarioRepository = usuarioRepository;
         this.correoPermitidoRepository = correoPermitidoRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
-        this.eventPublisher = eventPublisher;
         this.dominiosPermitidos = Arrays.stream(dominiosPermitidosCsv.split(","))
                 .map(String::trim)
                 .map(String::toLowerCase)
@@ -82,8 +78,6 @@ public class UsuarioService {
         String contrasenaTemporal = generarContrasenaTemporal();
         Usuario usuario = new Usuario(correo, passwordEncoder.encode(contrasenaTemporal), request.rol());
         usuarioRepository.save(usuario);
-
-        eventPublisher.publishEvent(new ContrasenaTemporalGeneradaEvent(usuario.getId(), correo, contrasenaTemporal));
 
         return new CrearUsuarioResponse(usuario.getId(), usuario.getCorreo(), usuario.getRol(), contrasenaTemporal);
     }

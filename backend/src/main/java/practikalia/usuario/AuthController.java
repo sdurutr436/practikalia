@@ -1,5 +1,7 @@
 package practikalia.usuario;
 
+import practikalia.usuario.jwt.JwtService;
+
 import java.time.Duration;
 
 import org.springframework.http.HttpHeaders;
@@ -19,7 +21,6 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private static final String COOKIE_NAME = "practikalia_token";
     private static final Duration DURACION_COOKIE = Duration.ofDays(7);
 
     private final UsuarioService usuarioService;
@@ -58,7 +59,7 @@ public class AuthController {
     }
 
     private ResponseCookie construirCookie(String token, Duration duracion) {
-        return ResponseCookie.from(COOKIE_NAME, token)
+        return ResponseCookie.from(JwtService.COOKIE_NAME, token)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")

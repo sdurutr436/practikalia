@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -30,7 +29,6 @@ class UsuarioServiceTest {
     private CorreoPermitidoRepository correoPermitidoRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private JwtService jwtService;
-    private ApplicationEventPublisher eventPublisher;
     private UsuarioService usuarioService;
 
     @BeforeEach
@@ -38,9 +36,8 @@ class UsuarioServiceTest {
         usuarioRepository = mock(UsuarioRepository.class);
         correoPermitidoRepository = mock(CorreoPermitidoRepository.class);
         jwtService = mock(JwtService.class);
-        eventPublisher = mock(ApplicationEventPublisher.class);
         usuarioService = new UsuarioService(
-                usuarioRepository, correoPermitidoRepository, passwordEncoder, jwtService, eventPublisher,
+                usuarioRepository, correoPermitidoRepository, passwordEncoder, jwtService,
                 "iesejemplo.es");
     }
 
@@ -61,7 +58,6 @@ class UsuarioServiceTest {
         assertThat(response.correo()).isEqualTo("ana@iesejemplo.es");
         assertThat(response.contrasenaTemporal()).hasSize(12);
         assertThat(POLITICA.matcher(response.contrasenaTemporal()).matches()).isTrue();
-        verify(eventPublisher).publishEvent(any(ContrasenaTemporalGeneradaEvent.class));
     }
 
     @Test

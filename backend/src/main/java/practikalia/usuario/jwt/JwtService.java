@@ -27,6 +27,7 @@ import io.jsonwebtoken.security.Keys;
 public class JwtService {
 
     public static final String AUTORIDAD_CAMBIO_PENDIENTE = "CAMBIO_CONTRASENA_PENDIENTE";
+    public static final String COOKIE_NAME = "practikalia_token";
 
     private static final String CLAIM_AUTHORITIES = "authorities";
     private static final Duration EXPIRACION_RESTRINGIDA = Duration.ofMinutes(10);

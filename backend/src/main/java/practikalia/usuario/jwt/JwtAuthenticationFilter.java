@@ -19,8 +19,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    static final String COOKIE_NAME = "practikalia_token";
-
     private final JwtService jwtService;
 
     public JwtAuthenticationFilter(JwtService jwtService) {
@@ -46,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return Optional.empty();
         }
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> COOKIE_NAME.equals(cookie.getName()))
+                .filter(cookie -> JwtService.COOKIE_NAME.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
     }
