@@ -317,7 +317,7 @@ Líneas activas de trabajo:
 
 ## Licencia
 
-Pendiente de definir.
+[MIT](../LICENSE).
 
 La intención del proyecto es que sea open source y desplegable por cualquier centro en su propia infraestructura.
 
