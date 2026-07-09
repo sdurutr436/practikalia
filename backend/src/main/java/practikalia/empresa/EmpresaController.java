@@ -1,9 +1,5 @@
 package practikalia.empresa;
 
-import practikalia.usuario.Rol;
-import practikalia.usuario.UsuarioDto;
-import practikalia.usuario.UsuarioService;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +21,9 @@ import jakarta.validation.Valid;
 public class EmpresaController {
 
     private final EmpresaService empresaService;
-    private final UsuarioService usuarioService;
 
-    public EmpresaController(EmpresaService empresaService, UsuarioService usuarioService) {
+    public EmpresaController(EmpresaService empresaService) {
         this.empresaService = empresaService;
-        this.usuarioService = usuarioService;
     }
 
     @GetMapping
@@ -63,7 +57,7 @@ public class EmpresaController {
     }
 
     private boolean esProfesor(Authentication authentication) {
-        UsuarioDto llamante = usuarioService.buscarPorCorreo(authentication.getName());
-        return llamante.rol() == Rol.PROFESOR;
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_PROFESOR"));
     }
 }

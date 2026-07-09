@@ -58,7 +58,7 @@ public class EmpresaService {
     public EmpresaProfesorDto crear(CrearEmpresaRequest request, String correoCreador) {
         Etiqueta sector = buscarEtiqueta(request.sectorId());
         List<Etiqueta> etiquetas = buscarEtiquetas(request.etiquetaIds());
-        Usuario creador = usuarioRepository.findByCorreo(correoCreador).orElseThrow(EmpresaException::noEncontrada);
+        Usuario creador = usuarioRepository.findByCorreo(correoCreador).orElseThrow();
 
         Empresa empresa = new Empresa(request.nombre(), request.descripcion(), request.direccion(), sector,
                 request.observaciones(), request.contactoNombre(), request.contactoTelefono(),
