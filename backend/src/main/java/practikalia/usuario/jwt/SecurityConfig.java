@@ -32,6 +32,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/cambiar-contrasena").hasAnyAuthority(
                                 JwtService.AUTORIDAD_CAMBIO_PENDIENTE, "ROLE_ALUMNO", "ROLE_PROFESOR")
                         .requestMatchers("/api/usuarios/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .anyRequest().hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN"))
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'")))
