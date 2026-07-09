@@ -27,6 +27,7 @@ backend/nbproject/private/
 backend/nbbuild/
 backend/nbdist/
 backend/dist/
+backend/uploads/
 
 # --- Frontend (Angular) ---
 frontend/dist
