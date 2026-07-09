@@ -37,6 +37,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/empresas/*/asignaciones").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/asignaciones").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/asignaciones/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .anyRequest().hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN"))
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'")))
