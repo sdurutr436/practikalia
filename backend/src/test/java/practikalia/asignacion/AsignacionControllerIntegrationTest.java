@@ -1,0 +1,153 @@
+package practikalia.asignacion;
+
+import practikalia.empresa.Empresa;
+import practikalia.empresa.EmpresaRepository;
+import practikalia.etiqueta.Etiqueta;
+import practikalia.etiqueta.EtiquetaRepository;
+import practikalia.usuario.Rol;
+import practikalia.usuario.Usuario;
+import practikalia.usuario.UsuarioRepository;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+class AsignacionControllerIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    @Autowired
+    private EtiquetaRepository etiquetaRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    @Autowired
+    private EmpresaRepository empresaRepository;
+    @Autowired
+    private AsignacionRepository asignacionRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private Usuario profesor;
+    private Usuario alumno;
+    private Usuario otroAlumno;
+    private Empresa empresa;
+
+    @BeforeEach
+    void setUp() {
+        Etiqueta sector = etiquetaRepository.save(new Etiqueta("Tecnología"));
+        profesor = usuarioRepository.save(new Usuario("prof@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.PROFESOR));
+        alumno = usuarioRepository.save(new Usuario("alumno@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
+        otroAlumno = usuarioRepository.save(new Usuario("otro@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
+        empresa = empresaRepository.save(new Empresa("Acme", "d", "dir", sector, "obs", "c", "t", "e", profesor));
+    }
+
+    private CrearAsignacionRequest request() {
+        return new CrearAsignacionRequest(alumno.getId(), empresa.getId(), profesor.getId(), LocalDate.of(2026, 1, 15));
+    }
+
+    @Test
+    void profesorCreaAsignacion() throws Exception {
+        mockMvc.perform(post("/api/asignaciones")
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.alumnoCorreo").value("alumno@iesejemplo.es"))
+                .andExpect(jsonPath("$.tutorCentroCorreo").value("prof@iesejemplo.es"));
+    }
+
+    @Test
+    void alumnoNoPuedeCrearAsignacionDevuelve403() throws Exception {
+        mockMvc.perform(post("/api/asignaciones")
+                        .with(csrf())
+                        .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request())))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("ACCESO_DENEGADO"));
+    }
+
+    @Test
+    void alumnoConsultaSusPropiasAsignaciones() throws Exception {
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+
+        mockMvc.perform(get("/api/alumnos/" + alumno.getId() + "/asignaciones")
+                        .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void alumnoConsultandoAsignacionesDeOtroAlumnoDevuelve403() throws Exception {
+        mockMvc.perform(get("/api/alumnos/" + alumno.getId() + "/asignaciones")
+                        .with(user(otroAlumno.getCorreo()).authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("ACCESO_DENEGADO"));
+    }
+
+    @Test
+    void profesorConsultaAsignacionesDeCualquierAlumno() throws Exception {
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+
+        mockMvc.perform(get("/api/alumnos/" + alumno.getId() + "/asignaciones")
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void profesorConsultaAsignacionesDeUnaEmpresa() throws Exception {
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+
+        mockMvc.perform(get("/api/empresas/" + empresa.getId() + "/asignaciones")
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].empresaNombre").value("Acme"));
+    }
+
+    @Test
+    void alumnoConsultandoAsignacionesDeEmpresaDevuelve403() throws Exception {
+        mockMvc.perform(get("/api/empresas/" + empresa.getId() + "/asignaciones")
+                        .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void profesorCierraAsignacion() throws Exception {
+        Asignacion asignacion = asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+
+        mockMvc.perform(put("/api/asignaciones/" + asignacion.getId())
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fechaFin").value("2026-06-30"));
+    }
+}
