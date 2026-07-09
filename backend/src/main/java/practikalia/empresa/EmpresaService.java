@@ -5,6 +5,7 @@ import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -104,9 +105,12 @@ public class EmpresaService {
     }
 
     private List<Etiqueta> buscarEtiquetas(List<Long> ids) {
-        if (ids == null) {
-            return List.of();
+        List<Etiqueta> etiquetas = new ArrayList<>();
+        if (ids != null) {
+            for (Long id : ids) {
+                etiquetas.add(buscarEtiqueta(id));
+            }
         }
-        return ids.stream().map(this::buscarEtiqueta).toList();
+        return etiquetas;
     }
 }
