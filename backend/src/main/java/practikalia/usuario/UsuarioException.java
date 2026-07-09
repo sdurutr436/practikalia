@@ -1,24 +1,13 @@
 package practikalia.usuario;
 
+import practikalia.common.ApiException;
+
 import org.springframework.http.HttpStatus;
 
-public class UsuarioException extends RuntimeException {
-
-    private final HttpStatus status;
-    private final String codigo;
+public class UsuarioException extends ApiException {
 
     private UsuarioException(HttpStatus status, String codigo, String mensaje) {
-        super(mensaje);
-        this.status = status;
-        this.codigo = codigo;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getCodigo() {
-        return codigo;
+        super(status, codigo, mensaje);
     }
 
     public static UsuarioException credencialesInvalidas() {
