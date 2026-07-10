@@ -4,8 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CrearReviewRequest(
-        @NotNull Long empresaId,
-        @NotNull Long alumnoId,
+        @NotNull Long asignacionId,
         @NotBlank String contenido,
         int calificacion) {
 }

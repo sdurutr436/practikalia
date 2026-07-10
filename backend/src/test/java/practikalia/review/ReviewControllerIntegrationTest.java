@@ -6,6 +6,8 @@ import practikalia.empresa.Empresa;
 import practikalia.empresa.EmpresaRepository;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.etiqueta.EtiquetaRepository;
+import practikalia.grado.Grado;
+import practikalia.grado.GradoRepository;
 import practikalia.usuario.Rol;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioRepository;
@@ -50,6 +52,8 @@ class ReviewControllerIntegrationTest {
     @Autowired
     private AsignacionRepository asignacionRepository;
     @Autowired
+    private GradoRepository gradoRepository;
+    @Autowired
     private ReviewRepository reviewRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -58,6 +62,7 @@ class ReviewControllerIntegrationTest {
     private Usuario otroProfesor;
     private Usuario alumno;
     private Empresa empresa;
+    private Grado grado;
 
     @BeforeEach
     void setUp() {
@@ -66,25 +71,26 @@ class ReviewControllerIntegrationTest {
         otroProfesor = usuarioRepository.save(new Usuario("otro@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.PROFESOR));
         alumno = usuarioRepository.save(new Usuario("alumno@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
         empresa = empresaRepository.save(new Empresa("Acme", "d", "dir", sector, "obs", "c", "t", "e", profesor));
+        grado = gradoRepository.save(new Grado("DAW"));
     }
 
-    private void crearAsignacion() {
-        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+    private Asignacion crearAsignacion(Usuario alumno) {
+        return asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
     }
 
-    private CrearReviewRequest request(int calificacion) {
-        return new CrearReviewRequest(empresa.getId(), alumno.getId(), "Buena experiencia", calificacion);
+    private CrearReviewRequest request(Long asignacionId, int calificacion) {
+        return new CrearReviewRequest(asignacionId, "Buena experiencia", calificacion);
     }
 
     @Test
     void alumnoCreaReviewSobreSiMismoQuedaPendiente() throws Exception {
-        crearAsignacion();
+        Asignacion asignacion = crearAsignacion(alumno);
 
         mockMvc.perform(post("/api/reviews")
                         .with(csrf())
                         .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO")))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request(4))))
+                        .content(objectMapper.writeValueAsString(request(asignacion.getId(), 4))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.estado").value("PENDIENTE"))
                 .andExpect(jsonPath("$.autorCorreo").value("alumno@iesejemplo.es"));
@@ -92,13 +98,13 @@ class ReviewControllerIntegrationTest {
 
     @Test
     void tutorCreaReviewSobreSuAlumnoQuedaAprobada() throws Exception {
-        crearAsignacion();
+        Asignacion asignacion = crearAsignacion(alumno);
 
         mockMvc.perform(post("/api/reviews")
                         .with(csrf())
                         .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request(5))))
+                        .content(objectMapper.writeValueAsString(request(asignacion.getId(), 5))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.estado").value("APROBADA"))
                 .andExpect(jsonPath("$.autorCorreo").value("prof@iesejemplo.es"));
@@ -110,31 +116,31 @@ class ReviewControllerIntegrationTest {
                         .with(csrf())
                         .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO")))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request(4))))
+                        .content(objectMapper.writeValueAsString(request(999L, 4))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.codigo").value("ASIGNACION_NO_ENCONTRADA"));
     }
 
     @Test
     void profesorQueNoEsElTutorNoPuedeCrearReview() throws Exception {
-        crearAsignacion();
+        Asignacion asignacion = crearAsignacion(alumno);
 
         mockMvc.perform(post("/api/reviews")
                         .with(csrf())
                         .with(user(otroProfesor.getCorreo()).authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request(4))))
+                        .content(objectMapper.writeValueAsString(request(asignacion.getId(), 4))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.codigo").value("ACCESO_DENEGADO"));
     }
 
     @Test
     void alumnoVeAprobadasYPropiasProfesorVeTodas() throws Exception {
-        crearAsignacion();
-        reviewRepository.save(new Review(alumno, alumno, empresa, "propia", 4, EstadoReview.PENDIENTE));
+        Asignacion asignacion = crearAsignacion(alumno);
+        reviewRepository.save(new Review(asignacion, alumno, "propia", 4, EstadoReview.PENDIENTE));
         Usuario otroAlumno = usuarioRepository.save(new Usuario("otro-alumno@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
-        asignacionRepository.save(new Asignacion(otroAlumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
-        reviewRepository.save(new Review(otroAlumno, otroAlumno, empresa, "ajena pendiente", 3, EstadoReview.PENDIENTE));
+        Asignacion asignacionOtro = crearAsignacion(otroAlumno);
+        reviewRepository.save(new Review(asignacionOtro, otroAlumno, "ajena pendiente", 3, EstadoReview.PENDIENTE));
 
         mockMvc.perform(get("/api/empresas/" + empresa.getId() + "/reviews")
                         .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
@@ -149,7 +155,8 @@ class ReviewControllerIntegrationTest {
 
     @Test
     void profesorConsultaPendientesAlumnoRecibe403() throws Exception {
-        reviewRepository.save(new Review(alumno, alumno, empresa, "propia", 4, EstadoReview.PENDIENTE));
+        Asignacion asignacion = crearAsignacion(alumno);
+        reviewRepository.save(new Review(asignacion, alumno, "propia", 4, EstadoReview.PENDIENTE));
 
         mockMvc.perform(get("/api/reviews/pendientes")
                         .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
@@ -163,9 +170,11 @@ class ReviewControllerIntegrationTest {
 
     @Test
     void profesorModeraAprobandoYRechazando() throws Exception {
-        Review paraAprobar = reviewRepository.save(new Review(alumno, alumno, empresa, "propia", 4, EstadoReview.PENDIENTE));
+        Asignacion asignacion = crearAsignacion(alumno);
+        Review paraAprobar = reviewRepository.save(new Review(asignacion, alumno, "propia", 4, EstadoReview.PENDIENTE));
         Usuario otroAlumno = usuarioRepository.save(new Usuario("otro-alumno@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
-        Review paraRechazar = reviewRepository.save(new Review(otroAlumno, otroAlumno, empresa, "otra", 2, EstadoReview.PENDIENTE));
+        Asignacion asignacionOtro = crearAsignacion(otroAlumno);
+        Review paraRechazar = reviewRepository.save(new Review(asignacionOtro, otroAlumno, "otra", 2, EstadoReview.PENDIENTE));
 
         mockMvc.perform(put("/api/reviews/" + paraAprobar.getId() + "/moderar")
                         .with(csrf())
@@ -188,7 +197,8 @@ class ReviewControllerIntegrationTest {
 
     @Test
     void alumnoNoPuedeModerarDevuelve403() throws Exception {
-        Review review = reviewRepository.save(new Review(alumno, alumno, empresa, "propia", 4, EstadoReview.PENDIENTE));
+        Asignacion asignacion = crearAsignacion(alumno);
+        Review review = reviewRepository.save(new Review(asignacion, alumno, "propia", 4, EstadoReview.PENDIENTE));
 
         mockMvc.perform(put("/api/reviews/" + review.getId() + "/moderar")
                         .with(csrf())
@@ -196,6 +206,49 @@ class ReviewControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ModerarReviewRequest(EstadoReview.APROBADA, null))))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void autorAlumnoEditaReviewYVuelveAPendiente() throws Exception {
+        Asignacion asignacion = crearAsignacion(alumno);
+        Review review = reviewRepository.save(new Review(asignacion, alumno, "propia", 4, EstadoReview.APROBADA));
+
+        mockMvc.perform(put("/api/reviews/" + review.getId())
+                        .with(csrf())
+                        .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new EditarReviewRequest("editada", 5))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("PENDIENTE"))
+                .andExpect(jsonPath("$.contenido").value("editada"));
+    }
+
+    @Test
+    void autorProfesorEditaReviewMantieneAprobada() throws Exception {
+        Asignacion asignacion = crearAsignacion(alumno);
+        Review review = reviewRepository.save(new Review(asignacion, profesor, "propia", 4, EstadoReview.APROBADA));
+
+        mockMvc.perform(put("/api/reviews/" + review.getId())
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new EditarReviewRequest("editada", 5))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("APROBADA"));
+    }
+
+    @Test
+    void editarSinSerAutorDevuelve403() throws Exception {
+        Asignacion asignacion = crearAsignacion(alumno);
+        Review review = reviewRepository.save(new Review(asignacion, alumno, "propia", 4, EstadoReview.APROBADA));
+
+        mockMvc.perform(put("/api/reviews/" + review.getId())
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new EditarReviewRequest("editada", 5))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("ACCESO_DENEGADO"));
     }
 
     @Test

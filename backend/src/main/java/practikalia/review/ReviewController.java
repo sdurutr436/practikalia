@@ -29,6 +29,12 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("/api/reviews/{id}")
+    public ResponseEntity<ReviewDto> editar(
+            Authentication authentication, @PathVariable Long id, @Valid @RequestBody EditarReviewRequest request) {
+        return ResponseEntity.ok(reviewService.editar(id, request, authentication.getName()));
+    }
+
     @GetMapping("/api/empresas/{empresaId}/reviews")
     public ResponseEntity<List<ReviewDto>> listarPorEmpresa(Authentication authentication, @PathVariable Long empresaId) {
         return ResponseEntity.ok(

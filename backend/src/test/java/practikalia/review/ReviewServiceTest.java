@@ -6,6 +6,7 @@ import practikalia.asignacion.AsignacionRepository;
 import practikalia.empresa.Empresa;
 import practikalia.empresa.EmpresaRepository;
 import practikalia.etiqueta.Etiqueta;
+import practikalia.grado.Grado;
 import practikalia.usuario.Rol;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioException;
@@ -35,12 +36,18 @@ class ReviewServiceTest {
     private final Usuario tutor = usuarioConId(2L, "tutor@iesejemplo.es", Rol.PROFESOR);
     private final Usuario otroProfesor = usuarioConId(3L, "otro@iesejemplo.es", Rol.PROFESOR);
     private final Empresa empresa = new Empresa("Acme", null, null, new Etiqueta("Tecnología"), null, null, null, null, tutor);
+    private final Grado grado = new Grado("DAW");
 
     {
         empresa.setId(10L);
+        grado.setId(20L);
     }
 
-    private final Asignacion asignacion = new Asignacion(alumno, empresa, tutor, LocalDate.of(2026, 1, 15));
+    private final Asignacion asignacion = new Asignacion(alumno, empresa, tutor, grado, 1, LocalDate.of(2026, 1, 15));
+
+    {
+        asignacion.setId(50L);
+    }
 
     @BeforeEach
     void setUp() {
@@ -59,13 +66,13 @@ class ReviewServiceTest {
     }
 
     private CrearReviewRequest request(int calificacion) {
-        return new CrearReviewRequest(10L, 1L, "Buena experiencia", calificacion);
+        return new CrearReviewRequest(50L, "Buena experiencia", calificacion);
     }
 
     @Test
-    void alumnoCreaSobreEmpresaALaQuePertenecioQuedaPendiente() {
+    void alumnoCreaSobreAsignacionPropiaQuedaPendiente() {
         when(usuarioRepository.findByCorreo("alumno@iesejemplo.es")).thenReturn(Optional.of(alumno));
-        when(asignacionRepository.findByAlumnoIdAndEmpresaId(1L, 10L)).thenReturn(Optional.of(asignacion));
+        when(asignacionRepository.findById(50L)).thenReturn(Optional.of(asignacion));
 
         ReviewDto dto = reviewService.crear(request(4), "alumno@iesejemplo.es");
 
@@ -75,9 +82,9 @@ class ReviewServiceTest {
     }
 
     @Test
-    void alumnoCreaSobreEmpresaALaQueNoPerteneceDevuelve404() {
+    void crearReviewConAsignacionInexistenteDevuelve404() {
         when(usuarioRepository.findByCorreo("alumno@iesejemplo.es")).thenReturn(Optional.of(alumno));
-        when(asignacionRepository.findByAlumnoIdAndEmpresaId(1L, 10L)).thenReturn(Optional.empty());
+        when(asignacionRepository.findById(50L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reviewService.crear(request(4), "alumno@iesejemplo.es"))
                 .isInstanceOf(AsignacionException.class)
@@ -85,9 +92,20 @@ class ReviewServiceTest {
     }
 
     @Test
+    void alumnoCreandoSobreAsignacionAjenaDevuelve403() {
+        Usuario otroAlumno = usuarioConId(4L, "otro-alumno@iesejemplo.es", Rol.ALUMNO);
+        when(usuarioRepository.findByCorreo("otro-alumno@iesejemplo.es")).thenReturn(Optional.of(otroAlumno));
+        when(asignacionRepository.findById(50L)).thenReturn(Optional.of(asignacion));
+
+        assertThatThrownBy(() -> reviewService.crear(request(4), "otro-alumno@iesejemplo.es"))
+                .isInstanceOf(UsuarioException.class)
+                .hasFieldOrPropertyWithValue("codigo", "ACCESO_DENEGADO");
+    }
+
+    @Test
     void tutorCreaEnNombreDeSuAlumnoQuedaAprobada() {
         when(usuarioRepository.findByCorreo("tutor@iesejemplo.es")).thenReturn(Optional.of(tutor));
-        when(asignacionRepository.findByAlumnoIdAndEmpresaId(1L, 10L)).thenReturn(Optional.of(asignacion));
+        when(asignacionRepository.findById(50L)).thenReturn(Optional.of(asignacion));
 
         ReviewDto dto = reviewService.crear(request(4), "tutor@iesejemplo.es");
 
@@ -100,7 +118,7 @@ class ReviewServiceTest {
     @Test
     void profesorQueNoEsElTutorNoPuedeCrearReview() {
         when(usuarioRepository.findByCorreo("otro@iesejemplo.es")).thenReturn(Optional.of(otroProfesor));
-        when(asignacionRepository.findByAlumnoIdAndEmpresaId(1L, 10L)).thenReturn(Optional.of(asignacion));
+        when(asignacionRepository.findById(50L)).thenReturn(Optional.of(asignacion));
 
         assertThatThrownBy(() -> reviewService.crear(request(4), "otro@iesejemplo.es"))
                 .isInstanceOf(UsuarioException.class)
@@ -108,10 +126,10 @@ class ReviewServiceTest {
     }
 
     @Test
-    void tutorNoPuedeCrearReviewSiElAlumnoYaTieneUna() {
+    void tutorNoPuedeCrearReviewSiLaAsignacionYaTieneUna() {
         when(usuarioRepository.findByCorreo("tutor@iesejemplo.es")).thenReturn(Optional.of(tutor));
-        when(asignacionRepository.findByAlumnoIdAndEmpresaId(1L, 10L)).thenReturn(Optional.of(asignacion));
-        when(reviewRepository.existsByAlumnoIdAndEmpresaId(1L, 10L)).thenReturn(true);
+        when(asignacionRepository.findById(50L)).thenReturn(Optional.of(asignacion));
+        when(reviewRepository.existsByAsignacionId(50L)).thenReturn(true);
 
         assertThatThrownBy(() -> reviewService.crear(request(4), "tutor@iesejemplo.es"))
                 .isInstanceOf(ReviewException.class)
@@ -121,7 +139,7 @@ class ReviewServiceTest {
     @Test
     void calificacionFueraDeRangoDevuelve400() {
         when(usuarioRepository.findByCorreo("alumno@iesejemplo.es")).thenReturn(Optional.of(alumno));
-        when(asignacionRepository.findByAlumnoIdAndEmpresaId(1L, 10L)).thenReturn(Optional.of(asignacion));
+        when(asignacionRepository.findById(50L)).thenReturn(Optional.of(asignacion));
 
         assertThatThrownBy(() -> reviewService.crear(request(6), "alumno@iesejemplo.es"))
                 .isInstanceOf(ReviewException.class)
@@ -129,8 +147,45 @@ class ReviewServiceTest {
     }
 
     @Test
+    void editarComoAutorAlumnoVuelveAPendiente() {
+        Review review = new Review(asignacion, alumno, "texto", 4, EstadoReview.APROBADA);
+        review.setModeradaPor(tutor);
+        when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
+        when(usuarioRepository.findByCorreo("alumno@iesejemplo.es")).thenReturn(Optional.of(alumno));
+
+        ReviewDto dto = reviewService.editar(5L, new EditarReviewRequest("texto editado", 5), "alumno@iesejemplo.es");
+
+        assertThat(dto.estado()).isEqualTo(EstadoReview.PENDIENTE);
+        assertThat(dto.moderadaPorCorreo()).isNull();
+        assertThat(dto.contenido()).isEqualTo("texto editado");
+        assertThat(dto.calificacion()).isEqualTo(5);
+    }
+
+    @Test
+    void editarComoAutorProfesorMantieneAprobada() {
+        Review review = new Review(asignacion, tutor, "texto", 4, EstadoReview.APROBADA);
+        when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
+        when(usuarioRepository.findByCorreo("tutor@iesejemplo.es")).thenReturn(Optional.of(tutor));
+
+        ReviewDto dto = reviewService.editar(5L, new EditarReviewRequest("texto editado", 5), "tutor@iesejemplo.es");
+
+        assertThat(dto.estado()).isEqualTo(EstadoReview.APROBADA);
+    }
+
+    @Test
+    void editarSinSerAutorDevuelve403() {
+        Review review = new Review(asignacion, alumno, "texto", 4, EstadoReview.PENDIENTE);
+        when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
+        when(usuarioRepository.findByCorreo("tutor@iesejemplo.es")).thenReturn(Optional.of(tutor));
+
+        assertThatThrownBy(() -> reviewService.editar(5L, new EditarReviewRequest("texto editado", 5), "tutor@iesejemplo.es"))
+                .isInstanceOf(UsuarioException.class)
+                .hasFieldOrPropertyWithValue("codigo", "ACCESO_DENEGADO");
+    }
+
+    @Test
     void moderarAprobandoRellenaModeradorYFecha() {
-        Review review = new Review(alumno, alumno, empresa, "texto", 4, EstadoReview.PENDIENTE);
+        Review review = new Review(asignacion, alumno, "texto", 4, EstadoReview.PENDIENTE);
         when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
         when(usuarioRepository.findByCorreo("tutor@iesejemplo.es")).thenReturn(Optional.of(tutor));
 
@@ -143,7 +198,7 @@ class ReviewServiceTest {
 
     @Test
     void moderarRechazandoConMotivoLoGuarda() {
-        Review review = new Review(alumno, alumno, empresa, "texto", 4, EstadoReview.PENDIENTE);
+        Review review = new Review(asignacion, alumno, "texto", 4, EstadoReview.PENDIENTE);
         when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
         when(usuarioRepository.findByCorreo("tutor@iesejemplo.es")).thenReturn(Optional.of(tutor));
 
@@ -156,7 +211,7 @@ class ReviewServiceTest {
 
     @Test
     void rechazarSinMotivoDevuelve400() {
-        Review review = new Review(alumno, alumno, empresa, "texto", 4, EstadoReview.PENDIENTE);
+        Review review = new Review(asignacion, alumno, "texto", 4, EstadoReview.PENDIENTE);
         when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
 
         assertThatThrownBy(() ->
@@ -167,7 +222,7 @@ class ReviewServiceTest {
 
     @Test
     void moderarUnaYaModeradaDevuelve409() {
-        Review review = new Review(alumno, alumno, empresa, "texto", 4, EstadoReview.APROBADA);
+        Review review = new Review(asignacion, alumno, "texto", 4, EstadoReview.APROBADA);
         when(reviewRepository.findById(5L)).thenReturn(Optional.of(review));
 
         assertThatThrownBy(() ->
