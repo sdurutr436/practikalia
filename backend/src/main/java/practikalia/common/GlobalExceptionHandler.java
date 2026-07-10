@@ -1,4 +1,4 @@
-package practikalia.usuario;
+package practikalia.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +13,8 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(UsuarioException.class)
-    public ResponseEntity<ErrorBody> manejarUsuarioException(UsuarioException ex) {
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorBody> manejarApiException(ApiException ex) {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorBody(ex.getCodigo(), ex.getMessage()));
     }
 

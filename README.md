@@ -56,4 +56,6 @@ La app queda disponible en `http://localhost` (Nginx sirve el frontend y hace de
 
 ## Licencia
 
-Pendiente de definir. El proyecto está pensado para ser open source y desplegable por cualquier centro en su propia infraestructura.
+[MIT](LICENSE). El proyecto está pensado para ser open source y desplegable por cualquier centro en su propia infraestructura.
+
+Ver también [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md) y [CHANGELOG.md](CHANGELOG.md).

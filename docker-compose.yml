@@ -19,6 +19,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      APP_UPLOADS_DIR: /app/uploads
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -34,6 +37,7 @@ services:
     image: nginx:alpine
     volumes:
       - frontend_dist:/usr/share/nginx/html:ro
+      - uploads_data:/usr/share/nginx/uploads:ro
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "80:80"
@@ -46,3 +50,4 @@ services:
 volumes:
   postgres_data:
   frontend_dist:
+  uploads_data:
