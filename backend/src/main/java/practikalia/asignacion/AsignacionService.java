@@ -68,6 +68,17 @@ public class AsignacionService {
         return asignacionRepository.findByEmpresaId(empresaId).stream().map(AsignacionDto::de).toList();
     }
 
+    @Transactional(readOnly = true)
+    public TasaContratacionDto tasaContratacion(Long empresaId) {
+        if (!empresaRepository.existsById(empresaId)) {
+            throw EmpresaException.noEncontrada();
+        }
+        long decididas = asignacionRepository.countByEmpresaIdAndFechaFinIsNotNullAndContratadoPosteriorIsNotNull(empresaId);
+        long contrataciones = asignacionRepository.countByEmpresaIdAndFechaFinIsNotNullAndContratadoPosteriorTrue(empresaId);
+        double tasa = decididas == 0 ? 0.0 : (double) contrataciones / decididas;
+        return new TasaContratacionDto(empresaId, decididas, contrataciones, tasa);
+    }
+
     @Transactional
     public AsignacionDto cerrar(Long id, ActualizarAsignacionRequest request) {
         Asignacion asignacion = asignacionRepository.findById(id).orElseThrow(AsignacionException::noEncontrada);

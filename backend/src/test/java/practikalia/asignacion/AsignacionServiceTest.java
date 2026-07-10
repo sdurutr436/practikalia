@@ -1,6 +1,7 @@
 package practikalia.asignacion;
 
 import practikalia.empresa.Empresa;
+import practikalia.empresa.EmpresaException;
 import practikalia.empresa.EmpresaRepository;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.grado.Grado;
@@ -163,6 +164,38 @@ class AsignacionServiceTest {
 
         assertThat(dto.fechaFin()).isEqualTo(LocalDate.of(2026, 6, 30));
         assertThat(dto.contratadoPosterior()).isFalse();
+    }
+
+    @Test
+    void tasaContratacionCalculaRatio() {
+        when(empresaRepository.existsById(10L)).thenReturn(true);
+        when(asignacionRepository.countByEmpresaIdAndFechaFinIsNotNullAndContratadoPosteriorIsNotNull(10L)).thenReturn(4L);
+        when(asignacionRepository.countByEmpresaIdAndFechaFinIsNotNullAndContratadoPosteriorTrue(10L)).thenReturn(3L);
+
+        TasaContratacionDto dto = asignacionService.tasaContratacion(10L);
+
+        assertThat(dto.asignacionesDecididas()).isEqualTo(4);
+        assertThat(dto.contrataciones()).isEqualTo(3);
+        assertThat(dto.tasa()).isEqualTo(0.75);
+    }
+
+    @Test
+    void tasaContratacionSinDecididasEsCero() {
+        when(empresaRepository.existsById(10L)).thenReturn(true);
+
+        TasaContratacionDto dto = asignacionService.tasaContratacion(10L);
+
+        assertThat(dto.asignacionesDecididas()).isZero();
+        assertThat(dto.tasa()).isEqualTo(0.0);
+    }
+
+    @Test
+    void tasaContratacionEmpresaInexistenteLanzaExcepcion() {
+        when(empresaRepository.existsById(99L)).thenReturn(false);
+
+        assertThatThrownBy(() -> asignacionService.tasaContratacion(99L))
+                .isInstanceOf(EmpresaException.class)
+                .hasFieldOrPropertyWithValue("codigo", "EMPRESA_NO_ENCONTRADA");
     }
 
     @Test

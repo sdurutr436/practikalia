@@ -185,6 +185,45 @@ class AsignacionControllerIntegrationTest {
     }
 
     @Test
+    void alumnoConsultaTasaContratacionExcluyendoNoDecididas() throws Exception {
+        asignacionRepository.save(cerrada(1, true));
+        asignacionRepository.save(cerrada(2, false));
+        asignacionRepository.save(cerrada(3, null));
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 4, LocalDate.of(2026, 1, 15)));
+
+        mockMvc.perform(get("/api/empresas/" + empresa.getId() + "/tasa-contratacion")
+                        .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.asignacionesDecididas").value(2))
+                .andExpect(jsonPath("$.contrataciones").value(1))
+                .andExpect(jsonPath("$.tasa").value(0.5));
+    }
+
+    @Test
+    void tasaContratacionSinDecididasEsCero() throws Exception {
+        mockMvc.perform(get("/api/empresas/" + empresa.getId() + "/tasa-contratacion")
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.asignacionesDecididas").value(0))
+                .andExpect(jsonPath("$.tasa").value(0.0));
+    }
+
+    @Test
+    void tasaContratacionEmpresaInexistenteDevuelve404() throws Exception {
+        mockMvc.perform(get("/api/empresas/99999/tasa-contratacion")
+                        .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.codigo").value("EMPRESA_NO_ENCONTRADA"));
+    }
+
+    private Asignacion cerrada(int anio, Boolean contratadoPosterior) {
+        Asignacion asignacion = new Asignacion(alumno, empresa, profesor, grado, anio, LocalDate.of(2026, 1, 15));
+        asignacion.setFechaFin(LocalDate.of(2026, 6, 30));
+        asignacion.setContratadoPosterior(contratadoPosterior);
+        return asignacion;
+    }
+
+    @Test
     void profesorMarcaContratadoPosteriorEnLlamadaPosterior() throws Exception {
         Asignacion asignacion = asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
 
