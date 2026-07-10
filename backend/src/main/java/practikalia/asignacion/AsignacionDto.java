@@ -15,7 +15,8 @@ public record AsignacionDto(
         GradoDto grado,
         Integer anio,
         LocalDate fechaInicio,
-        LocalDate fechaFin) {
+        LocalDate fechaFin,
+        Boolean contratadoPosterior) {
 
     static AsignacionDto de(Asignacion asignacion) {
         return new AsignacionDto(
@@ -29,6 +30,7 @@ public record AsignacionDto(
                 GradoDto.de(asignacion.getGrado()),
                 asignacion.getAnio(),
                 asignacion.getFechaInicio(),
-                asignacion.getFechaFin());
+                asignacion.getFechaFin(),
+                asignacion.getContratadoPosterior());
     }
 }

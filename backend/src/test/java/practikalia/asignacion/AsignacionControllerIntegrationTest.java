@@ -178,8 +178,30 @@ class AsignacionControllerIntegrationTest {
                         .with(csrf())
                         .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30)))))
+                        .content(objectMapper.writeValueAsString(new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30), null))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.fechaFin").value("2026-06-30"));
+                .andExpect(jsonPath("$.fechaFin").value("2026-06-30"))
+                .andExpect(jsonPath("$.contratadoPosterior").value((Object) null));
+    }
+
+    @Test
+    void profesorMarcaContratadoPosteriorEnLlamadaPosterior() throws Exception {
+        Asignacion asignacion = asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
+
+        mockMvc.perform(put("/api/asignaciones/" + asignacion.getId())
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30), null))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/api/asignaciones/" + asignacion.getId())
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30), true))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fechaFin").value("2026-06-30"))
+                .andExpect(jsonPath("$.contratadoPosterior").value(true));
     }
 }

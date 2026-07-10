@@ -72,6 +72,7 @@ public class AsignacionService {
     public AsignacionDto cerrar(Long id, ActualizarAsignacionRequest request) {
         Asignacion asignacion = asignacionRepository.findById(id).orElseThrow(AsignacionException::noEncontrada);
         asignacion.setFechaFin(request.fechaFin());
+        asignacion.setContratadoPosterior(request.contratadoPosterior());
         asignacionRepository.save(asignacion);
         return AsignacionDto.de(asignacion);
     }

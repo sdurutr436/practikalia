@@ -137,9 +137,32 @@ class AsignacionServiceTest {
         Asignacion asignacion = new Asignacion(alumno, empresa, tutor, grado, 1, LocalDate.of(2026, 1, 15));
         when(asignacionRepository.findById(5L)).thenReturn(Optional.of(asignacion));
 
-        AsignacionDto dto = asignacionService.cerrar(5L, new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30)));
+        AsignacionDto dto = asignacionService.cerrar(5L, new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30), null));
 
         assertThat(dto.fechaFin()).isEqualTo(LocalDate.of(2026, 6, 30));
+        assertThat(dto.contratadoPosterior()).isNull();
+    }
+
+    @Test
+    void cerrarConContratadoPosteriorLoPersiste() {
+        Asignacion asignacion = new Asignacion(alumno, empresa, tutor, grado, 1, LocalDate.of(2026, 1, 15));
+        when(asignacionRepository.findById(5L)).thenReturn(Optional.of(asignacion));
+
+        AsignacionDto dto = asignacionService.cerrar(5L, new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30), true));
+
+        assertThat(dto.contratadoPosterior()).isTrue();
+    }
+
+    @Test
+    void actualizarContratadoPosteriorEnLlamadaPosterior() {
+        Asignacion asignacion = new Asignacion(alumno, empresa, tutor, grado, 1, LocalDate.of(2026, 1, 15));
+        when(asignacionRepository.findById(5L)).thenReturn(Optional.of(asignacion));
+
+        asignacionService.cerrar(5L, new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30), null));
+        AsignacionDto dto = asignacionService.cerrar(5L, new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30), false));
+
+        assertThat(dto.fechaFin()).isEqualTo(LocalDate.of(2026, 6, 30));
+        assertThat(dto.contratadoPosterior()).isFalse();
     }
 
     @Test

@@ -47,6 +47,8 @@ public class Asignacion {
 
     private LocalDate fechaFin;
 
+    private Boolean contratadoPosterior;
+
     @Column(nullable = false, updatable = false)
     private Instant fechaCreacion = Instant.now();
 
