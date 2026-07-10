@@ -1,5 +1,8 @@
 package practikalia.usuario;
 
+import practikalia.grado.Grado;
+import practikalia.grado.GradoException;
+import practikalia.grado.GradoRepository;
 import practikalia.usuario.correo.CorreoPermitidoRepository;
 import practikalia.usuario.jwt.JwtService;
 
@@ -40,6 +43,7 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final CorreoPermitidoRepository correoPermitidoRepository;
+    private final GradoRepository gradoRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final Set<String> dominiosPermitidos;
@@ -47,11 +51,13 @@ public class UsuarioService {
     public UsuarioService(
             UsuarioRepository usuarioRepository,
             CorreoPermitidoRepository correoPermitidoRepository,
+            GradoRepository gradoRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             @Value("${allowed.domains:}") String dominiosPermitidosCsv) {
         this.usuarioRepository = usuarioRepository;
         this.correoPermitidoRepository = correoPermitidoRepository;
+        this.gradoRepository = gradoRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.dominiosPermitidos = Arrays.stream(dominiosPermitidosCsv.split(","))
@@ -124,6 +130,17 @@ public class UsuarioService {
 
     public UsuarioDto buscarPorCorreo(String correo) {
         return UsuarioDto.de(buscarUsuarioPorCorreo(correo));
+    }
+
+    @Transactional
+    public UsuarioGradoDto actualizarGrado(Long id, ActualizarGradoRequest request) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioException::noEncontrado);
+        Grado grado = gradoRepository.findById(request.gradoId()).orElseThrow(GradoException::noEncontrado);
+
+        usuario.setGrado(grado);
+        usuario.setAnio(request.anio());
+        usuarioRepository.save(usuario);
+        return UsuarioGradoDto.de(usuario);
     }
 
     @Transactional

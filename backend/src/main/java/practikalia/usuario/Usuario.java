@@ -1,5 +1,7 @@
 package practikalia.usuario;
 
+import practikalia.grado.Grado;
+
 import java.time.Instant;
 
 import jakarta.persistence.Column;
@@ -9,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -46,6 +49,11 @@ public class Usuario {
     private int intentosFallidos = 0;
 
     private Instant bloqueadoHasta;
+
+    @ManyToOne
+    private Grado grado;
+
+    private Integer anio;
 
     @Column(nullable = false, updatable = false)
     private Instant fechaCreacion = Instant.now();

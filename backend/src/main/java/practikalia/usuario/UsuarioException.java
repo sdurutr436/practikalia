@@ -22,6 +22,10 @@ public class UsuarioException extends ApiException {
         return new UsuarioException(HttpStatus.FORBIDDEN, "ACCESO_DENEGADO", "No tienes permisos para esta acción");
     }
 
+    public static UsuarioException noEncontrado() {
+        return new UsuarioException(HttpStatus.NOT_FOUND, "USUARIO_NO_ENCONTRADO", "El usuario no existe");
+    }
+
     public static UsuarioException correoYaRegistrado() {
         return new UsuarioException(HttpStatus.CONFLICT, "CORREO_YA_REGISTRADO", "El correo ya está registrado");
     }

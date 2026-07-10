@@ -1,0 +1,2 @@
+ALTER TABLE usuario ADD COLUMN grado_id BIGINT REFERENCES grado(id);
+ALTER TABLE usuario ADD COLUMN anio INTEGER;

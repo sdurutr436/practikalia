@@ -1,5 +1,7 @@
 package practikalia.usuario;
 
+import practikalia.grado.Grado;
+import practikalia.grado.GradoRepository;
 import practikalia.usuario.correo.CorreoPermitidoRepository;
 import practikalia.usuario.jwt.JwtService;
 
@@ -27,6 +29,7 @@ class UsuarioServiceTest {
 
     private UsuarioRepository usuarioRepository;
     private CorreoPermitidoRepository correoPermitidoRepository;
+    private GradoRepository gradoRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private JwtService jwtService;
     private UsuarioService usuarioService;
@@ -35,9 +38,10 @@ class UsuarioServiceTest {
     void setUp() {
         usuarioRepository = mock(UsuarioRepository.class);
         correoPermitidoRepository = mock(CorreoPermitidoRepository.class);
+        gradoRepository = mock(GradoRepository.class);
         jwtService = mock(JwtService.class);
         usuarioService = new UsuarioService(
-                usuarioRepository, correoPermitidoRepository, passwordEncoder, jwtService,
+                usuarioRepository, correoPermitidoRepository, gradoRepository, passwordEncoder, jwtService,
                 "iesejemplo.es");
     }
 
@@ -213,5 +217,40 @@ class UsuarioServiceTest {
 
         assertThat(usuario.isDebeCambiarContrasena()).isFalse();
         assertThat(passwordEncoder.matches("Nueva123!", usuario.getContrasenaHash())).isTrue();
+    }
+
+    @Test
+    void actualizarGradoActualizaPerfilDelAlumno() {
+        Usuario alumno = new Usuario("ana@iesejemplo.es", passwordEncoder.encode("Correcta123!"), Rol.ALUMNO);
+        alumno.setId(1L);
+        Grado grado = new Grado("DAW");
+        grado.setId(2L);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
+        when(gradoRepository.findById(2L)).thenReturn(Optional.of(grado));
+
+        UsuarioGradoDto dto = usuarioService.actualizarGrado(1L, new ActualizarGradoRequest(2L, 1));
+
+        assertThat(dto.grado().nombre()).isEqualTo("DAW");
+        assertThat(dto.anio()).isEqualTo(1);
+    }
+
+    @Test
+    void actualizarGradoConGradoInexistenteLanzaExcepcion() {
+        Usuario alumno = new Usuario("ana@iesejemplo.es", passwordEncoder.encode("Correcta123!"), Rol.ALUMNO);
+        alumno.setId(1L);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
+        when(gradoRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> usuarioService.actualizarGrado(1L, new ActualizarGradoRequest(2L, 1)))
+                .hasFieldOrPropertyWithValue("codigo", "GRADO_NO_ENCONTRADO");
+    }
+
+    @Test
+    void actualizarGradoConUsuarioInexistenteLanzaExcepcion() {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> usuarioService.actualizarGrado(1L, new ActualizarGradoRequest(2L, 1)))
+                .isInstanceOf(UsuarioException.class)
+                .hasFieldOrPropertyWithValue("codigo", "USUARIO_NO_ENCONTRADO");
     }
 }
