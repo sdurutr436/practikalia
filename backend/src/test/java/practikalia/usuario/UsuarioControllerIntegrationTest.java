@@ -1,11 +1,14 @@
 package practikalia.usuario;
 
+import practikalia.grado.Grado;
+import practikalia.grado.GradoRepository;
 import practikalia.usuario.correo.CorreoPermitido;
 import practikalia.usuario.correo.CorreoPermitidoRepository;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,6 +38,8 @@ class UsuarioControllerIntegrationTest {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private CorreoPermitidoRepository correoPermitidoRepository;
+    @Autowired
+    private GradoRepository gradoRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -135,5 +140,34 @@ class UsuarioControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(new CrearUsuarioRequest("otro@iesejemplo.es", Rol.ALUMNO))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.codigo").value("ACCESO_DENEGADO"));
+    }
+
+    @Test
+    void profesorActualizaGradoDeAlumno() throws Exception {
+        guardarProfesor("prof6@iesejemplo.es", false);
+        Usuario alumno = usuarioRepository.save(new Usuario("alumno@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
+        Grado grado = gradoRepository.save(new Grado("DAW"));
+
+        mockMvc.perform(put("/api/usuarios/" + alumno.getId() + "/grado")
+                        .with(csrf())
+                        .with(user("prof6@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ActualizarGradoRequest(grado.getId(), 2))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.grado.nombre").value("DAW"))
+                .andExpect(jsonPath("$.anio").value(2));
+    }
+
+    @Test
+    void alumnoNoPuedeActualizarGradoDevuelve403() throws Exception {
+        Usuario alumno = usuarioRepository.save(new Usuario("alumno2@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
+        Grado grado = gradoRepository.save(new Grado("DAM"));
+
+        mockMvc.perform(put("/api/usuarios/" + alumno.getId() + "/grado")
+                        .with(csrf())
+                        .with(user("alumno2@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ActualizarGradoRequest(grado.getId(), 1))))
+                .andExpect(status().isForbidden());
     }
 }

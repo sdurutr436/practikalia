@@ -45,14 +45,12 @@ public class ReviewService {
     @Transactional
     public ReviewDto crear(CrearReviewRequest request, String correoAutenticado) {
         Usuario autor = usuarioRepository.findByCorreo(correoAutenticado).orElseThrow();
+        Asignacion asignacion = asignacionRepository.findById(request.asignacionId())
+                .orElseThrow(AsignacionException::noEncontrada);
 
-        if (autor.getRol() == Rol.ALUMNO && !autor.getId().equals(request.alumnoId())) {
+        if (autor.getRol() == Rol.ALUMNO && !autor.getId().equals(asignacion.getAlumno().getId())) {
             throw UsuarioException.accesoDenegado();
         }
-
-        Asignacion asignacion = asignacionRepository
-                .findByAlumnoIdAndEmpresaId(request.alumnoId(), request.empresaId())
-                .orElseThrow(AsignacionException::noEncontrada);
 
         if (request.calificacion() < calificacionMin || request.calificacion() > calificacionMax) {
             throw ReviewException.campoInvalido(
@@ -63,13 +61,37 @@ public class ReviewService {
             throw UsuarioException.accesoDenegado();
         }
 
-        if (reviewRepository.existsByAlumnoIdAndEmpresaId(request.alumnoId(), request.empresaId())) {
+        if (reviewRepository.existsByAsignacionId(asignacion.getId())) {
             throw ReviewException.yaExiste();
         }
 
         EstadoReview estado = autor.getRol() == Rol.PROFESOR ? EstadoReview.APROBADA : EstadoReview.PENDIENTE;
-        Review review = new Review(
-                asignacion.getAlumno(), autor, asignacion.getEmpresa(), request.contenido(), request.calificacion(), estado);
+        Review review = new Review(asignacion, autor, request.contenido(), request.calificacion(), estado);
+        reviewRepository.save(review);
+        return ReviewDto.de(review);
+    }
+
+    @Transactional
+    public ReviewDto editar(Long id, EditarReviewRequest request, String correoAutenticado) {
+        Review review = reviewRepository.findById(id).orElseThrow(ReviewException::noEncontrada);
+        Usuario autenticado = usuarioRepository.findByCorreo(correoAutenticado).orElseThrow();
+
+        if (!review.getAutor().getId().equals(autenticado.getId())) {
+            throw UsuarioException.accesoDenegado();
+        }
+        if (request.calificacion() < calificacionMin || request.calificacion() > calificacionMax) {
+            throw ReviewException.campoInvalido(
+                    "La calificación debe estar entre " + calificacionMin + " y " + calificacionMax);
+        }
+
+        review.setContenido(request.contenido());
+        review.setCalificacion(request.calificacion());
+        if (review.getAutor().getRol() == Rol.ALUMNO) {
+            review.setEstado(EstadoReview.PENDIENTE);
+            review.setModeradaPor(null);
+            review.setMotivoRechazo(null);
+            review.setFechaModeracion(null);
+        }
         reviewRepository.save(review);
         return ReviewDto.de(review);
     }
@@ -79,7 +101,7 @@ public class ReviewService {
         if (!empresaRepository.existsById(empresaId)) {
             throw EmpresaException.noEncontrada();
         }
-        List<Review> reviews = reviewRepository.findByEmpresaId(empresaId);
+        List<Review> reviews = reviewRepository.findByAsignacion_EmpresaId(empresaId);
         if (esProfesor) {
             return reviews.stream().map(ReviewDto::de).toList();
         }
@@ -87,7 +109,7 @@ public class ReviewService {
         Usuario autenticado = usuarioRepository.findByCorreo(correoAutenticado).orElseThrow();
         return reviews.stream()
                 .filter(review -> review.getEstado() == EstadoReview.APROBADA
-                        || review.getAlumno().getId().equals(autenticado.getId())
+                        || review.getAsignacion().getAlumno().getId().equals(autenticado.getId())
                         || review.getAutor().getRol() == Rol.PROFESOR)
                 .map(ReviewDto::de)
                 .toList();

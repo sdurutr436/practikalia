@@ -1,7 +1,6 @@
 package practikalia.asignacion;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,7 +10,9 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, Long> {
 
     List<Asignacion> findByEmpresaId(Long empresaId);
 
-    boolean existsByAlumnoIdAndEmpresaId(Long alumnoId, Long empresaId);
+    boolean existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(Long alumnoId, Long empresaId, Long gradoId, int anio);
 
-    Optional<Asignacion> findByAlumnoIdAndEmpresaId(Long alumnoId, Long empresaId);
+    long countByEmpresaIdAndFechaFinIsNotNullAndContratadoPosteriorIsNotNull(Long empresaId);
+
+    long countByEmpresaIdAndFechaFinIsNotNullAndContratadoPosteriorTrue(Long empresaId);
 }

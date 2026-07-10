@@ -1,6 +1,6 @@
 package practikalia.review;
 
-import practikalia.empresa.Empresa;
+import practikalia.asignacion.Asignacion;
 import practikalia.usuario.Usuario;
 
 import java.time.Instant;
@@ -28,13 +28,10 @@ public class Review {
     private Long id;
 
     @ManyToOne(optional = false)
-    private Usuario alumno;
+    private Asignacion asignacion;
 
     @ManyToOne(optional = false)
     private Usuario autor;
-
-    @ManyToOne(optional = false)
-    private Empresa empresa;
 
     @Column(nullable = false)
     private String contenido;
@@ -56,10 +53,9 @@ public class Review {
 
     private Instant fechaModeracion;
 
-    public Review(Usuario alumno, Usuario autor, Empresa empresa, String contenido, int calificacion, EstadoReview estado) {
-        this.alumno = alumno;
+    public Review(Asignacion asignacion, Usuario autor, String contenido, int calificacion, EstadoReview estado) {
+        this.asignacion = asignacion;
         this.autor = autor;
-        this.empresa = empresa;
         this.contenido = contenido;
         this.calificacion = calificacion;
         this.estado = estado;

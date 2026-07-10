@@ -38,6 +38,11 @@ public class AsignacionController {
         return ResponseEntity.ok(asignacionService.listarPorEmpresa(empresaId));
     }
 
+    @GetMapping("/api/empresas/{empresaId}/tasa-contratacion")
+    public ResponseEntity<TasaContratacionDto> tasaContratacion(@PathVariable Long empresaId) {
+        return ResponseEntity.ok(asignacionService.tasaContratacion(empresaId));
+    }
+
     @PutMapping("/api/asignaciones/{id}")
     public ResponseEntity<AsignacionDto> cerrar(@PathVariable Long id, @Valid @RequestBody ActualizarAsignacionRequest request) {
         return ResponseEntity.ok(asignacionService.cerrar(id, request));

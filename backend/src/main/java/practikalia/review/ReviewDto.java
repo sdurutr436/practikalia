@@ -4,6 +4,7 @@ import java.time.Instant;
 
 public record ReviewDto(
         Long id,
+        Long asignacionId,
         Long empresaId,
         String alumnoCorreo,
         String autorCorreo,
@@ -18,8 +19,9 @@ public record ReviewDto(
     static ReviewDto de(Review review) {
         return new ReviewDto(
                 review.getId(),
-                review.getEmpresa().getId(),
-                review.getAlumno().getCorreo(),
+                review.getAsignacion().getId(),
+                review.getAsignacion().getEmpresa().getId(),
+                review.getAsignacion().getAlumno().getCorreo(),
                 review.getAutor().getCorreo(),
                 review.getContenido(),
                 review.getCalificacion(),
