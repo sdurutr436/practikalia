@@ -3,6 +3,8 @@ package practikalia.asignacion;
 import practikalia.empresa.Empresa;
 import practikalia.empresa.EmpresaRepository;
 import practikalia.etiqueta.Etiqueta;
+import practikalia.grado.Grado;
+import practikalia.grado.GradoRepository;
 import practikalia.usuario.Rol;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioException;
@@ -25,14 +27,17 @@ class AsignacionServiceTest {
     private AsignacionRepository asignacionRepository;
     private UsuarioRepository usuarioRepository;
     private EmpresaRepository empresaRepository;
+    private GradoRepository gradoRepository;
     private AsignacionService asignacionService;
 
     private final Usuario alumno = usuarioConId(1L, "alumno@iesejemplo.es", Rol.ALUMNO);
     private final Usuario tutor = usuarioConId(2L, "tutor@iesejemplo.es", Rol.PROFESOR);
     private final Empresa empresa = new Empresa("Acme", null, null, new Etiqueta("Tecnología"), null, null, null, null, tutor);
+    private final Grado grado = new Grado("DAW");
 
     {
         empresa.setId(10L);
+        grado.setId(20L);
     }
 
     @BeforeEach
@@ -40,7 +45,8 @@ class AsignacionServiceTest {
         asignacionRepository = mock(AsignacionRepository.class);
         usuarioRepository = mock(UsuarioRepository.class);
         empresaRepository = mock(EmpresaRepository.class);
-        asignacionService = new AsignacionService(asignacionRepository, usuarioRepository, empresaRepository);
+        gradoRepository = mock(GradoRepository.class);
+        asignacionService = new AsignacionService(asignacionRepository, usuarioRepository, empresaRepository, gradoRepository);
         when(asignacionRepository.save(any(Asignacion.class))).thenAnswer(inv -> inv.getArgument(0));
     }
 
@@ -51,7 +57,7 @@ class AsignacionServiceTest {
     }
 
     private CrearAsignacionRequest request() {
-        return new CrearAsignacionRequest(1L, 10L, 2L, LocalDate.of(2026, 1, 15));
+        return new CrearAsignacionRequest(1L, 10L, 2L, 20L, 1, LocalDate.of(2026, 1, 15));
     }
 
     @Test
@@ -59,11 +65,14 @@ class AsignacionServiceTest {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
         when(usuarioRepository.findById(2L)).thenReturn(Optional.of(tutor));
         when(empresaRepository.findById(10L)).thenReturn(Optional.of(empresa));
+        when(gradoRepository.findById(20L)).thenReturn(Optional.of(grado));
 
         AsignacionDto dto = asignacionService.crear(request());
 
         assertThat(dto.alumnoCorreo()).isEqualTo("alumno@iesejemplo.es");
         assertThat(dto.tutorCentroCorreo()).isEqualTo("tutor@iesejemplo.es");
+        assertThat(dto.grado().nombre()).isEqualTo("DAW");
+        assertThat(dto.anio()).isEqualTo(1);
         assertThat(dto.fechaFin()).isNull();
     }
 
@@ -87,11 +96,12 @@ class AsignacionServiceTest {
     }
 
     @Test
-    void asignacionDuplicadaLanzaExcepcion() {
+    void asignacionDuplicadaMismoGradoYAnioLanzaExcepcion() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
         when(usuarioRepository.findById(2L)).thenReturn(Optional.of(tutor));
         when(empresaRepository.findById(10L)).thenReturn(Optional.of(empresa));
-        when(asignacionRepository.existsByAlumnoIdAndEmpresaId(1L, 10L)).thenReturn(true);
+        when(gradoRepository.findById(20L)).thenReturn(Optional.of(grado));
+        when(asignacionRepository.existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(1L, 10L, 20L, 1)).thenReturn(true);
 
         assertThatThrownBy(() -> asignacionService.crear(request()))
                 .isInstanceOf(AsignacionException.class)
@@ -99,8 +109,32 @@ class AsignacionServiceTest {
     }
 
     @Test
+    void mismoAlumnoEmpresaDistintoAnioNoLanzaExcepcion() {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(tutor));
+        when(empresaRepository.findById(10L)).thenReturn(Optional.of(empresa));
+        when(gradoRepository.findById(20L)).thenReturn(Optional.of(grado));
+        when(asignacionRepository.existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(1L, 10L, 20L, 2)).thenReturn(false);
+
+        AsignacionDto dto = asignacionService.crear(new CrearAsignacionRequest(1L, 10L, 2L, 20L, 2, LocalDate.of(2027, 1, 15)));
+
+        assertThat(dto.anio()).isEqualTo(2);
+    }
+
+    @Test
+    void gradoIdQueNoExisteLanzaExcepcion() {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(tutor));
+        when(empresaRepository.findById(10L)).thenReturn(Optional.of(empresa));
+        when(gradoRepository.findById(20L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> asignacionService.crear(request()))
+                .hasFieldOrPropertyWithValue("codigo", "GRADO_NO_ENCONTRADO");
+    }
+
+    @Test
     void cerrarAsignacionEstableceFechaFin() {
-        Asignacion asignacion = new Asignacion(alumno, empresa, tutor, LocalDate.of(2026, 1, 15));
+        Asignacion asignacion = new Asignacion(alumno, empresa, tutor, grado, 1, LocalDate.of(2026, 1, 15));
         when(asignacionRepository.findById(5L)).thenReturn(Optional.of(asignacion));
 
         AsignacionDto dto = asignacionService.cerrar(5L, new ActualizarAsignacionRequest(LocalDate.of(2026, 6, 30)));

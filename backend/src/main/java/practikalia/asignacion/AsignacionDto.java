@@ -1,5 +1,7 @@
 package practikalia.asignacion;
 
+import practikalia.grado.GradoDto;
+
 import java.time.LocalDate;
 
 public record AsignacionDto(
@@ -10,6 +12,8 @@ public record AsignacionDto(
         String empresaNombre,
         Long tutorCentroId,
         String tutorCentroCorreo,
+        GradoDto grado,
+        Integer anio,
         LocalDate fechaInicio,
         LocalDate fechaFin) {
 
@@ -22,6 +26,8 @@ public record AsignacionDto(
                 asignacion.getEmpresa().getNombre(),
                 asignacion.getTutorCentro().getId(),
                 asignacion.getTutorCentro().getCorreo(),
+                GradoDto.de(asignacion.getGrado()),
+                asignacion.getAnio(),
                 asignacion.getFechaInicio(),
                 asignacion.getFechaFin());
     }

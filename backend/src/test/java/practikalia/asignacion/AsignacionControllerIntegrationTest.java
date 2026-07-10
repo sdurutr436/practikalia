@@ -4,6 +4,8 @@ import practikalia.empresa.Empresa;
 import practikalia.empresa.EmpresaRepository;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.etiqueta.EtiquetaRepository;
+import practikalia.grado.Grado;
+import practikalia.grado.GradoRepository;
 import practikalia.usuario.Rol;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioRepository;
@@ -49,12 +51,15 @@ class AsignacionControllerIntegrationTest {
     @Autowired
     private AsignacionRepository asignacionRepository;
     @Autowired
+    private GradoRepository gradoRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private Usuario profesor;
     private Usuario alumno;
     private Usuario otroAlumno;
     private Empresa empresa;
+    private Grado grado;
 
     @BeforeEach
     void setUp() {
@@ -63,10 +68,11 @@ class AsignacionControllerIntegrationTest {
         alumno = usuarioRepository.save(new Usuario("alumno@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
         otroAlumno = usuarioRepository.save(new Usuario("otro@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
         empresa = empresaRepository.save(new Empresa("Acme", "d", "dir", sector, "obs", "c", "t", "e", profesor));
+        grado = gradoRepository.save(new Grado("DAW"));
     }
 
     private CrearAsignacionRequest request() {
-        return new CrearAsignacionRequest(alumno.getId(), empresa.getId(), profesor.getId(), LocalDate.of(2026, 1, 15));
+        return new CrearAsignacionRequest(alumno.getId(), empresa.getId(), profesor.getId(), grado.getId(), 1, LocalDate.of(2026, 1, 15));
     }
 
     @Test
@@ -82,6 +88,32 @@ class AsignacionControllerIntegrationTest {
     }
 
     @Test
+    void mismoAlumnoEmpresaDistintoAnioNoEsConflicto() throws Exception {
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
+
+        mockMvc.perform(post("/api/asignaciones")
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new CrearAsignacionRequest(alumno.getId(), empresa.getId(), profesor.getId(), grado.getId(), 2, LocalDate.of(2027, 1, 15)))))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void mismoAlumnoEmpresaGradoYAnioEsConflicto() throws Exception {
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
+
+        mockMvc.perform(post("/api/asignaciones")
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request())))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("ASIGNACION_YA_EXISTE"));
+    }
+
+    @Test
     void alumnoNoPuedeCrearAsignacionDevuelve403() throws Exception {
         mockMvc.perform(post("/api/asignaciones")
                         .with(csrf())
@@ -94,7 +126,7 @@ class AsignacionControllerIntegrationTest {
 
     @Test
     void alumnoConsultaSusPropiasAsignaciones() throws Exception {
-        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
 
         mockMvc.perform(get("/api/alumnos/" + alumno.getId() + "/asignaciones")
                         .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
@@ -112,7 +144,7 @@ class AsignacionControllerIntegrationTest {
 
     @Test
     void profesorConsultaAsignacionesDeCualquierAlumno() throws Exception {
-        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
 
         mockMvc.perform(get("/api/alumnos/" + alumno.getId() + "/asignaciones")
                         .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
@@ -122,7 +154,7 @@ class AsignacionControllerIntegrationTest {
 
     @Test
     void profesorConsultaAsignacionesDeUnaEmpresa() throws Exception {
-        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
 
         mockMvc.perform(get("/api/empresas/" + empresa.getId() + "/asignaciones")
                         .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
@@ -140,7 +172,7 @@ class AsignacionControllerIntegrationTest {
 
     @Test
     void profesorCierraAsignacion() throws Exception {
-        Asignacion asignacion = asignacionRepository.save(new Asignacion(alumno, empresa, profesor, LocalDate.of(2026, 1, 15)));
+        Asignacion asignacion = asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
 
         mockMvc.perform(put("/api/asignaciones/" + asignacion.getId())
                         .with(csrf())

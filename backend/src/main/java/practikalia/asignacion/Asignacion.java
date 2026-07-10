@@ -1,6 +1,7 @@
 package practikalia.asignacion;
 
 import practikalia.empresa.Empresa;
+import practikalia.grado.Grado;
 import practikalia.usuario.Usuario;
 
 import java.time.Instant;
@@ -35,6 +36,12 @@ public class Asignacion {
     @ManyToOne(optional = false)
     private Usuario tutorCentro;
 
+    @ManyToOne(optional = false)
+    private Grado grado;
+
+    @Column(nullable = false)
+    private int anio;
+
     @Column(nullable = false)
     private LocalDate fechaInicio;
 
@@ -43,10 +50,12 @@ public class Asignacion {
     @Column(nullable = false, updatable = false)
     private Instant fechaCreacion = Instant.now();
 
-    public Asignacion(Usuario alumno, Empresa empresa, Usuario tutorCentro, LocalDate fechaInicio) {
+    public Asignacion(Usuario alumno, Empresa empresa, Usuario tutorCentro, Grado grado, int anio, LocalDate fechaInicio) {
         this.alumno = alumno;
         this.empresa = empresa;
         this.tutorCentro = tutorCentro;
+        this.grado = grado;
+        this.anio = anio;
         this.fechaInicio = fechaInicio;
     }
 }

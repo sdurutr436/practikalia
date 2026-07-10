@@ -3,6 +3,9 @@ package practikalia.asignacion;
 import practikalia.empresa.Empresa;
 import practikalia.empresa.EmpresaException;
 import practikalia.empresa.EmpresaRepository;
+import practikalia.grado.Grado;
+import practikalia.grado.GradoException;
+import practikalia.grado.GradoRepository;
 import practikalia.usuario.Rol;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioException;
@@ -19,14 +22,17 @@ public class AsignacionService {
     private final AsignacionRepository asignacionRepository;
     private final UsuarioRepository usuarioRepository;
     private final EmpresaRepository empresaRepository;
+    private final GradoRepository gradoRepository;
 
     public AsignacionService(
             AsignacionRepository asignacionRepository,
             UsuarioRepository usuarioRepository,
-            EmpresaRepository empresaRepository) {
+            EmpresaRepository empresaRepository,
+            GradoRepository gradoRepository) {
         this.asignacionRepository = asignacionRepository;
         this.usuarioRepository = usuarioRepository;
         this.empresaRepository = empresaRepository;
+        this.gradoRepository = gradoRepository;
     }
 
     @Transactional
@@ -34,12 +40,14 @@ public class AsignacionService {
         Usuario alumno = buscarAlumno(request.alumnoId());
         Usuario tutorCentro = buscarTutor(request.tutorCentroId());
         Empresa empresa = empresaRepository.findById(request.empresaId()).orElseThrow(EmpresaException::noEncontrada);
+        Grado grado = gradoRepository.findById(request.gradoId()).orElseThrow(GradoException::noEncontrado);
 
-        if (asignacionRepository.existsByAlumnoIdAndEmpresaId(alumno.getId(), empresa.getId())) {
+        if (asignacionRepository.existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(
+                alumno.getId(), empresa.getId(), grado.getId(), request.anio())) {
             throw AsignacionException.yaExiste();
         }
 
-        Asignacion asignacion = new Asignacion(alumno, empresa, tutorCentro, request.fechaInicio());
+        Asignacion asignacion = new Asignacion(alumno, empresa, tutorCentro, grado, request.anio(), request.fechaInicio());
         asignacionRepository.save(asignacion);
         return AsignacionDto.de(asignacion);
     }
