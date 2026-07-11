@@ -34,6 +34,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/cambiar-contrasena").hasAnyAuthority(
                                 JwtService.AUTORIDAD_CAMBIO_PENDIENTE, "ROLE_ALUMNO", "ROLE_PROFESOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/etiquetas").hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/*/etiquetas").hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN")
                         .requestMatchers("/api/usuarios/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/empresas/*/interes").hasAuthority("ROLE_ALUMNO")
                         .requestMatchers(HttpMethod.DELETE, "/api/empresas/*/interes").hasAuthority("ROLE_ALUMNO")

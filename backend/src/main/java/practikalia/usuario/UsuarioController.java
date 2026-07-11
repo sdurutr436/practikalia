@@ -1,8 +1,13 @@
 package practikalia.usuario;
 
+import practikalia.etiqueta.EtiquetaDto;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -32,5 +37,23 @@ public class UsuarioController {
     @PutMapping("/{id}/grado")
     public ResponseEntity<UsuarioGradoDto> actualizarGrado(@PathVariable Long id, @Valid @RequestBody ActualizarGradoRequest request) {
         return ResponseEntity.ok(usuarioService.actualizarGrado(id, request));
+    }
+
+    @PutMapping("/{id}/etiquetas")
+    public ResponseEntity<List<EtiquetaDto>> actualizarEtiquetas(Authentication authentication,
+            @PathVariable Long id, @Valid @RequestBody ActualizarEtiquetasRequest request) {
+        return ResponseEntity.ok(usuarioService.actualizarEtiquetas(
+                id, request, esProfesor(authentication), authentication.getName()));
+    }
+
+    @GetMapping("/{id}/etiquetas")
+    public ResponseEntity<List<EtiquetaDto>> obtenerEtiquetas(Authentication authentication, @PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.obtenerEtiquetas(
+                id, esProfesor(authentication), authentication.getName()));
+    }
+
+    private boolean esProfesor(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_PROFESOR"));
     }
 }
