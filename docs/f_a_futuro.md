@@ -19,7 +19,7 @@ documentación del proyecto, se commitea.
 
 ## Código backend
 
-- **`EtiquetaException` compartida en `practikalia.etiqueta`** — hoy "etiqueta no encontrada" está duplicada por feature a propósito (dos usos no justifican la utilidad común): `EmpresaException.etiquetaNoEncontrada()` (`400`, legado de Fase 2) y `UsuarioException.etiquetaNoEncontrada()` (`404`, Fase 8). Disparador: un **tercer consumidor** del concepto (candidato: Fase 9/Afinidad, si valida ids de etiqueta en un endpoint propio). Al extraerla, el status canónico es **`404 NOT_FOUND`** (decisión cerrada en el addendum 8.1 del prompt de Fase 8: es el status correcto para "el recurso referenciado no existe") y el `400` de Empresa se migra a `404` en esa misma extracción — es un cambio de contrato de los endpoints de empresa, avisarlo en el commit.
+- **`EtiquetaException` compartida en `practikalia.etiqueta`** — hoy "etiqueta no encontrada" está duplicada por feature a propósito (dos usos no justifican la utilidad común): `EmpresaException.etiquetaNoEncontrada()` (`400`, legado de Fase 2) y `UsuarioException.etiquetaNoEncontrada()` (`404`, Fase 8). Disparador: un **tercer consumidor** del concepto (candidato: Fase 9/Afinidad, si valida ids de etiqueta en un endpoint propio). Al extraerla, el status canónico es **`404 NOT_FOUND`** (decisión cerrada en el addendum post-implementación del prompt de Fase 8: es el status correcto para "el recurso referenciado no existe") y el `400` de Empresa se migra a `404` en esa misma extracción — es un cambio de contrato de los endpoints de empresa, avisarlo en el commit.
 
 ## Autenticación
 
