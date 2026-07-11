@@ -1,6 +1,7 @@
 package practikalia.usuario;
 
 import practikalia.etiqueta.Etiqueta;
+import practikalia.etiqueta.EtiquetaDto;
 import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.grado.Grado;
 import practikalia.grado.GradoException;
@@ -133,8 +134,26 @@ public class UsuarioService {
         return new LoginResultado(token, UsuarioDto.de(usuario));
     }
 
+    @Transactional(readOnly = true)
     public UsuarioDto buscarPorCorreo(String correo) {
         return UsuarioDto.de(buscarUsuarioPorCorreo(correo));
+    }
+
+    @Transactional
+    public List<EtiquetaDto> actualizarEtiquetas(Long id, ActualizarEtiquetasRequest request,
+            boolean esProfesor, String correoAutenticado) {
+        verificarPropioOProfesor(id, esProfesor, correoAutenticado);
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioException::noEncontrado);
+        usuario.setEtiquetas(buscarEtiquetas(request.etiquetaIds()));
+        usuarioRepository.save(usuario);
+        return usuario.getEtiquetas().stream().map(EtiquetaDto::de).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EtiquetaDto> obtenerEtiquetas(Long id, boolean esProfesor, String correoAutenticado) {
+        verificarPropioOProfesor(id, esProfesor, correoAutenticado);
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioException::noEncontrado);
+        return usuario.getEtiquetas().stream().map(EtiquetaDto::de).toList();
     }
 
     @Transactional

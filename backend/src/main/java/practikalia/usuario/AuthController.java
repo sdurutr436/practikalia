@@ -49,7 +49,8 @@ public class AuthController {
     public ResponseEntity<MeResponse> me(Authentication authentication) {
         UsuarioDto usuario = usuarioService.buscarPorCorreo(authentication.getName());
         return ResponseEntity.ok(
-                new MeResponse(usuario.correo(), usuario.rol(), usuario.esAdmin(), usuario.debeCambiarContrasena()));
+                new MeResponse(usuario.correo(), usuario.rol(), usuario.esAdmin(), usuario.debeCambiarContrasena(),
+                        usuario.etiquetas()));
     }
 
     @PostMapping("/cambiar-contrasena")

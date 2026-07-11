@@ -1,5 +1,6 @@
 package practikalia.usuario;
 
+import practikalia.etiqueta.Etiqueta;
 import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.grado.Grado;
 import practikalia.grado.GradoRepository;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -49,7 +51,7 @@ class UsuarioServiceTest {
     }
 
     private UsuarioDto profesor() {
-        return new UsuarioDto("prof@iesejemplo.es", Rol.PROFESOR, false, false);
+        return new UsuarioDto("prof@iesejemplo.es", Rol.PROFESOR, false, false, List.of());
     }
 
     @Test
@@ -97,7 +99,7 @@ class UsuarioServiceTest {
 
     @Test
     void esAdminSiPuedeCrearOtroProfesor() {
-        UsuarioDto admin = new UsuarioDto("prof@iesejemplo.es", Rol.PROFESOR, true, false);
+        UsuarioDto admin = new UsuarioDto("prof@iesejemplo.es", Rol.PROFESOR, true, false, List.of());
         when(usuarioRepository.findByCorreo("otro@iesejemplo.es")).thenReturn(Optional.empty());
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -255,5 +257,102 @@ class UsuarioServiceTest {
         assertThatThrownBy(() -> usuarioService.actualizarGrado(1L, new ActualizarGradoRequest(2L, 1)))
                 .isInstanceOf(UsuarioException.class)
                 .hasFieldOrPropertyWithValue("codigo", "USUARIO_NO_ENCONTRADO");
+    }
+
+    private Usuario alumnoConId(Long id, String correo) {
+        Usuario alumno = new Usuario(correo, passwordEncoder.encode("Correcta123!"), Rol.ALUMNO);
+        alumno.setId(id);
+        return alumno;
+    }
+
+    private Etiqueta etiquetaConId(Long id, String nombre) {
+        Etiqueta etiqueta = new Etiqueta(nombre);
+        etiqueta.setId(id);
+        return etiqueta;
+    }
+
+    @Test
+    void alumnoActualizaSusPropiasEtiquetas() {
+        Usuario alumno = alumnoConId(1L, "ana@iesejemplo.es");
+        when(usuarioRepository.findByCorreo("ana@iesejemplo.es")).thenReturn(Optional.of(alumno));
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
+        when(etiquetaRepository.findById(5L)).thenReturn(Optional.of(etiquetaConId(5L, "Java")));
+
+        var etiquetas = usuarioService.actualizarEtiquetas(
+                1L, new ActualizarEtiquetasRequest(List.of(5L)), false, "ana@iesejemplo.es");
+
+        assertThat(etiquetas).extracting("nombre").containsExactly("Java");
+        assertThat(alumno.getEtiquetas()).hasSize(1);
+    }
+
+    @Test
+    void alumnoNoPuedeActualizarEtiquetasDeOtro() {
+        when(usuarioRepository.findByCorreo("ana@iesejemplo.es"))
+                .thenReturn(Optional.of(alumnoConId(1L, "ana@iesejemplo.es")));
+
+        assertThatThrownBy(() -> usuarioService.actualizarEtiquetas(
+                2L, new ActualizarEtiquetasRequest(List.of(5L)), false, "ana@iesejemplo.es"))
+                .isInstanceOf(UsuarioException.class)
+                .hasFieldOrPropertyWithValue("codigo", "ACCESO_DENEGADO");
+    }
+
+    @Test
+    void profesorActualizaEtiquetasDeCualquierAlumno() {
+        Usuario alumno = alumnoConId(2L, "ana@iesejemplo.es");
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(alumno));
+        when(etiquetaRepository.findById(5L)).thenReturn(Optional.of(etiquetaConId(5L, "Java")));
+
+        var etiquetas = usuarioService.actualizarEtiquetas(
+                2L, new ActualizarEtiquetasRequest(List.of(5L)), true, "prof@iesejemplo.es");
+
+        assertThat(etiquetas).extracting("nombre").containsExactly("Java");
+    }
+
+    @Test
+    void actualizarEtiquetasConIdInexistenteLanzaExcepcion() {
+        Usuario alumno = alumnoConId(1L, "ana@iesejemplo.es");
+        when(usuarioRepository.findByCorreo("ana@iesejemplo.es")).thenReturn(Optional.of(alumno));
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
+        when(etiquetaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> usuarioService.actualizarEtiquetas(
+                1L, new ActualizarEtiquetasRequest(List.of(99L)), false, "ana@iesejemplo.es"))
+                .isInstanceOf(UsuarioException.class)
+                .hasFieldOrPropertyWithValue("codigo", "ETIQUETA_NO_ENCONTRADA");
+    }
+
+    @Test
+    void actualizarEtiquetasConListaVaciaLimpiaLasExistentes() {
+        Usuario alumno = alumnoConId(1L, "ana@iesejemplo.es");
+        alumno.getEtiquetas().add(etiquetaConId(5L, "Java"));
+        when(usuarioRepository.findByCorreo("ana@iesejemplo.es")).thenReturn(Optional.of(alumno));
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(alumno));
+
+        var etiquetas = usuarioService.actualizarEtiquetas(
+                1L, new ActualizarEtiquetasRequest(List.of()), false, "ana@iesejemplo.es");
+
+        assertThat(etiquetas).isEmpty();
+        assertThat(alumno.getEtiquetas()).isEmpty();
+    }
+
+    @Test
+    void alumnoNoPuedeVerEtiquetasDeOtro() {
+        when(usuarioRepository.findByCorreo("ana@iesejemplo.es"))
+                .thenReturn(Optional.of(alumnoConId(1L, "ana@iesejemplo.es")));
+
+        assertThatThrownBy(() -> usuarioService.obtenerEtiquetas(2L, false, "ana@iesejemplo.es"))
+                .isInstanceOf(UsuarioException.class)
+                .hasFieldOrPropertyWithValue("codigo", "ACCESO_DENEGADO");
+    }
+
+    @Test
+    void profesorVeEtiquetasDeCualquierAlumno() {
+        Usuario alumno = alumnoConId(2L, "ana@iesejemplo.es");
+        alumno.getEtiquetas().add(etiquetaConId(5L, "Java"));
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(alumno));
+
+        var etiquetas = usuarioService.obtenerEtiquetas(2L, true, "prof@iesejemplo.es");
+
+        assertThat(etiquetas).extracting("nombre").containsExactly("Java");
     }
 }

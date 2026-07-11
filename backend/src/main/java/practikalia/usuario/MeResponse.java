@@ -1,4 +1,9 @@
 package practikalia.usuario;
 
-public record MeResponse(String correo, Rol rol, boolean esAdmin, boolean debeCambiarContrasena) {
+import practikalia.etiqueta.EtiquetaDto;
+
+import java.util.List;
+
+public record MeResponse(String correo, Rol rol, boolean esAdmin, boolean debeCambiarContrasena,
+        List<EtiquetaDto> etiquetas) {
 }
