@@ -17,6 +17,10 @@ documentación del proyecto, se commitea.
 - **Caffeine (cache)** — sin ningún punto caliente identificado todavía. Candidato natural: el algoritmo de afinidad (Fase 6 del backend).
 - **Publicar imágenes en Docker Hub + pipeline de CI** — no tiene sentido hasta que el proyecto llegue a la versión 1.0 (hoy es el scaffold de Angular + Spring Boot).
 
+## Código backend
+
+- **`EtiquetaException` compartida en `practikalia.etiqueta`** — hoy "etiqueta no encontrada" está duplicada por feature a propósito (dos usos no justifican la utilidad común): `EmpresaException.etiquetaNoEncontrada()` (`400`, legado de Fase 2) y `UsuarioException.etiquetaNoEncontrada()` (`404`, Fase 8). Disparador: un **tercer consumidor** del concepto (candidato: Fase 9/Afinidad, si valida ids de etiqueta en un endpoint propio). Al extraerla, el status canónico es **`404 NOT_FOUND`** (decisión cerrada en el addendum 8.1 del prompt de Fase 8: es el status correcto para "el recurso referenciado no existe") y el `400` de Empresa se migra a `404` en esa misma extracción — es un cambio de contrato de los endpoints de empresa, avisarlo en el commit.
+
 ## Autenticación
 
 - **OTP / 2FA por correo** — sustituiría o complementaría el login por contraseña actual. Roadmap del briefing, "más adelante".
