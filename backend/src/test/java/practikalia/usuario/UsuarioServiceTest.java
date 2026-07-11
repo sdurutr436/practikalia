@@ -1,5 +1,6 @@
 package practikalia.usuario;
 
+import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.grado.Grado;
 import practikalia.grado.GradoRepository;
 import practikalia.usuario.correo.CorreoPermitidoRepository;
@@ -30,6 +31,7 @@ class UsuarioServiceTest {
     private UsuarioRepository usuarioRepository;
     private CorreoPermitidoRepository correoPermitidoRepository;
     private GradoRepository gradoRepository;
+    private EtiquetaRepository etiquetaRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private JwtService jwtService;
     private UsuarioService usuarioService;
@@ -39,10 +41,11 @@ class UsuarioServiceTest {
         usuarioRepository = mock(UsuarioRepository.class);
         correoPermitidoRepository = mock(CorreoPermitidoRepository.class);
         gradoRepository = mock(GradoRepository.class);
+        etiquetaRepository = mock(EtiquetaRepository.class);
         jwtService = mock(JwtService.class);
         usuarioService = new UsuarioService(
-                usuarioRepository, correoPermitidoRepository, gradoRepository, passwordEncoder, jwtService,
-                "iesejemplo.es");
+                usuarioRepository, correoPermitidoRepository, gradoRepository, etiquetaRepository,
+                passwordEncoder, jwtService, "iesejemplo.es");
     }
 
     private UsuarioDto profesor() {

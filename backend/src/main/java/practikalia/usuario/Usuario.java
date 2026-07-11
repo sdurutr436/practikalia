@@ -1,8 +1,11 @@
 package practikalia.usuario;
 
+import practikalia.etiqueta.Etiqueta;
 import practikalia.grado.Grado;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +14,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,6 +60,12 @@ public class Usuario {
     private Grado grado;
 
     private Integer anio;
+
+    @ManyToMany
+    @JoinTable(name = "usuario_etiqueta",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "etiqueta_id"))
+    private List<Etiqueta> etiquetas = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
     private Instant fechaCreacion = Instant.now();
