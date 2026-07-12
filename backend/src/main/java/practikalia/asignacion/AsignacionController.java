@@ -10,8 +10,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
+/**
+ * Asignación de un alumno a una empresa para un grado/año concreto (snapshot
+ * del perfil del alumno en ese momento, no se actualiza si el alumno cambia
+ * de grado/año después). Creación y cierre restringidos a profesor/admin en
+ * {@code SecurityConfig}; la lectura por alumno añade "propio o profesor" en
+ * el servicio.
+ */
 @RestController
 public class AsignacionController {
 
@@ -21,28 +30,43 @@ public class AsignacionController {
         this.asignacionService = asignacionService;
     }
 
+    @Operation(summary = "Crear una asignación", description = "Solo profesor/admin. Única por (alumno, empresa, grado, año): "
+            + "el mismo alumno puede volver a la misma empresa en un año distinto (recurrencia).")
+    @ApiResponse(responseCode = "400", description = "El usuario indicado como alumno no tiene rol `ALUMNO`, o el indicado como tutor no tiene rol `PROFESOR`")
+    @ApiResponse(responseCode = "404", description = "El alumno, el tutor, la empresa o el grado indicados no existen")
+    @ApiResponse(responseCode = "409", description = "Ya existe una asignación de ese alumno a esa empresa para ese grado y año")
     @PostMapping("/api/asignaciones")
     public ResponseEntity<AsignacionDto> crear(@Valid @RequestBody CrearAsignacionRequest request) {
         AsignacionDto response = asignacionService.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Listar las asignaciones de un alumno", description = "Accesible por el propio alumno o por cualquier profesor/admin. Incluye el histórico completo (todos los años).")
+    @ApiResponse(responseCode = "403", description = "Un alumno intenta consultar las asignaciones de otro alumno")
     @GetMapping("/api/alumnos/{alumnoId}/asignaciones")
     public ResponseEntity<?> listarPorAlumno(Authentication authentication, @PathVariable Long alumnoId) {
         return ResponseEntity.ok(
                 asignacionService.listarPorAlumno(alumnoId, esProfesor(authentication), authentication.getName()));
     }
 
+    @Operation(summary = "Listar las asignaciones de una empresa", description = "Cualquier rol autenticado. Incluye el histórico completo (todos los alumnos y años).")
     @GetMapping("/api/empresas/{empresaId}/asignaciones")
     public ResponseEntity<?> listarPorEmpresa(@PathVariable Long empresaId) {
         return ResponseEntity.ok(asignacionService.listarPorEmpresa(empresaId));
     }
 
+    @Operation(summary = "Tasa de contratación posterior de una empresa", description = "Cualquier rol autenticado. Ratio "
+            + "`0.0`-`1.0` sobre las asignaciones \"decididas\" (con `fechaFin` y `contratadoPosterior` ambos informados); "
+            + "las abiertas o sin decidir no cuentan en el denominador. `0.0` si no hay ninguna decidida.")
+    @ApiResponse(responseCode = "404", description = "La empresa no existe")
     @GetMapping("/api/empresas/{empresaId}/tasa-contratacion")
     public ResponseEntity<TasaContratacionDto> tasaContratacion(@PathVariable Long empresaId) {
         return ResponseEntity.ok(asignacionService.tasaContratacion(empresaId));
     }
 
+    @Operation(summary = "Cerrar una asignación", description = "Solo profesor/admin. Fija `fechaFin` y, opcionalmente, si "
+            + "hubo contratación posterior; puede llamarse más de una vez para corregir el dato de contratación tras el cierre.")
+    @ApiResponse(responseCode = "404", description = "La asignación no existe")
     @PutMapping("/api/asignaciones/{id}")
     public ResponseEntity<AsignacionDto> cerrar(@PathVariable Long id, @Valid @RequestBody ActualizarAsignacionRequest request) {
         return ResponseEntity.ok(asignacionService.cerrar(id, request));
