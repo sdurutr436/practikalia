@@ -2,6 +2,7 @@ package practikalia.interes;
 
 import java.time.Instant;
 
+/** Interés de un alumno en una empresa, con el grado/año snapshot de cuando se marcó. */
 public record InteresDto(
         Long empresaId,
         String empresaNombre,
