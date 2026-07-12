@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/empresas/*/interes").hasAuthority("ROLE_ALUMNO")
                         .requestMatchers(HttpMethod.DELETE, "/api/empresas/*/interes").hasAuthority("ROLE_ALUMNO")
                         .requestMatchers(HttpMethod.GET, "/api/empresas/*/interesados").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/empresas/afinidad").hasAuthority("ROLE_ALUMNO")
+                        .requestMatchers(HttpMethod.GET, "/api/alumnos/*/afinidad").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/empresas/*/asignaciones").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
