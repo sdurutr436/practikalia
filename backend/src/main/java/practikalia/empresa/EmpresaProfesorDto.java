@@ -2,13 +2,17 @@ package practikalia.empresa;
 
 import practikalia.etiqueta.EtiquetaDto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.Instant;
 import java.util.List;
 
+/** Vista de empresa para profesorado/admin: detalle completo, incluidos contacto y datos de gestión. */
 public record EmpresaProfesorDto(
         Long id,
         String nombre,
         String descripcion,
+        @Schema(description = "Ruta relativa servida por nginx en `/uploads/`; `null` si la empresa no tiene imagen todavía")
         String imagen,
         String direccion,
         EtiquetaDto sector,
@@ -17,6 +21,7 @@ public record EmpresaProfesorDto(
         String contactoNombre,
         String contactoTelefono,
         String contactoEmail,
+        @Schema(description = "Si es `false`, la empresa no aparece en el listado ni el detalle del alumnado")
         boolean publicada,
         String creadaPorCorreo,
         Instant fechaCreacion) {
