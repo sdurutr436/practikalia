@@ -17,6 +17,16 @@ documentación del proyecto, se commitea.
 - **Caffeine (cache)** — sin ningún punto caliente identificado todavía. Candidato natural: el algoritmo de afinidad (Fase 6 del backend).
 - **Publicar imágenes en Docker Hub + pipeline de CI** — no tiene sentido hasta que el proyecto llegue a la versión 1.0 (hoy es el scaffold de Angular + Spring Boot).
 
+## Código backend
+
+- **`EtiquetaException` compartida en `practikalia.etiqueta`** — hoy "etiqueta no encontrada" está duplicada por feature a propósito (dos usos no justifican la utilidad común): `EmpresaException.etiquetaNoEncontrada()` (`400`, legado de Fase 2) y `UsuarioException.etiquetaNoEncontrada()` (`404`, Fase 8). Disparador: un **tercer consumidor** del concepto (candidato: Fase 9/Afinidad, si valida ids de etiqueta en un endpoint propio). Al extraerla, el status canónico es **`404 NOT_FOUND`** (decisión cerrada en el addendum post-implementación del prompt de Fase 8: es el status correcto para "el recurso referenciado no existe") y el `400` de Empresa se migra a `404` en esa misma extracción — es un cambio de contrato de los endpoints de empresa, avisarlo en el commit.
+
+## Roles y perfil (debates Fases 8.1 y 8.2, 2026-07-12)
+
+- **Perfil de profesor** — el profesorado no se perfila: es gestor/moderador (briefing § Roles) y la afinidad (Fase 9) rankea solo para alumnos. Alcance máximo admitido si algún día se revisita: **etiquetas docentes indicando el curso y las asignaturas que imparte** — nunca el perfil de intereses del alumno. Disparador: que se planifique una feature que lo consuma (reparto de tutorías/moderación por especialidad, filtros por ámbito docente, dashboard de coordinación).
+- **Validar `Rol.ALUMNO` en el usuario destino de `UsuarioService.actualizarEtiquetas`/`actualizarGrado`** — descartado por ahora: se tolera el dato inerte (un profesor puede hoy ponerse etiquetas/grado a sí mismo o a otro profesor; nada lo consume y no es explotable), porque blindarlo es un cambio de contrato (`4xx` nuevo para llamadas que hoy devuelven `200`) sin beneficio actual, y podría chocar con las etiquetas docentes de arriba si algún día reutilizaran el mismo campo. Este criterio — *tolerar el dato inerte en campos ligados a un rol de `Usuario`* — aplica también a la pregunta gemela de la Fase 8.2 (`esAdmin` sobre `ALUMNO`, confirmado al cerrar la 8.2). Disparador: que algo empiece a consumir esos campos sin filtrar por rol — en ese momento, validar en servicio como ya hace `InteresService` con quien actúa.
+- **Configuración de instancia editable por admin** (debate Fase 8.2) — la Fase 10 prevé pesos del score "como constantes primero; configurables por instancia solo si un centro lo pide". No se adelanta nada: si ese disparador se cumple y la config pasa a ser editable, el menú de edición es **exclusivo del admin** (el quién ya está decidido, no reabrirlo). Disparador: que un centro pida configurar pesos/rango de calificación u otra config de instancia.
+
 ## Autenticación
 
 - **OTP / 2FA por correo** — sustituiría o complementaría el login por contraseña actual. Roadmap del briefing, "más adelante".

@@ -1,5 +1,8 @@
 package practikalia.usuario;
 
+import practikalia.etiqueta.Etiqueta;
+import practikalia.etiqueta.EtiquetaDto;
+import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.grado.Grado;
 import practikalia.grado.GradoException;
 import practikalia.grado.GradoRepository;
@@ -44,6 +47,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final CorreoPermitidoRepository correoPermitidoRepository;
     private final GradoRepository gradoRepository;
+    private final EtiquetaRepository etiquetaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final Set<String> dominiosPermitidos;
@@ -52,12 +56,14 @@ public class UsuarioService {
             UsuarioRepository usuarioRepository,
             CorreoPermitidoRepository correoPermitidoRepository,
             GradoRepository gradoRepository,
+            EtiquetaRepository etiquetaRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             @Value("${allowed.domains:}") String dominiosPermitidosCsv) {
         this.usuarioRepository = usuarioRepository;
         this.correoPermitidoRepository = correoPermitidoRepository;
         this.gradoRepository = gradoRepository;
+        this.etiquetaRepository = etiquetaRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.dominiosPermitidos = Arrays.stream(dominiosPermitidosCsv.split(","))
@@ -128,8 +134,26 @@ public class UsuarioService {
         return new LoginResultado(token, UsuarioDto.de(usuario));
     }
 
+    @Transactional(readOnly = true)
     public UsuarioDto buscarPorCorreo(String correo) {
         return UsuarioDto.de(buscarUsuarioPorCorreo(correo));
+    }
+
+    @Transactional
+    public List<EtiquetaDto> actualizarEtiquetas(Long id, ActualizarEtiquetasRequest request,
+            boolean esProfesor, String correoAutenticado) {
+        verificarPropioOProfesor(id, esProfesor, correoAutenticado);
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioException::noEncontrado);
+        usuario.setEtiquetas(buscarEtiquetas(request.etiquetaIds()));
+        usuarioRepository.save(usuario);
+        return usuario.getEtiquetas().stream().map(EtiquetaDto::de).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EtiquetaDto> obtenerEtiquetas(Long id, boolean esProfesor, String correoAutenticado) {
+        verificarPropioOProfesor(id, esProfesor, correoAutenticado);
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioException::noEncontrado);
+        return usuario.getEtiquetas().stream().map(EtiquetaDto::de).toList();
     }
 
     @Transactional
@@ -169,6 +193,25 @@ public class UsuarioService {
 
     private Usuario buscarUsuarioPorCorreo(String correo) {
         return usuarioRepository.findByCorreo(correo).orElseThrow(UsuarioException::credencialesInvalidas);
+    }
+
+    private void verificarPropioOProfesor(Long id, boolean esProfesor, String correoAutenticado) {
+        if (!esProfesor) {
+            Usuario autenticado = usuarioRepository.findByCorreo(correoAutenticado).orElseThrow();
+            if (!autenticado.getId().equals(id)) {
+                throw UsuarioException.accesoDenegado();
+            }
+        }
+    }
+
+    private List<Etiqueta> buscarEtiquetas(List<Long> ids) {
+        List<Etiqueta> etiquetas = new ArrayList<>();
+        if (ids != null) {
+            for (Long id : ids) {
+                etiquetas.add(etiquetaRepository.findById(id).orElseThrow(UsuarioException::etiquetaNoEncontrada));
+            }
+        }
+        return etiquetas;
     }
 
     private boolean correoPermitido(String correo) {

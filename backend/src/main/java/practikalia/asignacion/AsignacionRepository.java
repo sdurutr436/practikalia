@@ -12,6 +12,8 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, Long> {
 
     boolean existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(Long alumnoId, Long empresaId, Long gradoId, int anio);
 
+    boolean existsByAlumnoIdAndTutorCentroIdAndFechaFinIsNull(Long alumnoId, Long tutorCentroId);
+
     long countByEmpresaIdAndFechaFinIsNotNullAndContratadoPosteriorIsNotNull(Long empresaId);
 
     long countByEmpresaIdAndFechaFinIsNotNullAndContratadoPosteriorTrue(Long empresaId);

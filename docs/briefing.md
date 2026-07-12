@@ -137,6 +137,16 @@ Además de lo anterior, puede ver y gestionar:
 - Gestión de intereses y seguimiento.
 - Validación de contenido.
 
+#### Administrador
+
+Es un profesor con permisos ampliados (no un rol aparte): hereda todo lo del
+profesor y además gestiona:
+
+- Altas de profesores (ya operativo).
+- Whitelist de correos permitidos para el registro.
+- Catálogos de etiquetas y grados.
+- Usuarios: listado y activación/desactivación.
+
 ---
 
 ## Stack del proyecto
