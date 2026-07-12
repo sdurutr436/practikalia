@@ -13,7 +13,7 @@ public record EmpresaAlumnoDto(
         EtiquetaDto sector,
         List<EtiquetaDto> etiquetas) {
 
-    static EmpresaAlumnoDto de(Empresa empresa) {
+    public static EmpresaAlumnoDto de(Empresa empresa) {
         return new EmpresaAlumnoDto(
                 empresa.getId(),
                 empresa.getNombre(),
