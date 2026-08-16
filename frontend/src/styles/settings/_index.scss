@@ -1,0 +1,9 @@
+// PROVISIONAL: tokens de diseño neutros mínimos, una variable por concepto.
+// Los tokens definitivos (paleta, tipografía, escala) los dará el usuario;
+// no invertir en estilo visual hasta entonces.
+$color-primario: #2563eb;
+$color-texto: #1f2937;
+$color-fondo: #f9fafb;
+$color-error: #b91c1c;
+$espaciado-base: 1rem;
+$tipografia-sistema: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

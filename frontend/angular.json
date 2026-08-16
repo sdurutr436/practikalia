@@ -8,7 +8,11 @@
   "projects": {
     "practikalia-frontend": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -24,7 +28,8 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"]
+            "inlineStyleLanguage": "scss",
+            "styles": ["src/styles.scss"]
           },
           "configurations": {
             "production": {

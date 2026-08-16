@@ -1,0 +1,9 @@
+// Capa elements (ITCSS): estilos base de etiquetas HTML, sin clases.
+@use '../settings' as s;
+
+body {
+  font-family: s.$tipografia-sistema;
+  color: s.$color-texto;
+  background: s.$color-fondo;
+  line-height: 1.5;
+}

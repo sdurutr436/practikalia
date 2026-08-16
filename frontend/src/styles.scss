@@ -1,0 +1,8 @@
+// Punto de entrada global de estilos — capas ITCSS en orden de
+// especificidad/alcance creciente. settings y tools no emiten CSS
+// (solo variables/mixins); se importan desde cada capa que los necesite.
+@use 'styles/generic';
+@use 'styles/elements';
+@use 'styles/objects';
+@use 'styles/components';
+@use 'styles/utilities';
