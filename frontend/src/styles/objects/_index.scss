@@ -1,2 +1,10 @@
 // Capa objects (ITCSS): patrones de layout sin estilo visual (prefijo o-).
-// Vacía por ahora — se añadirán con las primeras pantallas.
+@use '../settings' as s;
+
+// Centrado de una vista completa (páginas de auth).
+.o-centrado {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: s.$espaciado-base;
+}

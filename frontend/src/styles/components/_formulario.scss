@@ -1,0 +1,72 @@
+// Átomos/moléculas de formulario (BEM). Colores auxiliares (superficie,
+// bordes) hardcodeados como provisionales hasta recibir los tokens reales.
+@use '../settings' as s;
+
+.c-formulario {
+  display: grid;
+  gap: s.$espaciado-base;
+  width: 100%;
+  max-width: 24rem;
+  padding: s.$espaciado-base * 1.5;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.c-formulario__titulo {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.c-campo {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.c-campo__etiqueta {
+  font-size: 0.875rem;
+}
+
+.c-campo__entrada {
+  padding: 0.5em 0.75em;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid s.$color-primario;
+    outline-offset: 1px;
+  }
+}
+
+.c-campo__error {
+  margin: 0;
+  color: s.$color-error;
+  font-size: 0.875rem;
+}
+
+.c-boton {
+  padding: 0.5em 1em;
+  border: 0;
+  border-radius: 4px;
+  background: s.$color-primario;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.c-alerta {
+  margin: 0;
+  padding: 0.75em 1em;
+  border-radius: 4px;
+
+  &--error {
+    color: s.$color-error;
+    border: 1px solid currentcolor;
+  }
+}
