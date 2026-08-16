@@ -45,13 +45,17 @@
   font-size: 0.875rem;
 }
 
+// Vale tanto para <button> como para <a>.
 .c-boton {
+  display: inline-block;
   padding: 0.5em 1em;
   border: 0;
   border-radius: 4px;
   background: s.$color-primario;
   color: #fff;
   font: inherit;
+  text-align: center;
+  text-decoration: none;
   cursor: pointer;
 
   &:disabled {
