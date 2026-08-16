@@ -1,0 +1,46 @@
+<main class="o-centrado">
+  <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
+    <h1 class="c-formulario__titulo">Iniciar sesión</h1>
+
+    @if (error(); as mensaje) {
+      <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+    }
+
+    <div class="c-campo">
+      <label class="c-campo__etiqueta" for="correo">Correo</label>
+      <input
+        class="c-campo__entrada"
+        id="correo"
+        type="email"
+        formControlName="correo"
+        autocomplete="email"
+      />
+      @if (form.controls.correo.touched && form.controls.correo.invalid) {
+        <p class="c-campo__error">Introduce un correo válido.</p>
+      }
+    </div>
+
+    <div class="c-campo">
+      <label class="c-campo__etiqueta" for="contrasena">Contraseña</label>
+      <input
+        class="c-campo__entrada"
+        id="contrasena"
+        type="password"
+        formControlName="contrasena"
+        autocomplete="current-password"
+      />
+      @if (form.controls.contrasena.touched && form.controls.contrasena.invalid) {
+        <p class="c-campo__error">Introduce la contraseña.</p>
+      }
+    </div>
+
+    <div class="u-honeypot" aria-hidden="true">
+      <label for="web">Web</label>
+      <input id="web" type="text" formControlName="web" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <button class="c-boton" type="submit" [disabled]="enviando()">
+      {{ enviando() ? 'Entrando…' : 'Entrar' }}
+    </button>
+  </form>
+</main>

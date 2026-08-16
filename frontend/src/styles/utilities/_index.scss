@@ -1,0 +1,10 @@
+// Capa utilities (ITCSS): utilidades de un solo propósito (prefijo u-).
+
+// Honeypot anti-bots: fuera de pantalla (no display:none, para no delatarlo).
+.u-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

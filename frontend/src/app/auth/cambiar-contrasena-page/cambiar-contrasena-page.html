@@ -1,0 +1,44 @@
+<main class="o-centrado">
+  <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
+    <h1 class="c-formulario__titulo">Cambiar contraseña</h1>
+    <p>Debes cambiar tu contraseña antes de continuar.</p>
+
+    @if (error(); as mensaje) {
+      <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+    }
+
+    <div class="c-campo">
+      <label class="c-campo__etiqueta" for="contrasena-actual">Contraseña actual</label>
+      <input
+        class="c-campo__entrada"
+        id="contrasena-actual"
+        type="password"
+        formControlName="contrasenaActual"
+        autocomplete="current-password"
+      />
+      @if (form.controls.contrasenaActual.touched && form.controls.contrasenaActual.invalid) {
+        <p class="c-campo__error">Introduce la contraseña actual.</p>
+      }
+    </div>
+
+    <div class="c-campo">
+      <label class="c-campo__etiqueta" for="contrasena-nueva">Contraseña nueva</label>
+      <input
+        class="c-campo__entrada"
+        id="contrasena-nueva"
+        type="password"
+        formControlName="contrasenaNueva"
+        autocomplete="new-password"
+      />
+      @if (form.controls.contrasenaNueva.touched && form.controls.contrasenaNueva.invalid) {
+        <p class="c-campo__error">
+          Mínimo 8 caracteres, con mayúscula, minúscula, número y carácter especial.
+        </p>
+      }
+    </div>
+
+    <button class="c-boton" type="submit" [disabled]="enviando()">
+      {{ enviando() ? 'Guardando…' : 'Cambiar contraseña' }}
+    </button>
+  </form>
+</main>
