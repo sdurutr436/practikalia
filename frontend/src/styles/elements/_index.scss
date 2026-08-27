@@ -6,4 +6,15 @@ body {
   color: s.$color-texto;
   background: s.$color-fondo;
   line-height: 1.5;
+  letter-spacing: s.$tracking;
+}
+
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+legend {
+  padding: 0;
 }

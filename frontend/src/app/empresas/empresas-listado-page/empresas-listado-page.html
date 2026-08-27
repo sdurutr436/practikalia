@@ -1,0 +1,36 @@
+<main class="o-pagina">
+  <header class="c-cabecera">
+    <h1 class="c-cabecera__titulo">Empresas</h1>
+    <div class="c-cabecera__acciones">
+      @if (sesion()?.rol === 'PROFESOR') {
+        <a class="c-boton" routerLink="/empresas/nueva">Nueva empresa</a>
+      }
+      <button class="c-boton" type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else if (error(); as mensaje) {
+    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+  } @else if (empresas().length === 0) {
+    <p>Todavía no hay empresas.</p>
+  } @else {
+    <ul class="o-rejilla">
+      @for (empresa of empresas(); track empresa.id) {
+        <li>
+          <a class="c-tarjeta-empresa" [routerLink]="['/empresas', empresa.id]">
+            @if (empresa.imagen) {
+              <img class="c-tarjeta-empresa__imagen" [src]="empresa.imagen" [alt]="empresa.nombre" />
+            }
+            <h2 class="c-tarjeta-empresa__nombre">{{ empresa.nombre }}</h2>
+            <p class="c-tarjeta-empresa__meta">{{ empresa.sector.nombre }}</p>
+            @if (esVistaProfesor(empresa) && !empresa.publicada) {
+              <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
+            }
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</main>

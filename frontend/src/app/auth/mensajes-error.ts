@@ -13,6 +13,12 @@ export const MENSAJES_CAMBIO_CONTRASENA: Record<string, string> = {
     'La contraseña nueva no cumple la política: mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial.',
 };
 
+/** Mensajes de UI por código del contrato de /api/empresas (crear/editar/imagen). */
+export const MENSAJES_EMPRESA: Record<string, string> = {
+  ETIQUETA_NO_ENCONTRADA: 'El sector o alguna de las etiquetas indicadas no existe.',
+  EMPRESA_NO_ENCONTRADA: 'La empresa no existe.',
+};
+
 /** Código conocido → su mensaje; si no, el mensaje del backend; si no, genérico. */
 export function mensajeDeError(error: unknown, mensajes: Record<string, string>): string {
   if (error instanceof HttpErrorResponse) {

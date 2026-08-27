@@ -35,3 +35,24 @@ export const cambioContrasenaPendienteGuard: CanActivateFn = async () => {
   }
   return true;
 };
+
+/**
+ * Rutas de escritura (crear/editar empresa, subir imagen, etc.): solo
+ * profesor/admin (`esAdmin` no es un rol aparte, siempre viaja sobre
+ * `rol=PROFESOR`). Chequeo de UI — la barrera real la pone el backend.
+ */
+export const profesorGuard: CanActivateFn = async () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const sesion = await auth.asegurarSesion();
+  if (!sesion) {
+    return router.createUrlTree(['/login']);
+  }
+  if (sesion.debeCambiarContrasena) {
+    return router.createUrlTree(['/cambiar-contrasena']);
+  }
+  if (sesion.rol !== 'PROFESOR') {
+    return router.createUrlTree(['/']);
+  }
+  return true;
+};

@@ -1,9 +1,79 @@
-// PROVISIONAL: tokens de diseño neutros mínimos, una variable por concepto.
-// Los tokens definitivos (paleta, tipografía, escala) los dará el usuario;
-// no invertir en estilo visual hasta entonces.
-$color-primario: #2563eb;
-$color-texto: #1f2937;
-$color-fondo: #f9fafb;
-$color-error: #b91c1c;
-$espaciado-base: 1rem;
-$tipografia-sistema: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+// TEMA 2 (paleta en prueba, sistema de tokens definitivo): hoja shadcn/
+// tailwind traducida entera a ITCSS — color, tipografía (DM Sans),
+// espaciado (--spacing), radio, sombras y tracking, no solo la paleta.
+// Las custom properties conservan los nombres del generador para poder pegar
+// otra paleta encima sin retraducir; las capas consumen los alias SCSS de abajo.
+// Recortado a conceptos con consumidor real o cercano (fuera chart-*,
+// sidebar-*, popover-*; --font-mono/Space Mono sin consumidor todavía).
+// Modo oscuro: añadir class="dark" en <html> (sin toggle todavía).
+
+:root {
+  --background: hsl(80 33.3333% 96.4706%);
+  --foreground: hsl(0 0% 0%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 0%);
+  --primary: hsl(243.3962 75.3555% 58.6275%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(173.4146 80.3922% 40%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(0 0% 94.1176%);
+  --muted-foreground: hsl(0 0% 20%);
+  --accent: hsl(37.6923 92.126% 50.1961%);
+  --accent-foreground: hsl(0 0% 0%);
+  --destructive: hsl(0 84.2365% 60.1961%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(0 0% 0%);
+  --input: hsl(0 0% 45.098%);
+  --ring: hsl(229.6552 93.5484% 81.7647%);
+  --font-sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius: 1rem;
+  --shadow-sm:
+    0px 0px 0px 0px hsl(0 0% 10.1961% / 0.05), 0px 1px 2px -1px hsl(0 0% 10.1961% / 0.05);
+  --shadow-lg:
+    0px 0px 0px 0px hsl(0 0% 10.1961% / 0.05), 0px 4px 6px -1px hsl(0 0% 10.1961% / 0.05);
+  --tracking-normal: normal;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(0 0% 100%);
+  --card: hsl(215.2941 24.6377% 13.5294%);
+  --card-foreground: hsl(0 0% 100%);
+  --primary: hsl(234.4538 89.4737% 73.9216%);
+  --primary-foreground: hsl(0 0% 0%);
+  --secondary: hsl(172.4551 66.0079% 50.3922%);
+  --secondary-foreground: hsl(0 0% 0%);
+  --muted: hsl(0 0% 20%);
+  --muted-foreground: hsl(0 0% 80%);
+  --accent: hsl(45.9429 96.6851% 64.5098%);
+  --accent-foreground: hsl(0 0% 0%);
+  --destructive: hsl(0 90.604% 70.7843%);
+  --destructive-foreground: hsl(0 0% 0%);
+  --border: hsl(0 0% 32.9412%);
+  --input: hsl(0 0% 100%);
+  --ring: hsl(234.4538 89.4737% 73.9216%);
+}
+
+// Alias SCSS que consumen las capas (elements/objects/components).
+$color-fondo: var(--background);
+$color-texto: var(--foreground);
+$color-superficie: var(--card);
+$color-superficie-texto: var(--card-foreground);
+$color-primario: var(--primary);
+$color-primario-texto: var(--primary-foreground);
+$color-apagado: var(--muted);
+$color-texto-apagado: var(--muted-foreground);
+$color-error: var(--destructive);
+$color-error-texto: var(--destructive-foreground);
+$color-borde: var(--border);
+$color-borde-entrada: var(--input);
+$color-anillo: var(--ring);
+$radio: var(--radius); // tarjetas
+$radio-m: calc(var(--radius) - 2px); // entradas y botones
+$sombra: var(--shadow-sm);
+$sombra-grande: var(--shadow-lg);
+$espaciado-base: calc(var(--spacing) * 4); // 1rem con la unidad del tema
+$espaciado-grande: calc(var(--spacing) * 6); // 1.5rem
+$tracking: var(--tracking-normal);
+$tipografia-sistema: var(--font-sans);

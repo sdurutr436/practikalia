@@ -1,0 +1,53 @@
+<main class="o-pagina">
+  <a routerLink="/empresas">← Volver al listado</a>
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else if (error(); as mensaje) {
+    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+  } @else if (empresa(); as empresa) {
+    <article class="c-ficha-empresa">
+      @if (empresa.imagen) {
+        <img class="c-ficha-empresa__imagen" [src]="empresa.imagen" [alt]="empresa.nombre" />
+      }
+
+      <header class="c-cabecera">
+        <h1 class="c-cabecera__titulo">{{ empresa.nombre }}</h1>
+        @if (esVistaProfesor(empresa)) {
+          <a class="c-boton" [routerLink]="['/empresas', empresa.id, 'editar']">Editar</a>
+        }
+      </header>
+
+      @if (esVistaProfesor(empresa) && !empresa.publicada) {
+        <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
+      }
+
+      <p>{{ empresa.descripcion }}</p>
+      <p>{{ empresa.direccion }}</p>
+
+      <ul class="c-etiquetas">
+        <li class="c-etiqueta">{{ empresa.sector.nombre }}</li>
+        @for (etiqueta of empresa.etiquetas; track etiqueta.id) {
+          <li class="c-etiqueta">{{ etiqueta.nombre }}</li>
+        }
+      </ul>
+
+      @if (esVistaProfesor(empresa)) {
+        <section class="c-ficha-empresa__gestion">
+          <h2>Datos de gestión</h2>
+          <dl>
+            <dt>Contacto</dt>
+            <dd>
+              {{ empresa.contactoNombre || '—' }} · {{ empresa.contactoTelefono || '—' }} ·
+              {{ empresa.contactoEmail || '—' }}
+            </dd>
+            <dt>Observaciones</dt>
+            <dd>{{ empresa.observaciones || '—' }}</dd>
+            <dt>Creada por</dt>
+            <dd>{{ empresa.creadaPorCorreo }}</dd>
+          </dl>
+        </section>
+      }
+    </article>
+  }
+</main>

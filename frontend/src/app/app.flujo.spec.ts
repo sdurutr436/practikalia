@@ -37,20 +37,19 @@ describe('flujo de sesión', () => {
     await promesa;
   }
 
-  it('login → página general (cierra sesión) → volver a "/" acaba en login', async () => {
+  it('login → "/" redirige al listado de empresas', async () => {
     const harness = await RouterTestingHarness.create('/login');
     await loginComo(false);
 
-    // Aterrizaje en la general: el guard deja pasar y la página cierra sesión al cargar.
     await harness.navigateByUrl('/');
-    expect(router.url).toBe('/');
-    http.expectOne('/api/auth/logout').flush(null, { status: 204, statusText: 'No Content' });
+    http.expectOne('/api/empresas').flush([]);
     await esperarMicrotareas();
-    expect(auth.sesion()).toBeNull();
+    expect(router.url).toBe('/empresas');
+  });
 
-    // Volver al login (breadcrumb/botón) y "volver atrás" a la general: ya no
-    // hay sesión viva, así que el guard redirige a login sin tocar la API.
-    await harness.navigateByUrl('/login');
+  it('sin sesión, "/" redirige a login sin tocar la API de empresas', async () => {
+    const harness = await RouterTestingHarness.create();
+    auth.limpiarSesion();
     await harness.navigateByUrl('/');
     expect(router.url).toBe('/login');
   });
@@ -62,7 +61,7 @@ describe('flujo de sesión', () => {
     await harness.navigateByUrl('/');
     expect(router.url).toBe('/cambiar-contrasena');
 
-    // Tras completar el cambio se entra con normalidad (y la general cierra sesión).
+    // Tras completar el cambio se entra con normalidad, al listado de empresas.
     const promesa = auth.cambiarContrasena('secreta', 'Nueva.1234');
     http
       .expectOne('/api/auth/cambiar-contrasena')
@@ -70,9 +69,9 @@ describe('flujo de sesión', () => {
     await promesa;
 
     await harness.navigateByUrl('/');
-    expect(router.url).toBe('/');
-    http.expectOne('/api/auth/logout').flush(null, { status: 204, statusText: 'No Content' });
+    http.expectOne('/api/empresas').flush([]);
     await esperarMicrotareas();
+    expect(router.url).toBe('/empresas');
   });
 
   it('sin sesión, /cambiar-contrasena redirige a login', async () => {

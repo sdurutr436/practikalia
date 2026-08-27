@@ -1,0 +1,21 @@
+// Cabecera de página de dominio: título + acciones (reutilizable por
+// cualquier pantalla que use .o-pagina).
+@use '../settings' as s;
+
+.c-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-base;
+}
+
+.c-cabecera__titulo {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.c-cabecera__acciones {
+  display: flex;
+  gap: 0.5rem;
+}

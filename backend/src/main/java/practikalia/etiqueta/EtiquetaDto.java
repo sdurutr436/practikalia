@@ -2,9 +2,11 @@ package practikalia.etiqueta;
 
 /**
  * Catálogo de etiquetas (usado tanto como sector de empresa como como interés
- * de alumno/empresa). Sin controller propio: se gestiona directamente en
- * base de datos por cada centro, fuera de la app; solo se lee, anidado en
- * otras respuestas (empresa, perfil de usuario, afinidad).
+ * de alumno/empresa). El alta/baja se gestiona directamente en base de datos
+ * por cada centro, fuera de la app; la lectura tiene tanto
+ * {@link EtiquetaController} (listado propio, {@code GET /api/etiquetas})
+ * como su forma anidada en otras respuestas (empresa, perfil de usuario,
+ * afinidad).
  */
 public record EtiquetaDto(Long id, String nombre) {
 
