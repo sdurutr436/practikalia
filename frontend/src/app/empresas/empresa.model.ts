@@ -12,15 +12,15 @@ export interface Etiqueta {
 export interface Empresa {
   id: number;
   nombre: string;
-  descripcion: string;
+  descripcion: string | null;
   imagen: string | null;
-  direccion: string;
+  direccion: string | null;
   sector: Etiqueta;
   etiquetas: Etiqueta[];
-  observaciones?: string;
-  contactoNombre?: string;
-  contactoTelefono?: string;
-  contactoEmail?: string;
+  observaciones?: string | null;
+  contactoNombre?: string | null;
+  contactoTelefono?: string | null;
+  contactoEmail?: string | null;
   publicada?: boolean;
   creadaPorCorreo?: string;
   fechaCreacion?: string;
