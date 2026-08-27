@@ -4,6 +4,7 @@ import { LoginPage } from './auth/login-page/login-page';
 import { CambiarContrasenaPage } from './auth/cambiar-contrasena-page/cambiar-contrasena-page';
 import { GeneralPage } from './general-page/general-page';
 import { EmpresasListadoPage } from './empresas/empresas-listado-page/empresas-listado-page';
+import { EmpresaDetallePage } from './empresas/empresa-detalle-page/empresa-detalle-page';
 
 export const routes: Routes = [
   { path: 'login', component: LoginPage },
@@ -13,6 +14,7 @@ export const routes: Routes = [
     canActivate: [cambioContrasenaPendienteGuard],
   },
   { path: 'empresas', component: EmpresasListadoPage, canActivate: [autenticadoGuard] },
+  { path: 'empresas/:id', component: EmpresaDetallePage, canActivate: [autenticadoGuard] },
   { path: '', pathMatch: 'full', component: GeneralPage, canActivate: [autenticadoGuard] },
   { path: '**', redirectTo: '' },
 ];
