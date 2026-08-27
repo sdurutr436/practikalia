@@ -1,0 +1,97 @@
+// Átomos/moléculas del dominio Empresa: tarjeta de listado, ficha de
+// detalle, y las etiquetas/badges que comparten ambas pantallas.
+@use '../settings' as s;
+
+.c-tarjeta-empresa {
+  display: grid;
+  gap: 0.5rem;
+  padding: s.$espaciado-base;
+  background: s.$color-superficie;
+  color: s.$color-superficie-texto;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio;
+  box-shadow: s.$sombra;
+  text-decoration: none;
+
+  &:hover {
+    box-shadow: s.$sombra-grande;
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, s.$color-anillo 50%, transparent);
+    outline-offset: 2px;
+  }
+}
+
+.c-tarjeta-empresa__imagen {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: s.$radio-m;
+  background: s.$color-apagado;
+}
+
+.c-tarjeta-empresa__nombre {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.c-tarjeta-empresa__meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: s.$color-texto-apagado;
+}
+
+.c-ficha-empresa {
+  display: grid;
+  gap: s.$espaciado-base;
+}
+
+.c-ficha-empresa__imagen {
+  width: 100%;
+  max-height: 20rem;
+  object-fit: cover;
+  border-radius: s.$radio;
+  background: s.$color-apagado;
+}
+
+.c-ficha-empresa__gestion {
+  display: grid;
+  gap: 0.5rem;
+  padding: s.$espaciado-base;
+  background: s.$color-apagado;
+  border-radius: s.$radio;
+
+  dt {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: s.$color-texto-apagado;
+  }
+
+  dd {
+    margin: 0 0 0.5rem;
+  }
+}
+
+.c-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.c-etiqueta {
+  display: inline-block;
+  padding: 0.125em 0.625em;
+  border-radius: 999px;
+  background: s.$color-apagado;
+  color: s.$color-texto-apagado;
+  font-size: 0.75rem;
+
+  &--no-publicada {
+    background: color-mix(in srgb, s.$color-error 15%, transparent);
+    color: s.$color-error;
+  }
+}

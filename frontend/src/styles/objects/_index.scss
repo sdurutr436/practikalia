@@ -8,3 +8,23 @@
   place-items: center;
   padding: s.$espaciado-base;
 }
+
+// Contenedor de página de dominio (ancho máximo + padding), reutilizable por
+// cualquier pantalla que no sea un formulario centrado de auth.
+.o-pagina {
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: s.$espaciado-grande s.$espaciado-base;
+  display: grid;
+  gap: s.$espaciado-grande;
+}
+
+// Rejilla de tarjetas (listados).
+.o-rejilla {
+  display: grid;
+  gap: s.$espaciado-base;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
