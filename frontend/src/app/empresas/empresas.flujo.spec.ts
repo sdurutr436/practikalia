@@ -293,4 +293,55 @@ describe('formulario de empresa', () => {
 
     expect(router.url).toBe('/empresas/2');
   });
+
+  it('profesor sube una imagen en la pantalla de editar', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
+    http.expectOne('/api/empresas').flush([EMPRESA_NO_PUBLICADA]);
+    await esperarMicrotareas();
+    http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
+    await esperarMicrotareas();
+
+    const fichero = new File(['contenido'], 'foto.jpg', { type: 'image/jpeg' });
+    const evento = { target: { files: [fichero] } } as unknown as Event;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    const subida = c.onArchivoSeleccionado(evento) as Promise<void>;
+
+    const peticion = http.expectOne('/api/empresas/2/imagen');
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body instanceof FormData).toBe(true);
+    peticion.flush({ ...EMPRESA_NO_PUBLICADA, imagen: '/uploads/empresas/foto.jpg' });
+    await subida;
+
+    expect(c.imagenActual()).toBe('/uploads/empresas/foto.jpg');
+  });
+
+  it('un fichero inválido deja un mensaje de error sin tocar la imagen actual', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
+    http.expectOne('/api/empresas').flush([EMPRESA_NO_PUBLICADA]);
+    await esperarMicrotareas();
+    http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
+    await esperarMicrotareas();
+
+    const fichero = new File(['no-es-una-imagen'], 'foto.txt', { type: 'text/plain' });
+    const evento = { target: { files: [fichero] } } as unknown as Event;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    const subida = c.onArchivoSeleccionado(evento) as Promise<void>;
+
+    http
+      .expectOne('/api/empresas/2/imagen')
+      .flush(
+        { codigo: 'IMAGEN_INVALIDA', mensaje: 'El fichero no es una imagen válida' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    await subida;
+
+    expect(c.errorImagen()).toBe('El fichero no es una imagen válida');
+    expect(c.imagenActual()).toBeNull();
+  });
 });

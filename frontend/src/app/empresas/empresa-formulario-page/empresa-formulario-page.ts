@@ -35,6 +35,9 @@ export class EmpresaFormularioPage {
   protected readonly sectores = signal<Etiqueta[]>([]);
   protected readonly etiquetasDisponibles = signal<Etiqueta[]>([]);
   protected readonly etiquetasSeleccionadas = signal<Set<number>>(new Set());
+  protected readonly imagenActual = signal<string | null>(null);
+  protected readonly subiendoImagen = signal(false);
+  protected readonly errorImagen = signal<string | null>(null);
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     nombre: ['', Validators.required],
@@ -99,6 +102,7 @@ export class EmpresaFormularioPage {
       publicada: empresa.publicada ?? false,
     });
     this.etiquetasSeleccionadas.set(new Set(empresa.etiquetas.map((e) => e.id)));
+    this.imagenActual.set(empresa.imagen ?? null);
   }
 
   protected toggleEtiqueta(id: number, marcada: boolean): void {
@@ -150,6 +154,26 @@ export class EmpresaFormularioPage {
       this.error.set(mensajeDeError(e, MENSAJES_EMPRESA));
     } finally {
       this.guardando.set(false);
+    }
+  }
+
+  protected async onArchivoSeleccionado(evento: Event): Promise<void> {
+    const input = evento.target as HTMLInputElement;
+    const fichero = input.files?.[0];
+    const id = this.empresaId();
+    if (!fichero || id === null) {
+      return;
+    }
+    this.subiendoImagen.set(true);
+    this.errorImagen.set(null);
+    try {
+      const actualizada = await this.empresaService.subirImagen(id, fichero);
+      this.imagenActual.set(actualizada.imagen ?? null);
+    } catch (e) {
+      this.errorImagen.set(mensajeDeError(e, MENSAJES_EMPRESA));
+    } finally {
+      this.subiendoImagen.set(false);
+      input.value = '';
     }
   }
 }

@@ -107,5 +107,25 @@
         {{ guardando() ? 'Guardando…' : 'Guardar' }}
       </button>
     </form>
+
+    @if (modo() === 'editar') {
+      <section class="c-formulario">
+        <h2 class="c-formulario__titulo">Imagen</h2>
+        @if (imagenActual(); as imagen) {
+          <img class="c-tarjeta-empresa__imagen" [src]="imagen" alt="Imagen actual de la empresa" />
+        } @else {
+          <p>Sin imagen todavía.</p>
+        }
+        @if (errorImagen(); as mensaje) {
+          <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+        }
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          [disabled]="subiendoImagen()"
+          (change)="onArchivoSeleccionado($event)"
+        />
+      </section>
+    }
   }
 </main>
