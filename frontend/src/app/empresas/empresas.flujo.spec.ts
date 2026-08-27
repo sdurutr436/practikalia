@@ -224,11 +224,10 @@ describe('formulario de empresa', () => {
     await loginComo('ALUMNO');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas/nueva');
-    expect(router.url).toBe('/');
-    // '/' sigue siendo general-page (se retira en el bloque f de esta misma
-    // fase) — su constructor cierra sesión sola nada más cargar.
-    http.expectOne('/api/auth/logout').flush(null, { status: 204, statusText: 'No Content' });
+    // profesorGuard deniega y "/" redirige al listado.
+    http.expectOne('/api/empresas').flush([]);
     await esperarMicrotareas();
+    expect(router.url).toBe('/empresas');
   });
 
   it('profesor crea una empresa: etiquetas de checkbox + manuales se combinan sin duplicar', async () => {
