@@ -7,6 +7,7 @@ import { routes } from '../app.routes';
 import { AuthService } from '../auth/auth.service';
 import { authInterceptor } from '../auth/auth.interceptor';
 import { Empresa } from './empresa.model';
+import { EmpresaFormularioPage } from './empresa-formulario-page/empresa-formulario-page';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -190,5 +191,106 @@ describe('detalle de empresa', () => {
     harness.detectChanges();
 
     expect(harness.routeNativeElement?.textContent).toContain('no existe');
+  });
+});
+
+describe('formulario de empresa', () => {
+  let http: HttpTestingController;
+  let router: Router;
+  let auth: AuthService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    http = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => http.verify());
+
+  async function loginComo(rol: 'ALUMNO' | 'PROFESOR'): Promise<void> {
+    const promesa = auth.login('usuario@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol, esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+  }
+
+  it('un alumno no puede acceder a /empresas/nueva', async () => {
+    await loginComo('ALUMNO');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas/nueva');
+    expect(router.url).toBe('/');
+    // '/' sigue siendo general-page (se retira en el bloque f de esta misma
+    // fase) — su constructor cierra sesión sola nada más cargar.
+    http.expectOne('/api/auth/logout').flush(null, { status: 204, statusText: 'No Content' });
+    await esperarMicrotareas();
+  });
+
+  it('profesor crea una empresa: etiquetas de checkbox + manuales se combinan sin duplicar', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/empresas/nueva', EmpresaFormularioPage);
+    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA]); // catálogo derivado del listado
+    await esperarMicrotareas();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    c.form.patchValue({ nombre: 'Nueva SL', sectorId: 10, etiquetasManual: '20, 30, 20' });
+    c.toggleEtiqueta(20, true);
+    const envio = c.enviar() as Promise<void>;
+
+    const creacion = http.expectOne('/api/empresas');
+    expect(creacion.request.method).toBe('POST');
+    expect(creacion.request.body).toMatchObject({
+      nombre: 'Nueva SL',
+      sectorId: 10,
+      etiquetaIds: [20, 30],
+      publicada: false,
+    });
+    creacion.flush({ ...EMPRESA_NO_PUBLICADA, id: 5, nombre: 'Nueva SL' });
+    await envio;
+
+    // La navegación a /empresas/5/editar monta una nueva instancia de la
+    // página, que vuelve a pedir su propio catálogo y la empresa recién creada.
+    http.expectOne('/api/empresas').flush([EMPRESA_NO_PUBLICADA]);
+    await esperarMicrotareas();
+    http.expectOne('/api/empresas/5').flush({ ...EMPRESA_NO_PUBLICADA, id: 5, nombre: 'Nueva SL' });
+    await esperarMicrotareas();
+
+    expect(router.url).toBe('/empresas/5/editar');
+  });
+
+  it('profesor edita una empresa existente y vuelve al detalle', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
+    http.expectOne('/api/empresas').flush([EMPRESA_NO_PUBLICADA]);
+    await esperarMicrotareas();
+    http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
+    await esperarMicrotareas();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    expect(c.form.value.nombre).toBe('Beta');
+
+    c.form.patchValue({ nombre: 'Beta renombrada', publicada: true });
+    const envio = c.enviar() as Promise<void>;
+
+    const edicion = http.expectOne('/api/empresas/2');
+    expect(edicion.request.method).toBe('PUT');
+    expect(edicion.request.body).toMatchObject({ nombre: 'Beta renombrada', publicada: true });
+    edicion.flush({ ...EMPRESA_NO_PUBLICADA, nombre: 'Beta renombrada', publicada: true });
+    await envio;
+
+    // La navegación al detalle monta EmpresaDetallePage, que pide la empresa de nuevo.
+    http.expectOne('/api/empresas/2').flush({ ...EMPRESA_NO_PUBLICADA, nombre: 'Beta renombrada' });
+    await esperarMicrotareas();
+
+    expect(router.url).toBe('/empresas/2');
   });
 });

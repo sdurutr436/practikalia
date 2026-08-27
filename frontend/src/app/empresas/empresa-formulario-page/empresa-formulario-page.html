@@ -1,0 +1,111 @@
+<main class="o-pagina">
+  <a routerLink="/empresas">← Volver al listado</a>
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else {
+    <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
+      <h1 class="c-formulario__titulo">{{ modo() === 'editar' ? 'Editar empresa' : 'Nueva empresa' }}</h1>
+
+      @if (error(); as mensaje) {
+        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+      }
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="nombre">Nombre</label>
+        <input class="c-campo__entrada" id="nombre" type="text" formControlName="nombre" />
+        @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+          <p class="c-campo__error">Introduce el nombre.</p>
+        }
+      </div>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="descripcion">Descripción</label>
+        <textarea class="c-campo__entrada" id="descripcion" formControlName="descripcion"></textarea>
+      </div>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="direccion">Dirección</label>
+        <input class="c-campo__entrada" id="direccion" type="text" formControlName="direccion" />
+      </div>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="sector">Sector</label>
+        <input
+          class="c-campo__entrada"
+          id="sector"
+          type="number"
+          formControlName="sectorId"
+          list="lista-sectores"
+        />
+        <datalist id="lista-sectores">
+          @for (sector of sectores(); track sector.id) {
+            <option [value]="sector.id">{{ sector.nombre }}</option>
+          }
+        </datalist>
+        @if (form.controls.sectorId.touched && form.controls.sectorId.invalid) {
+          <p class="c-campo__error">Indica el ID de un sector (etiqueta) existente.</p>
+        }
+      </div>
+
+      <fieldset class="c-campo">
+        <legend class="c-campo__etiqueta">Etiquetas</legend>
+        @for (etiqueta of etiquetasDisponibles(); track etiqueta.id) {
+          <label class="c-checkbox">
+            <input
+              type="checkbox"
+              [checked]="etiquetasSeleccionadas().has(etiqueta.id)"
+              (change)="toggleEtiqueta(etiqueta.id, $any($event.target).checked)"
+            />
+            {{ etiqueta.nombre }}
+          </label>
+        }
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="etiquetas-manual">IDs adicionales (separados por coma)</label>
+          <input
+            class="c-campo__entrada"
+            id="etiquetas-manual"
+            type="text"
+            formControlName="etiquetasManual"
+          />
+        </div>
+      </fieldset>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="observaciones">Observaciones</label>
+        <textarea class="c-campo__entrada" id="observaciones" formControlName="observaciones"></textarea>
+      </div>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="contacto-nombre">Contacto: nombre</label>
+        <input class="c-campo__entrada" id="contacto-nombre" type="text" formControlName="contactoNombre" />
+      </div>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="contacto-telefono">Contacto: teléfono</label>
+        <input
+          class="c-campo__entrada"
+          id="contacto-telefono"
+          type="text"
+          formControlName="contactoTelefono"
+        />
+      </div>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="contacto-email">Contacto: email</label>
+        <input class="c-campo__entrada" id="contacto-email" type="email" formControlName="contactoEmail" />
+      </div>
+
+      @if (modo() === 'editar') {
+        <label class="c-checkbox">
+          <input type="checkbox" formControlName="publicada" />
+          Publicada
+        </label>
+      }
+
+      <button class="c-boton" type="submit" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </form>
+  }
+</main>
