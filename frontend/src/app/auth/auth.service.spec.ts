@@ -31,6 +31,7 @@ describe('AuthService', () => {
     peticion.flush(SESION_ALUMNO);
     const sesion = await promesa;
     expect(sesion.rol).toBe('ALUMNO');
+    expect(sesion.id).toBeNull();
     expect(service.sesion()?.debeCambiarContrasena).toBe(false);
   });
 
@@ -87,11 +88,14 @@ describe('AuthService', () => {
   it('asegurarSesion rehidrata con /me una sola vez', async () => {
     const promesa = service.asegurarSesion();
     httpMock.expectOne('/api/auth/me').flush({
+      id: 7,
       correo: 'a@b.es',
       ...SESION_ALUMNO,
       etiquetas: [],
     });
-    expect((await promesa)?.correo).toBe('a@b.es');
+    const sesion = await promesa;
+    expect(sesion?.correo).toBe('a@b.es');
+    expect(sesion?.id).toBe(7);
     // Segunda llamada: responde de memoria, sin petición nueva (verify() lo comprueba).
     expect(await service.asegurarSesion()).not.toBeNull();
   });

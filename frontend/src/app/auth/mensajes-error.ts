@@ -31,6 +31,16 @@ export const MENSAJES_ASIGNACION: Record<string, string> = {
   GRADO_NO_ENCONTRADO: 'El grado seleccionado no existe.',
 };
 
+/** Mensajes de UI por código del contrato de /api/reviews. */
+export const MENSAJES_REVIEW: Record<string, string> = {
+  ACCESO_DENEGADO: 'No eres el alumno ni el tutor de esa asignación.',
+  CAMPO_INVALIDO: 'La calificación está fuera del rango permitido.',
+  ASIGNACION_NO_ENCONTRADA: 'La asignación indicada no existe.',
+  REVIEW_YA_EXISTE: 'Ya existe una review para esta asignación.',
+  REVIEW_NO_ENCONTRADA: 'La review no existe.',
+  REVIEW_YA_MODERADA: 'Esta review ya ha sido moderada.',
+};
+
 /** Código conocido → su mensaje; si no, el mensaje del backend; si no, genérico. */
 export function mensajeDeError(error: unknown, mensajes: Record<string, string>): string {
   if (error instanceof HttpErrorResponse) {

@@ -5,6 +5,7 @@ import { catchError, firstValueFrom, throwError } from 'rxjs';
 /** Estado de sesión en memoria; la cookie httpOnly es la sesión real. */
 export interface Sesion {
   /** Solo lo devuelve GET /me; tras un login es null hasta rehidratar. */
+  id: number | null;
   correo: string | null;
   rol: string;
   esAdmin: boolean;
@@ -18,6 +19,7 @@ interface LoginResponse {
 }
 
 interface MeResponse extends LoginResponse {
+  id: number;
   correo: string;
 }
 
@@ -44,7 +46,7 @@ export class AuthService {
         ),
       ),
     );
-    const sesion: Sesion = { correo: null, ...respuesta };
+    const sesion: Sesion = { id: null, correo: null, ...respuesta };
     this.sesion.set(sesion);
     this.rehidratada = true;
     return sesion;

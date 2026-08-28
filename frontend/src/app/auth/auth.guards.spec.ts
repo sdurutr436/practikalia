@@ -19,6 +19,7 @@ function ejecutar(guard: CanActivateFn): Promise<boolean | UrlTree> {
 }
 
 const sesionNormal: Sesion = {
+  id: 1,
   correo: 'a@b.es',
   rol: 'ALUMNO',
   esAdmin: false,
