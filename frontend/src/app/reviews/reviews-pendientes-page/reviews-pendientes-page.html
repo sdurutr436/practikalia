@@ -1,0 +1,44 @@
+<main class="o-pagina">
+  <header class="c-cabecera">
+    <h1 class="c-cabecera__titulo">Reviews pendientes de moderación</h1>
+  </header>
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else if (error(); as mensaje) {
+    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+  } @else if (reviews().length === 0) {
+    <p>No hay reviews pendientes.</p>
+  } @else {
+    <ul>
+      @for (review of reviews(); track review.id) {
+        <li class="c-campo">
+          <p>
+            {{ review.alumnoCorreo }} · {{ review.calificacion }} ·
+            <a [routerLink]="['/empresas', review.empresaId]">Ver empresa</a>
+          </p>
+          <p>{{ review.contenido }}</p>
+
+          @if (errorModeracion()?.id === review.id) {
+            <p class="c-alerta c-alerta--error" role="alert">{{ errorModeracion()?.mensaje }}</p>
+          }
+
+          <div class="c-campo">
+            <button class="c-boton" type="button" [disabled]="guardandoId() === review.id" (click)="aprobar(review)">
+              Aprobar
+            </button>
+            <input class="c-campo__entrada" type="text" placeholder="Motivo de rechazo" #motivo />
+            <button
+              class="c-boton"
+              type="button"
+              [disabled]="guardandoId() === review.id"
+              (click)="rechazar(review, motivo.value)"
+            >
+              Rechazar
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</main>

@@ -229,3 +229,107 @@ describe('entrada desde la ficha de empresa (alumno)', () => {
     expect(texto).toContain('Escribir review');
   });
 });
+
+describe('cola de moderación', () => {
+  let http: HttpTestingController;
+  let router: Router;
+  let auth: AuthService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    http = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => http.verify());
+
+  it('un alumno no puede acceder a la cola de pendientes', async () => {
+    const promesa = auth.login('alumno@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/reviews/pendientes');
+    // profesorGuard deniega y "/" redirige al listado.
+    http.expectOne('/api/empresas').flush([]);
+    await esperarMicrotareas();
+    expect(router.url).toBe('/empresas');
+  });
+
+  it('profesor aprueba una review pendiente', async () => {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/reviews/pendientes');
+    http.expectOne('/api/reviews/pendientes').flush([REVIEW]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const boton = [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find((b) =>
+      b.textContent?.includes('Aprobar'),
+    );
+    boton?.dispatchEvent(new Event('click'));
+
+    const peticion = http.expectOne('/api/reviews/1/moderar');
+    expect(peticion.request.method).toBe('PUT');
+    expect(peticion.request.body).toEqual({ estado: 'APROBADA', motivoRechazo: null });
+    peticion.flush({ ...REVIEW, estado: 'APROBADA' });
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    expect(harness.routeNativeElement?.textContent).toContain('No hay reviews pendientes');
+  });
+
+  it('rechazar sin motivo muestra un error sin llamar al backend', async () => {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/reviews/pendientes');
+    http.expectOne('/api/reviews/pendientes').flush([REVIEW]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const boton = [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find((b) =>
+      b.textContent?.includes('Rechazar'),
+    );
+    boton?.dispatchEvent(new Event('click'));
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    expect(harness.routeNativeElement?.textContent).toContain('Indica un motivo de rechazo');
+  });
+
+  it('rechazar con motivo manda el PUT con el motivo', async () => {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/reviews/pendientes');
+    http.expectOne('/api/reviews/pendientes').flush([REVIEW]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const contenedor = harness.routeNativeElement as HTMLElement;
+    const input = contenedor.querySelector('input[type="text"]') as HTMLInputElement;
+    input.value = 'Poco detallada.';
+    const boton = [...contenedor.querySelectorAll('button')].find((b) => b.textContent?.includes('Rechazar'));
+    boton?.dispatchEvent(new Event('click'));
+
+    const peticion = http.expectOne('/api/reviews/1/moderar');
+    expect(peticion.request.body).toEqual({ estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
+    peticion.flush({ ...REVIEW, estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
+    await esperarMicrotareas();
+  });
+});

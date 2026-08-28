@@ -4,6 +4,7 @@
     <div class="c-cabecera__acciones">
       @if (sesion()?.rol === 'PROFESOR') {
         <a class="c-boton" routerLink="/empresas/nueva">Nueva empresa</a>
+        <a class="c-boton" routerLink="/reviews/pendientes">Reviews pendientes</a>
       }
       <button class="c-boton" type="button" (click)="cerrarSesion()">Cerrar sesión</button>
     </div>
