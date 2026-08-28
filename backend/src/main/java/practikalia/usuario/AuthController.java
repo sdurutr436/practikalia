@@ -65,8 +65,8 @@ public class AuthController {
     public ResponseEntity<MeResponse> me(Authentication authentication) {
         UsuarioDto usuario = usuarioService.buscarPorCorreo(authentication.getName());
         return ResponseEntity.ok(
-                new MeResponse(usuario.correo(), usuario.rol(), usuario.esAdmin(), usuario.debeCambiarContrasena(),
-                        usuario.etiquetas()));
+                new MeResponse(usuario.id(), usuario.correo(), usuario.rol(), usuario.esAdmin(),
+                        usuario.debeCambiarContrasena(), usuario.etiquetas()));
     }
 
     @Operation(summary = "Cambiar la contraseña propia", description = "Único endpoint accesible con un token restringido "
