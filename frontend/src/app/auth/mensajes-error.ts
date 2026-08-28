@@ -22,6 +22,13 @@ export const MENSAJES_EMPRESA: Record<string, string> = {
 /** Mensajes de UI por código del contrato de /api/asignaciones. */
 export const MENSAJES_ASIGNACION: Record<string, string> = {
   ASIGNACION_NO_ENCONTRADA: 'La asignación no existe.',
+  ASIGNACION_YA_EXISTE: 'Ya existe una asignación de ese alumno a esa empresa para ese grado y año.',
+  ALUMNO_INVALIDO: 'El usuario seleccionado como alumno no tiene rol de alumno.',
+  TUTOR_INVALIDO: 'El usuario seleccionado como tutor no tiene rol de profesor.',
+  ALUMNO_NO_ENCONTRADO: 'El alumno seleccionado no existe.',
+  TUTOR_NO_ENCONTRADO: 'El tutor seleccionado no existe.',
+  EMPRESA_NO_ENCONTRADA: 'La empresa no existe.',
+  GRADO_NO_ENCONTRADO: 'El grado seleccionado no existe.',
 };
 
 /** Código conocido → su mensaje; si no, el mensaje del backend; si no, genérico. */

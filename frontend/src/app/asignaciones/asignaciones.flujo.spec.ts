@@ -1,13 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../app.routes';
 import { AuthService } from '../auth/auth.service';
 import { authInterceptor } from '../auth/auth.interceptor';
 import { Empresa } from '../empresas/empresa.model';
 import { Asignacion } from './asignacion.model';
+import { AsignacionFormularioPage } from './asignacion-formulario-page/asignacion-formulario-page';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -125,5 +126,124 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     harness.detectChanges();
 
     expect(harness.routeNativeElement?.textContent).toContain('La asignación no existe');
+  });
+});
+
+describe('guard de profesor sobre el formulario de crear asignación', () => {
+  let http: HttpTestingController;
+  let router: Router;
+  let auth: AuthService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    http = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => http.verify());
+
+  it('un alumno no puede acceder al formulario de crear asignación', async () => {
+    const promesa = auth.login('alumno@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas/2/asignaciones/nueva');
+    http.expectOne('/api/empresas').flush([]);
+    await esperarMicrotareas();
+    expect(router.url).toBe('/empresas');
+  });
+});
+
+describe('formulario de crear asignación', () => {
+  let http: HttpTestingController;
+  let router: Router;
+  let auth: AuthService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    http = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => http.verify());
+
+  async function loginComoProfesor(): Promise<void> {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+  }
+
+  it('carga los selects reales y crea la asignación con empresaId fijado', async () => {
+    await loginComoProfesor();
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/empresas/2/asignaciones/nueva', AsignacionFormularioPage);
+
+    http.expectOne('/api/usuarios?rol=ALUMNO').flush([{ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO' }]);
+    http.expectOne('/api/usuarios?rol=PROFESOR').flush([{ id: 30, correo: 'profesor@centro.es', rol: 'PROFESOR' }]);
+    http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
+    await esperarMicrotareas();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    c.form.patchValue({ alumnoId: 10, tutorCentroId: 30, gradoId: 40, anio: 2026, fechaInicio: '2026-09-01' });
+    const envio = c.enviar() as Promise<void>;
+
+    const creacion = http.expectOne('/api/asignaciones');
+    expect(creacion.request.method).toBe('POST');
+    expect(creacion.request.body).toEqual({
+      alumnoId: 10,
+      empresaId: 2,
+      tutorCentroId: 30,
+      gradoId: 40,
+      anio: 2026,
+      fechaInicio: '2026-09-01',
+    });
+    creacion.flush(ASIGNACION_ABIERTA);
+    await envio;
+
+    http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
+    await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
+    await esperarMicrotareas();
+
+    expect(router.url).toBe('/empresas/2');
+  });
+
+  it('un 409 al repetir (alumno, empresa, grado, año) se muestra legible', async () => {
+    await loginComoProfesor();
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/empresas/2/asignaciones/nueva', AsignacionFormularioPage);
+
+    http.expectOne('/api/usuarios?rol=ALUMNO').flush([{ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO' }]);
+    http.expectOne('/api/usuarios?rol=PROFESOR').flush([{ id: 30, correo: 'profesor@centro.es', rol: 'PROFESOR' }]);
+    http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
+    await esperarMicrotareas();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    c.form.patchValue({ alumnoId: 10, tutorCentroId: 30, gradoId: 40, anio: 2026, fechaInicio: '2026-09-01' });
+    const envio = c.enviar() as Promise<void>;
+
+    http
+      .expectOne('/api/asignaciones')
+      .flush({ codigo: 'ASIGNACION_YA_EXISTE' }, { status: 409, statusText: 'Conflict' });
+    await envio;
+
+    expect(c.error()).toContain('Ya existe una asignación');
   });
 });

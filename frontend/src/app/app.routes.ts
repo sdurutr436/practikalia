@@ -5,6 +5,7 @@ import { CambiarContrasenaPage } from './auth/cambiar-contrasena-page/cambiar-co
 import { EmpresasListadoPage } from './empresas/empresas-listado-page/empresas-listado-page';
 import { EmpresaDetallePage } from './empresas/empresa-detalle-page/empresa-detalle-page';
 import { EmpresaFormularioPage } from './empresas/empresa-formulario-page/empresa-formulario-page';
+import { AsignacionFormularioPage } from './asignaciones/asignacion-formulario-page/asignacion-formulario-page';
 
 export const routes: Routes = [
   { path: 'login', component: LoginPage },
@@ -17,6 +18,11 @@ export const routes: Routes = [
   // Rutas literales antes de ':id' — si no, 'nueva' se interpretaría como un id.
   { path: 'empresas/nueva', component: EmpresaFormularioPage, canActivate: [profesorGuard] },
   { path: 'empresas/:id/editar', component: EmpresaFormularioPage, canActivate: [profesorGuard] },
+  {
+    path: 'empresas/:empresaId/asignaciones/nueva',
+    component: AsignacionFormularioPage,
+    canActivate: [profesorGuard],
+  },
   { path: 'empresas/:id', component: EmpresaDetallePage, canActivate: [autenticadoGuard] },
   { path: '', pathMatch: 'full', redirectTo: 'empresas' },
   { path: '**', redirectTo: 'empresas' },
