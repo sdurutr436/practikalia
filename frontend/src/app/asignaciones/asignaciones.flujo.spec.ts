@@ -247,3 +247,71 @@ describe('formulario de crear asignación', () => {
     expect(c.error()).toContain('Ya existe una asignación');
   });
 });
+
+describe('guard de profesor sobre el histórico por alumno', () => {
+  let http: HttpTestingController;
+  let router: Router;
+  let auth: AuthService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    http = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => http.verify());
+
+  it('un alumno no puede acceder al histórico de asignaciones de otro alumno', async () => {
+    const promesa = auth.login('alumno@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/alumnos/10/asignaciones');
+    http.expectOne('/api/empresas').flush([]);
+    await esperarMicrotareas();
+    expect(router.url).toBe('/empresas');
+  });
+});
+
+describe('histórico de asignaciones por alumno', () => {
+  let http: HttpTestingController;
+  let auth: AuthService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    http = TestBed.inject(HttpTestingController);
+    auth = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => http.verify());
+
+  it('un profesor ve el histórico completo de un alumno', async () => {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/alumnos/10/asignaciones');
+    http.expectOne('/api/alumnos/10/asignaciones').flush([ASIGNACION_ABIERTA]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const texto = harness.routeNativeElement?.textContent ?? '';
+    expect(texto).toContain('Beta');
+    expect(texto).toContain('DAM');
+  });
+});

@@ -1,0 +1,34 @@
+<main class="o-pagina">
+  <header class="c-cabecera">
+    <h1 class="c-cabecera__titulo">Histórico de asignaciones</h1>
+  </header>
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else if (error(); as mensaje) {
+    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+  } @else if (asignaciones().length === 0) {
+    <p>Este alumno no tiene asignaciones todavía.</p>
+  } @else {
+    <ul>
+      @for (asignacion of asignaciones(); track asignacion.id) {
+        <li class="c-campo">
+          <p>
+            {{ asignacion.alumnoCorreo }} en <a [routerLink]="['/empresas', asignacion.empresaId]">{{ asignacion.empresaNombre }}</a>
+            · {{ asignacion.grado.nombre }} ({{ asignacion.anio }}) · tutor {{ asignacion.tutorCentroCorreo }}
+          </p>
+          <p>
+            Inicio {{ asignacion.fechaInicio }} · Fin {{ asignacion.fechaFin || 'abierta' }} · Contratación
+            {{
+              asignacion.contratadoPosterior === null
+                ? 'sin decidir'
+                : asignacion.contratadoPosterior
+                  ? 'sí'
+                  : 'no'
+            }}
+          </p>
+        </li>
+      }
+    </ul>
+  }
+</main>

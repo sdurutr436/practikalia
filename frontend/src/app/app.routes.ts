@@ -6,6 +6,7 @@ import { EmpresasListadoPage } from './empresas/empresas-listado-page/empresas-l
 import { EmpresaDetallePage } from './empresas/empresa-detalle-page/empresa-detalle-page';
 import { EmpresaFormularioPage } from './empresas/empresa-formulario-page/empresa-formulario-page';
 import { AsignacionFormularioPage } from './asignaciones/asignacion-formulario-page/asignacion-formulario-page';
+import { AlumnoAsignacionesPage } from './asignaciones/alumno-asignaciones-page/alumno-asignaciones-page';
 
 export const routes: Routes = [
   { path: 'login', component: LoginPage },
@@ -24,6 +25,7 @@ export const routes: Routes = [
     canActivate: [profesorGuard],
   },
   { path: 'empresas/:id', component: EmpresaDetallePage, canActivate: [autenticadoGuard] },
+  { path: 'alumnos/:alumnoId/asignaciones', component: AlumnoAsignacionesPage, canActivate: [profesorGuard] },
   { path: '', pathMatch: 'full', redirectTo: 'empresas' },
   { path: '**', redirectTo: 'empresas' },
 ];
