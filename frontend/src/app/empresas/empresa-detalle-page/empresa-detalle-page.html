@@ -47,6 +47,65 @@
             <dd>{{ empresa.creadaPorCorreo }}</dd>
           </dl>
         </section>
+
+        <section class="c-ficha-empresa__gestion">
+          <header class="c-cabecera">
+            <h2>Asignaciones</h2>
+            <a class="c-boton" [routerLink]="['/empresas', empresa.id, 'asignaciones', 'nueva']">Crear asignación</a>
+          </header>
+
+          @if (cargandoAsignaciones()) {
+            <p>Cargando asignaciones…</p>
+          } @else if (errorAsignaciones(); as mensaje) {
+            <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          } @else if (asignaciones().length === 0) {
+            <p>Todavía no hay asignaciones para esta empresa.</p>
+          } @else {
+            <ul>
+              @for (asignacion of asignaciones(); track asignacion.id) {
+                <li class="c-campo">
+                  <p>
+                    {{ asignacion.alumnoCorreo }} · {{ asignacion.grado.nombre }} ({{ asignacion.anio }}) · tutor
+                    {{ asignacion.tutorCentroCorreo }}
+                  </p>
+                  <p>
+                    Inicio {{ asignacion.fechaInicio }} · Fin {{ asignacion.fechaFin || 'abierta' }} · Contratación
+                    {{
+                      asignacion.contratadoPosterior === null
+                        ? 'sin decidir'
+                        : asignacion.contratadoPosterior
+                          ? 'sí'
+                          : 'no'
+                    }}
+                  </p>
+                  <a [routerLink]="['/alumnos', asignacion.alumnoId, 'asignaciones']">
+                    Ver histórico completo de este alumno
+                  </a>
+
+                  @if (errorCierre()?.id === asignacion.id) {
+                    <p class="c-alerta c-alerta--error" role="alert">{{ errorCierre()?.mensaje }}</p>
+                  }
+                  <div class="c-campo">
+                    <input class="c-campo__entrada" type="date" [value]="asignacion.fechaFin ?? ''" #fechaFin required />
+                    <select class="c-campo__entrada" #contratado>
+                      <option value="" [selected]="asignacion.contratadoPosterior === null">Sin decidir</option>
+                      <option value="true" [selected]="asignacion.contratadoPosterior === true">Contratado</option>
+                      <option value="false" [selected]="asignacion.contratadoPosterior === false">No contratado</option>
+                    </select>
+                    <button
+                      class="c-boton"
+                      type="button"
+                      [disabled]="guardandoId() === asignacion.id"
+                      (click)="cerrarAsignacion(asignacion, fechaFin.value, contratado.value)"
+                    >
+                      {{ guardandoId() === asignacion.id ? 'Guardando…' : 'Guardar' }}
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
       }
     </article>
   }

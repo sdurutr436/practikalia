@@ -1,6 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
+import { AsignacionService } from '../../asignaciones/asignacion.service';
+import { Asignacion } from '../../asignaciones/asignacion.model';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, esVistaProfesor } from '../empresa.model';
 
@@ -12,11 +15,18 @@ import { Empresa, esVistaProfesor } from '../empresa.model';
 export class EmpresaDetallePage {
   private readonly route = inject(ActivatedRoute);
   private readonly empresaService = inject(EmpresaService);
+  private readonly asignacionService = inject(AsignacionService);
 
   protected readonly esVistaProfesor = esVistaProfesor;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly empresa = signal<Empresa | null>(null);
+
+  protected readonly asignaciones = signal<Asignacion[]>([]);
+  protected readonly cargandoAsignaciones = signal(false);
+  protected readonly errorAsignaciones = signal<string | null>(null);
+  protected readonly guardandoId = signal<number | null>(null);
+  protected readonly errorCierre = signal<{ id: number; mensaje: string } | null>(null);
 
   constructor() {
     void this.cargar();
@@ -25,7 +35,11 @@ export class EmpresaDetallePage {
   private async cargar(): Promise<void> {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     try {
-      this.empresa.set(await this.empresaService.obtener(id));
+      const empresa = await this.empresaService.obtener(id);
+      this.empresa.set(empresa);
+      if (esVistaProfesor(empresa)) {
+        void this.cargarAsignaciones(id);
+      }
     } catch (e) {
       this.error.set(
         e instanceof HttpErrorResponse && e.status === 404
@@ -34,6 +48,34 @@ export class EmpresaDetallePage {
       );
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  private async cargarAsignaciones(empresaId: number): Promise<void> {
+    this.cargandoAsignaciones.set(true);
+    try {
+      this.asignaciones.set(await this.asignacionService.listarPorEmpresa(empresaId));
+    } catch {
+      this.errorAsignaciones.set('No se pudieron cargar las asignaciones.');
+    } finally {
+      this.cargandoAsignaciones.set(false);
+    }
+  }
+
+  protected async cerrarAsignacion(asignacion: Asignacion, fechaFin: string, contratadoTexto: string): Promise<void> {
+    if (!fechaFin || this.guardandoId() !== null) {
+      return;
+    }
+    this.guardandoId.set(asignacion.id);
+    this.errorCierre.set(null);
+    const contratadoPosterior = contratadoTexto === '' ? null : contratadoTexto === 'true';
+    try {
+      const actualizada = await this.asignacionService.cerrar(asignacion.id, { fechaFin, contratadoPosterior });
+      this.asignaciones.update((lista) => lista.map((a) => (a.id === actualizada.id ? actualizada : a)));
+    } catch (e) {
+      this.errorCierre.set({ id: asignacion.id, mensaje: mensajeDeError(e, MENSAJES_ASIGNACION) });
+    } finally {
+      this.guardandoId.set(null);
     }
   }
 }

@@ -19,6 +19,11 @@ export const MENSAJES_EMPRESA: Record<string, string> = {
   EMPRESA_NO_ENCONTRADA: 'La empresa no existe.',
 };
 
+/** Mensajes de UI por código del contrato de /api/asignaciones. */
+export const MENSAJES_ASIGNACION: Record<string, string> = {
+  ASIGNACION_NO_ENCONTRADA: 'La asignación no existe.',
+};
+
 /** Código conocido → su mensaje; si no, el mensaje del backend; si no, genérico. */
 export function mensajeDeError(error: unknown, mensajes: Record<string, string>): string {
   if (error instanceof HttpErrorResponse) {
