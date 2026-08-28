@@ -139,6 +139,12 @@ public class UsuarioService {
         return UsuarioDto.de(buscarUsuarioPorCorreo(correo));
     }
 
+    @Transactional(readOnly = true)
+    public List<UsuarioResumenDto> listar(Rol rolFiltro) {
+        List<Usuario> usuarios = rolFiltro != null ? usuarioRepository.findByRol(rolFiltro) : usuarioRepository.findAll();
+        return usuarios.stream().map(UsuarioResumenDto::de).toList();
+    }
+
     @Transactional
     public List<EtiquetaDto> actualizarEtiquetas(Long id, ActualizarEtiquetasRequest request,
             boolean esProfesor, String correoAutenticado) {

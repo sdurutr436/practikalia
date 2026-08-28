@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,10 +21,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
 /**
- * Gestión de cuentas de usuario: alta (solo profesor/admin), perfil de
- * grado/año del alumno y sus etiquetas de interés. La mayoría de rutas están
- * restringidas a profesor/admin en {@code SecurityConfig}; las de etiquetas
- * son la excepción y añaden control "propio o profesor" en el servicio.
+ * Gestión de cuentas de usuario: alta y listado (solo profesor/admin), perfil
+ * de grado/año del alumno y sus etiquetas de interés. La mayoría de rutas
+ * están restringidas a profesor/admin en {@code SecurityConfig}; las de
+ * etiquetas son la excepción y añaden control "propio o profesor" en el
+ * servicio.
  */
 @RestController
 @RequestMapping("/api/usuarios")
@@ -45,6 +47,12 @@ public class UsuarioController {
         UsuarioDto creador = usuarioService.buscarPorCorreo(authentication.getName());
         CrearUsuarioResponse response = usuarioService.crearUsuario(request, creador);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Listar usuarios", description = "Solo profesor/admin. Filtrable por `rol` (`ALUMNO`/`PROFESOR`); sin el parámetro, devuelve todos.")
+    @GetMapping
+    public List<UsuarioResumenDto> listar(@RequestParam(required = false) Rol rol) {
+        return usuarioService.listar(rol);
     }
 
     @Operation(summary = "Actualizar el grado/año de un usuario", description = "Solo profesor/admin. Reemplaza el perfil completo (grado y año a la vez).")
