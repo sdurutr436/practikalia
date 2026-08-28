@@ -158,7 +158,12 @@ describe('detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/1');
     http.expectOne('/api/empresas/1').flush(EMPRESA_PUBLICADA);
     await esperarMicrotareas();
+    // La sesión post-login no trae id/correo (asimetría documentada) — se completa con /me.
     http.expectOne('/api/empresas/1/reviews').flush([]);
+    http.expectOne('/api/auth/me').flush({ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
+    await esperarMicrotareas();
+    // Vista alumno: con la sesión ya completa, cruza sus propias asignaciones sin review.
+    http.expectOne('/api/alumnos/10/asignaciones').flush([]);
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -174,9 +179,11 @@ describe('detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
     await esperarMicrotareas();
-    // Vista profesor: dispara además la carga de asignaciones y reviews de la empresa.
+    // Vista profesor: dispara además la carga de asignaciones y reviews de la empresa,
+    // y completa la sesión con /me (post-login no trae id/correo).
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -297,6 +304,7 @@ describe('formulario de empresa', () => {
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
 
     expect(router.url).toBe('/empresas/2');

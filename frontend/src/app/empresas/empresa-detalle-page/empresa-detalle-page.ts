@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
 import { Asignacion } from '../../asignaciones/asignacion.model';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService, Sesion } from '../../auth/auth.service';
 import { ReviewService } from '../../reviews/review.service';
 import { Review } from '../../reviews/review.model';
 import { EmpresaService } from '../empresa.service';
@@ -37,6 +37,7 @@ export class EmpresaDetallePage {
   protected readonly reviews = signal<Review[]>([]);
   protected readonly cargandoReviews = signal(false);
   protected readonly errorReviews = signal<string | null>(null);
+  protected readonly asignacionesSinReview = signal<Asignacion[]>([]);
 
   constructor() {
     void this.cargar();
@@ -50,7 +51,13 @@ export class EmpresaDetallePage {
       if (esVistaProfesor(empresa)) {
         void this.cargarAsignaciones(id);
       }
-      void this.cargarReviews(id);
+      const promesaReviews = this.cargarReviews(id);
+      const sesion = await this.completarSesionSiHaceFalta();
+
+      if (!esVistaProfesor(empresa) && sesion?.rol === 'ALUMNO' && sesion.id !== null) {
+        const alumnoId = sesion.id;
+        void promesaReviews.then(() => this.cargarAsignacionesPropiasSinReview(id, alumnoId));
+      }
     } catch (e) {
       this.error.set(
         e instanceof HttpErrorResponse && e.status === 404
@@ -62,6 +69,20 @@ export class EmpresaDetallePage {
     }
   }
 
+  /**
+   * Tras un login sin recargar la página, la sesión en memoria no trae
+   * id/correo (asimetría documentada de LoginResponse) — se completan aquí
+   * bajo demanda, una sola vez por sesión de app, para poder comparar
+   * autoría de reviews y cruzar asignaciones propias.
+   */
+  private async completarSesionSiHaceFalta(): Promise<Sesion | null> {
+    const sesion = this.authService.sesion();
+    if (sesion && sesion.correo === null) {
+      return this.authService.me();
+    }
+    return sesion;
+  }
+
   private async cargarReviews(empresaId: number): Promise<void> {
     this.cargandoReviews.set(true);
     try {
@@ -70,6 +91,17 @@ export class EmpresaDetallePage {
       this.errorReviews.set('No se pudieron cargar las reviews.');
     } finally {
       this.cargandoReviews.set(false);
+    }
+  }
+
+  /** Cruza las asignaciones propias del alumno en esta empresa contra las reviews ya cargadas. */
+  private async cargarAsignacionesPropiasSinReview(empresaId: number, alumnoId: number): Promise<void> {
+    try {
+      const propias = await this.asignacionService.listarPorAlumno(alumnoId);
+      const conReview = new Set(this.reviews().map((r) => r.asignacionId));
+      this.asignacionesSinReview.set(propias.filter((a) => a.empresaId === empresaId && !conReview.has(a.id)));
+    } catch {
+      // ponytail: best-effort — si falla, simplemente no se ofrece el atajo de "escribir review" aquí.
     }
   }
 

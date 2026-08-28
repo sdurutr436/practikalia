@@ -27,6 +27,15 @@
                   : 'no'
             }}
           </p>
+          @if (!asignacionesConReview().has(asignacion.id)) {
+            <a
+              class="c-boton"
+              [routerLink]="['/reviews/nueva']"
+              [queryParams]="{ asignacionId: asignacion.id, empresaId: asignacion.empresaId }"
+            >
+              Escribir review en nombre del alumno
+            </a>
+          }
         </li>
       }
     </ul>

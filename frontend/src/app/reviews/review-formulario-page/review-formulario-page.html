@@ -1,0 +1,44 @@
+<main class="o-pagina">
+  <a [routerLink]="['/empresas', empresaId]">← Volver a la empresa</a>
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else {
+    <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
+      <h1 class="c-formulario__titulo">{{ esEdicion ? 'Editar review' : 'Nueva review' }}</h1>
+
+      @if (error(); as mensaje) {
+        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+      }
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="contenido">Contenido</label>
+        <textarea class="c-campo__entrada" id="contenido" formControlName="contenido"></textarea>
+        @if (form.controls.contenido.touched && form.controls.contenido.invalid) {
+          <p class="c-campo__error">Escribe el contenido de la review.</p>
+        }
+      </div>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="calificacion">
+          Calificación ({{ config().min }}–{{ config().max }})
+        </label>
+        <input
+          class="c-campo__entrada"
+          id="calificacion"
+          type="number"
+          [min]="config().min"
+          [max]="config().max"
+          formControlName="calificacion"
+        />
+        @if (form.controls.calificacion.touched && form.controls.calificacion.invalid) {
+          <p class="c-campo__error">Indica una calificación entre {{ config().min }} y {{ config().max }}.</p>
+        }
+      </div>
+
+      <button class="c-boton" type="submit" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : esEdicion ? 'Guardar cambios' : 'Crear review' }}
+      </button>
+    </form>
+  }
+</main>

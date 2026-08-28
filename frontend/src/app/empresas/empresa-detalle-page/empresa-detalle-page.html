@@ -63,6 +63,26 @@
             }
           </ul>
         }
+
+        @if (asignacionesSinReview().length > 0) {
+          <div class="c-campo">
+            <p>Tienes prácticas en esta empresa sin review todavía:</p>
+            <ul>
+              @for (asignacion of asignacionesSinReview(); track asignacion.id) {
+                <li>
+                  {{ asignacion.grado.nombre }} ({{ asignacion.anio }})
+                  <a
+                    class="c-boton"
+                    [routerLink]="['/reviews/nueva']"
+                    [queryParams]="{ asignacionId: asignacion.id, empresaId: empresa.id }"
+                  >
+                    Escribir review
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
       </section>
 
       @if (esVistaProfesor(empresa)) {

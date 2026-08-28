@@ -76,6 +76,7 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -112,6 +113,7 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -222,6 +224,7 @@ describe('formulario de crear asignación', () => {
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
 
     expect(router.url).toBe('/empresas/2');
@@ -311,10 +314,13 @@ describe('histórico de asignaciones por alumno', () => {
     await harness.navigateByUrl('/alumnos/10/asignaciones');
     http.expectOne('/api/alumnos/10/asignaciones').flush([ASIGNACION_ABIERTA]);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/reviews').flush([]);
+    await esperarMicrotareas();
     harness.detectChanges();
 
     const texto = harness.routeNativeElement?.textContent ?? '';
     expect(texto).toContain('Beta');
     expect(texto).toContain('DAM');
+    expect(texto).toContain('Escribir review en nombre del alumno');
   });
 });
