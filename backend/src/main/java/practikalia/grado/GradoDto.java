@@ -1,10 +1,9 @@
 package practikalia.grado;
 
 /**
- * Catálogo de grados/ciclos. Sin controller propio: se gestiona directamente
- * en base de datos por cada centro, fuera de la app (mismo patrón que
- * {@code Etiqueta}); solo se lee, anidado en otras respuestas
- * (perfil de usuario, empresa, etc.).
+ * Catálogo de grados/ciclos. Solo lectura: el alta/baja sigue gestionándose
+ * directamente en base de datos por cada centro, fuera de la app (mismo
+ * patrón que {@code Etiqueta}).
  */
 public record GradoDto(Long id, String nombre) {
 
