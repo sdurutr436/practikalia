@@ -4,6 +4,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
 import { Asignacion } from '../../asignaciones/asignacion.model';
+import { AuthService } from '../../auth/auth.service';
+import { ReviewService } from '../../reviews/review.service';
+import { Review } from '../../reviews/review.model';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, esVistaProfesor } from '../empresa.model';
 
@@ -16,8 +19,11 @@ export class EmpresaDetallePage {
   private readonly route = inject(ActivatedRoute);
   private readonly empresaService = inject(EmpresaService);
   private readonly asignacionService = inject(AsignacionService);
+  private readonly reviewService = inject(ReviewService);
+  private readonly authService = inject(AuthService);
 
   protected readonly esVistaProfesor = esVistaProfesor;
+  protected readonly sesion = this.authService.sesion;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly empresa = signal<Empresa | null>(null);
@@ -27,6 +33,10 @@ export class EmpresaDetallePage {
   protected readonly errorAsignaciones = signal<string | null>(null);
   protected readonly guardandoId = signal<number | null>(null);
   protected readonly errorCierre = signal<{ id: number; mensaje: string } | null>(null);
+
+  protected readonly reviews = signal<Review[]>([]);
+  protected readonly cargandoReviews = signal(false);
+  protected readonly errorReviews = signal<string | null>(null);
 
   constructor() {
     void this.cargar();
@@ -40,6 +50,7 @@ export class EmpresaDetallePage {
       if (esVistaProfesor(empresa)) {
         void this.cargarAsignaciones(id);
       }
+      void this.cargarReviews(id);
     } catch (e) {
       this.error.set(
         e instanceof HttpErrorResponse && e.status === 404
@@ -48,6 +59,17 @@ export class EmpresaDetallePage {
       );
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  private async cargarReviews(empresaId: number): Promise<void> {
+    this.cargandoReviews.set(true);
+    try {
+      this.reviews.set(await this.reviewService.listarPorEmpresa(empresaId));
+    } catch {
+      this.errorReviews.set('No se pudieron cargar las reviews.');
+    } finally {
+      this.cargandoReviews.set(false);
     }
   }
 

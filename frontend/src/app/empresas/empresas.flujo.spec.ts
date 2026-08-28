@@ -158,6 +158,8 @@ describe('detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/1');
     http.expectOne('/api/empresas/1').flush(EMPRESA_PUBLICADA);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/1/reviews').flush([]);
+    await esperarMicrotareas();
     harness.detectChanges();
 
     const texto = harness.routeNativeElement?.textContent ?? '';
@@ -172,8 +174,9 @@ describe('detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
     await esperarMicrotareas();
-    // Vista profesor: dispara además la carga de asignaciones de la empresa.
+    // Vista profesor: dispara además la carga de asignaciones y reviews de la empresa.
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
+    http.expectOne('/api/empresas/2/reviews').flush([]);
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -293,6 +296,7 @@ describe('formulario de empresa', () => {
     http.expectOne('/api/empresas/2').flush({ ...EMPRESA_NO_PUBLICADA, nombre: 'Beta renombrada' });
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
+    http.expectOne('/api/empresas/2/reviews').flush([]);
     await esperarMicrotareas();
 
     expect(router.url).toBe('/empresas/2');
