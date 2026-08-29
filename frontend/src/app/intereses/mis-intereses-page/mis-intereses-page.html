@@ -1,0 +1,24 @@
+<main class="o-pagina">
+  <a routerLink="/empresas">← Volver al listado</a>
+
+  <header class="c-cabecera">
+    <h1 class="c-cabecera__titulo">Mis intereses</h1>
+  </header>
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else if (error(); as mensaje) {
+    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+  } @else if (intereses().length === 0) {
+    <p>Todavía no has marcado interés en ninguna empresa.</p>
+  } @else {
+    <ul>
+      @for (interes of intereses(); track interes.empresaId + '-' + interes.anio) {
+        <li class="c-campo">
+          <a [routerLink]="['/empresas', interes.empresaId]">{{ interes.empresaNombre }}</a>
+          · {{ interes.gradoNombre }} ({{ interes.anio }})
+        </li>
+      }
+    </ul>
+  }
+</main>

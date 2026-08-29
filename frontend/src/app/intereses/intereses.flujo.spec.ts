@@ -179,3 +179,85 @@ describe('interesados en el detalle de empresa (vista profesor)', () => {
     expect(texto).toContain('DAM');
   });
 });
+
+describe('página "Mis intereses"', () => {
+  let http: HttpTestingController;
+  let router: Router;
+  let auth: AuthService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    http = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
+    auth = TestBed.inject(AuthService);
+  });
+
+  afterEach(() => http.verify());
+
+  async function loginComo(rol: 'ALUMNO' | 'PROFESOR'): Promise<void> {
+    const promesa = auth.login('usuario@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol, esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+  }
+
+  it('un profesor no puede acceder, vuelve al listado', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/mis-intereses');
+    // alumnoGuard deniega y "/" redirige al listado.
+    http.expectOne('/api/empresas').flush([]);
+    await esperarMicrotareas();
+    expect(router.url).toBe('/empresas');
+  });
+
+  it('un alumno ve su histórico de intereses', async () => {
+    await loginComo('ALUMNO');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/mis-intereses');
+    // La sesión post-login no trae id/correo (asimetría documentada) — se completa con /me.
+    http.expectOne('/api/auth/me').flush({
+      id: 10,
+      correo: 'alumno@centro.es',
+      rol: 'ALUMNO',
+      esAdmin: false,
+      debeCambiarContrasena: false,
+      etiquetas: [],
+    });
+    await esperarMicrotareas();
+    http.expectOne('/api/alumnos/10/intereses').flush([
+      { empresaId: 2, empresaNombre: 'Beta', gradoNombre: 'DAM', anio: 2026, fechaCreacion: '2026-08-01T00:00:00Z' },
+    ]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const texto = harness.routeNativeElement?.textContent ?? '';
+    expect(texto).toContain('Beta');
+    expect(texto).toContain('DAM');
+  });
+
+  it('el listado de empresas enlaza a "Mis intereses" para alumno', async () => {
+    await loginComo('ALUMNO');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas');
+    http.expectOne('/api/empresas').flush([]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('Mis intereses');
+  });
+
+  it('el listado de empresas no enlaza a "Mis intereses" para profesor', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas');
+    http.expectOne('/api/empresas').flush([]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).not.toContain('Mis intereses');
+  });
+});
