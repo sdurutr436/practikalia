@@ -32,6 +32,87 @@
         }
       </ul>
 
+      @if (tasaContratacion(); as tasa) {
+        <section class="c-ficha-empresa__gestion">
+          <h2>Tasa de contratación</h2>
+          @if (tasa.asignacionesDecididas === 0) {
+            <p>Sin datos de contratación todavía.</p>
+          } @else {
+            <p>{{ tasa.tasa | percent }} ({{ tasa.contrataciones }} de {{ tasa.asignacionesDecididas }})</p>
+          }
+        </section>
+      }
+
+      <section class="c-ficha-empresa__gestion">
+        <h2>Reviews</h2>
+
+        @if (cargandoReviews()) {
+          <p>Cargando reviews…</p>
+        } @else if (errorReviews(); as mensaje) {
+          <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+        } @else if (reviews().length === 0) {
+          <p>Todavía no hay reviews de esta empresa.</p>
+        } @else {
+          <ul>
+            @for (review of reviews(); track review.id) {
+              <li class="c-campo">
+                <p>{{ review.alumnoCorreo }} · {{ review.calificacion }} · {{ review.estado }}</p>
+                <p>{{ review.contenido }}</p>
+                @if (review.estado === 'RECHAZADA' && review.motivoRechazo) {
+                  <p class="c-alerta c-alerta--error" role="alert">Motivo de rechazo: {{ review.motivoRechazo }}</p>
+                }
+                @if (review.autorCorreo === sesion()?.correo) {
+                  <a
+                    class="c-boton"
+                    [routerLink]="['/reviews', review.id, 'editar']"
+                    [queryParams]="{ empresaId: empresa.id }"
+                  >
+                    Editar
+                  </a>
+                }
+              </li>
+            }
+          </ul>
+        }
+
+        @if (asignacionesSinReview().length > 0) {
+          <div class="c-campo">
+            <p>Tienes prácticas en esta empresa sin review todavía:</p>
+            <ul>
+              @for (asignacion of asignacionesSinReview(); track asignacion.id) {
+                <li>
+                  {{ asignacion.grado.nombre }} ({{ asignacion.anio }})
+                  <a
+                    class="c-boton"
+                    [routerLink]="['/reviews/nueva']"
+                    [queryParams]="{ asignacionId: asignacion.id, empresaId: empresa.id }"
+                  >
+                    Escribir review
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </section>
+
+      @if (!esVistaProfesor(empresa)) {
+        <section class="c-ficha-empresa__gestion">
+          <h2>Interés</h2>
+          @if (errorInteres(); as mensaje) {
+            <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          }
+          <button
+            class="c-boton"
+            type="button"
+            [disabled]="guardandoInteres()"
+            (click)="alternarInteres(empresa.id)"
+          >
+            {{ interesado() ? 'Quitar interés' : 'Marcar interés' }}
+          </button>
+        </section>
+      }
+
       @if (esVistaProfesor(empresa)) {
         <section class="c-ficha-empresa__gestion">
           <h2>Datos de gestión</h2>
@@ -46,6 +127,82 @@
             <dt>Creada por</dt>
             <dd>{{ empresa.creadaPorCorreo }}</dd>
           </dl>
+        </section>
+
+        <section class="c-ficha-empresa__gestion">
+          <h2>Interesados</h2>
+          @if (cargandoInteresados()) {
+            <p>Cargando interesados…</p>
+          } @else if (errorInteresados(); as mensaje) {
+            <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          } @else if (interesados().length === 0) {
+            <p>Todavía no hay alumnos interesados en esta empresa.</p>
+          } @else {
+            <ul>
+              @for (interesado of interesados(); track interesado.alumnoId + '-' + interesado.anio) {
+                <li>{{ interesado.alumnoCorreo }} · {{ interesado.gradoNombre }} ({{ interesado.anio }})</li>
+              }
+            </ul>
+          }
+        </section>
+
+        <section class="c-ficha-empresa__gestion">
+          <header class="c-cabecera">
+            <h2>Asignaciones</h2>
+            <a class="c-boton" [routerLink]="['/empresas', empresa.id, 'asignaciones', 'nueva']">Crear asignación</a>
+          </header>
+
+          @if (cargandoAsignaciones()) {
+            <p>Cargando asignaciones…</p>
+          } @else if (errorAsignaciones(); as mensaje) {
+            <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          } @else if (asignaciones().length === 0) {
+            <p>Todavía no hay asignaciones para esta empresa.</p>
+          } @else {
+            <ul>
+              @for (asignacion of asignaciones(); track asignacion.id) {
+                <li class="c-campo">
+                  <p>
+                    {{ asignacion.alumnoCorreo }} · {{ asignacion.grado.nombre }} ({{ asignacion.anio }}) · tutor
+                    {{ asignacion.tutorCentroCorreo }}
+                  </p>
+                  <p>
+                    Inicio {{ asignacion.fechaInicio }} · Fin {{ asignacion.fechaFin || 'abierta' }} · Contratación
+                    {{
+                      asignacion.contratadoPosterior === null
+                        ? 'sin decidir'
+                        : asignacion.contratadoPosterior
+                          ? 'sí'
+                          : 'no'
+                    }}
+                  </p>
+                  <a [routerLink]="['/alumnos', asignacion.alumnoId, 'asignaciones']">
+                    Ver histórico completo de este alumno
+                  </a>
+
+                  @if (errorCierre()?.id === asignacion.id) {
+                    <p class="c-alerta c-alerta--error" role="alert">{{ errorCierre()?.mensaje }}</p>
+                  }
+                  <div class="c-campo">
+                    <input class="c-campo__entrada" type="date" [value]="asignacion.fechaFin ?? ''" #fechaFin required />
+                    <select class="c-campo__entrada" #contratado>
+                      <option value="" [selected]="asignacion.contratadoPosterior === null">Sin decidir</option>
+                      <option value="true" [selected]="asignacion.contratadoPosterior === true">Contratado</option>
+                      <option value="false" [selected]="asignacion.contratadoPosterior === false">No contratado</option>
+                    </select>
+                    <button
+                      class="c-boton"
+                      type="button"
+                      [disabled]="guardandoId() === asignacion.id"
+                      (click)="cerrarAsignacion(asignacion, fechaFin.value, contratado.value)"
+                    >
+                      {{ guardandoId() === asignacion.id ? 'Guardando…' : 'Guardar' }}
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
         </section>
       }
     </article>

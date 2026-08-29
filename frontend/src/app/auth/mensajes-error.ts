@@ -19,6 +19,54 @@ export const MENSAJES_EMPRESA: Record<string, string> = {
   EMPRESA_NO_ENCONTRADA: 'La empresa no existe.',
 };
 
+/** Mensajes de UI por código del contrato de /api/asignaciones. */
+export const MENSAJES_ASIGNACION: Record<string, string> = {
+  ASIGNACION_NO_ENCONTRADA: 'La asignación no existe.',
+  ASIGNACION_YA_EXISTE: 'Ya existe una asignación de ese alumno a esa empresa para ese grado y año.',
+  ALUMNO_INVALIDO: 'El usuario seleccionado como alumno no tiene rol de alumno.',
+  TUTOR_INVALIDO: 'El usuario seleccionado como tutor no tiene rol de profesor.',
+  ALUMNO_NO_ENCONTRADO: 'El alumno seleccionado no existe.',
+  TUTOR_NO_ENCONTRADO: 'El tutor seleccionado no existe.',
+  EMPRESA_NO_ENCONTRADA: 'La empresa no existe.',
+  GRADO_NO_ENCONTRADO: 'El grado seleccionado no existe.',
+};
+
+/** Mensajes de UI por código del contrato de PUT /api/usuarios/{id}/grado. */
+export const MENSAJES_GRADO: Record<string, string> = {
+  USUARIO_NO_ENCONTRADO: 'El alumno no existe.',
+  GRADO_NO_ENCONTRADO: 'El grado seleccionado no existe.',
+  CAMPO_INVALIDO: 'Selecciona un grado y un año válidos.',
+};
+
+/** Mensajes de UI por código del contrato de /api/empresas/{id}/interes. */
+export const MENSAJES_INTERES: Record<string, string> = {
+  ALUMNO_SIN_GRADO: 'Primero necesitas que un profesor te asigne un grado.',
+  EMPRESA_NO_ENCONTRADA: 'La empresa no existe, o no está publicada.',
+};
+
+/** Mensajes de UI por código del contrato de PUT /api/usuarios/{id}/etiquetas. */
+export const MENSAJES_PERFIL: Record<string, string> = {
+  ETIQUETA_NO_ENCONTRADA: 'Alguna de las etiquetas seleccionadas ya no existe.',
+  USUARIO_NO_ENCONTRADO: 'Tu usuario no existe.',
+  ACCESO_DENEGADO: 'No tienes permiso para editar estas etiquetas.',
+};
+
+/** Mensajes de UI por código del contrato de /api/alumnos/{id}/afinidad. */
+export const MENSAJES_AFINIDAD: Record<string, string> = {
+  ACCESO_DENEGADO: 'No eres tutor de ninguna asignación activa de este alumno.',
+  USUARIO_NO_ENCONTRADO: 'El alumno no existe.',
+};
+
+/** Mensajes de UI por código del contrato de /api/reviews. */
+export const MENSAJES_REVIEW: Record<string, string> = {
+  ACCESO_DENEGADO: 'No eres el alumno ni el tutor de esa asignación.',
+  CAMPO_INVALIDO: 'La calificación está fuera del rango permitido.',
+  ASIGNACION_NO_ENCONTRADA: 'La asignación indicada no existe.',
+  REVIEW_YA_EXISTE: 'Ya existe una review para esta asignación.',
+  REVIEW_NO_ENCONTRADA: 'La review no existe.',
+  REVIEW_YA_MODERADA: 'Esta review ya ha sido moderada.',
+};
+
 /** Código conocido → su mensaje; si no, el mensaje del backend; si no, genérico. */
 export function mensajeDeError(error: unknown, mensajes: Record<string, string>): string {
   if (error instanceof HttpErrorResponse) {

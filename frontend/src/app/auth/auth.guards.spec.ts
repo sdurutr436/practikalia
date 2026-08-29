@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
-import { autenticadoGuard, cambioContrasenaPendienteGuard, profesorGuard } from './auth.guards';
+import { alumnoGuard, autenticadoGuard, cambioContrasenaPendienteGuard, profesorGuard } from './auth.guards';
 import { AuthService, Sesion } from './auth.service';
 
 function configurar(sesion: Sesion | null): void {
@@ -19,6 +19,7 @@ function ejecutar(guard: CanActivateFn): Promise<boolean | UrlTree> {
 }
 
 const sesionNormal: Sesion = {
+  id: 1,
   correo: 'a@b.es',
   rol: 'ALUMNO',
   esAdmin: false,
@@ -78,5 +79,27 @@ describe('profesorGuard', () => {
   it('profesor pasa', async () => {
     configurar({ ...sesionNormal, rol: 'PROFESOR' });
     expect(await ejecutar(profesorGuard)).toBe(true);
+  });
+});
+
+describe('alumnoGuard', () => {
+  it('sin sesión redirige a login', async () => {
+    configurar(null);
+    expect(String(await ejecutar(alumnoGuard))).toBe('/login');
+  });
+
+  it('con cambio de contraseña pendiente redirige a esa pantalla', async () => {
+    configurar({ ...sesionNormal, debeCambiarContrasena: true });
+    expect(String(await ejecutar(alumnoGuard))).toBe('/cambiar-contrasena');
+  });
+
+  it('profesor no pasa, vuelve a la ruta por defecto', async () => {
+    configurar({ ...sesionNormal, rol: 'PROFESOR' });
+    expect(String(await ejecutar(alumnoGuard))).toBe('/');
+  });
+
+  it('alumno pasa', async () => {
+    configurar(sesionNormal); // rol ALUMNO
+    expect(await ejecutar(alumnoGuard)).toBe(true);
   });
 });

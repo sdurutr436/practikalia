@@ -213,11 +213,12 @@ class AuthControllerIntegrationTest {
 
     @Test
     void meConSesionValidaDevuelveDatosDelUsuario() throws Exception {
-        guardarUsuario("luis@iesejemplo.es", "Correcta123!", Rol.PROFESOR, false);
+        Usuario usuario = guardarUsuario("luis@iesejemplo.es", "Correcta123!", Rol.PROFESOR, false);
 
         mockMvc.perform(get("/api/auth/me")
                         .with(user("luis@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(usuario.getId()))
                 .andExpect(jsonPath("$.correo").value("luis@iesejemplo.es"))
                 .andExpect(jsonPath("$.rol").value("PROFESOR"));
     }

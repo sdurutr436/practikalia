@@ -51,7 +51,7 @@ class UsuarioServiceTest {
     }
 
     private UsuarioDto profesor() {
-        return new UsuarioDto("prof@iesejemplo.es", Rol.PROFESOR, false, false, List.of());
+        return new UsuarioDto(1L, "prof@iesejemplo.es", Rol.PROFESOR, false, false, List.of());
     }
 
     @Test
@@ -99,7 +99,7 @@ class UsuarioServiceTest {
 
     @Test
     void esAdminSiPuedeCrearOtroProfesor() {
-        UsuarioDto admin = new UsuarioDto("prof@iesejemplo.es", Rol.PROFESOR, true, false, List.of());
+        UsuarioDto admin = new UsuarioDto(1L, "prof@iesejemplo.es", Rol.PROFESOR, true, false, List.of());
         when(usuarioRepository.findByCorreo("otro@iesejemplo.es")).thenReturn(Optional.empty());
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
 

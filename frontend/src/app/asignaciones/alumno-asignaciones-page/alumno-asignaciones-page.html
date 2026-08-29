@@ -1,0 +1,84 @@
+<main class="o-pagina">
+  <header class="c-cabecera">
+    <h1 class="c-cabecera__titulo">Histórico de asignaciones</h1>
+    <a class="c-boton" [routerLink]="['/alumnos', alumnoId, 'afinidad']">Ver afinidad de este alumno</a>
+  </header>
+
+  @if (!cargando()) {
+    <form class="c-formulario" [formGroup]="formGrado" (ngSubmit)="guardarGrado()">
+      <h2 class="c-formulario__titulo">Fijar grado y año</h2>
+
+      @if (errorGrado(); as mensaje) {
+        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+      }
+      @if (gradoActualizado(); as actualizado) {
+        <p class="c-alerta" role="status">
+          Grado fijado: {{ actualizado.grado.nombre }} ({{ actualizado.anio }}).
+        </p>
+      }
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="grado-alumno">Grado</label>
+        <select class="c-campo__entrada" id="grado-alumno" formControlName="gradoId">
+          <option [value]="0" disabled>Selecciona un grado</option>
+          @for (grado of grados(); track grado.id) {
+            <option [value]="grado.id">{{ grado.nombre }}</option>
+          }
+        </select>
+        @if (formGrado.controls.gradoId.touched && formGrado.controls.gradoId.invalid) {
+          <p class="c-campo__error">Selecciona un grado.</p>
+        }
+      </div>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="anio-alumno">Año</label>
+        <input class="c-campo__entrada" id="anio-alumno" type="number" formControlName="anio" />
+        @if (formGrado.controls.anio.touched && formGrado.controls.anio.invalid) {
+          <p class="c-campo__error">Indica un año válido.</p>
+        }
+      </div>
+
+      <button class="c-boton" type="submit" [disabled]="guardandoGrado()">
+        {{ guardandoGrado() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </form>
+  }
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else if (error(); as mensaje) {
+    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+  } @else if (asignaciones().length === 0) {
+    <p>Este alumno no tiene asignaciones todavía.</p>
+  } @else {
+    <ul>
+      @for (asignacion of asignaciones(); track asignacion.id) {
+        <li class="c-campo">
+          <p>
+            {{ asignacion.alumnoCorreo }} en <a [routerLink]="['/empresas', asignacion.empresaId]">{{ asignacion.empresaNombre }}</a>
+            · {{ asignacion.grado.nombre }} ({{ asignacion.anio }}) · tutor {{ asignacion.tutorCentroCorreo }}
+          </p>
+          <p>
+            Inicio {{ asignacion.fechaInicio }} · Fin {{ asignacion.fechaFin || 'abierta' }} · Contratación
+            {{
+              asignacion.contratadoPosterior === null
+                ? 'sin decidir'
+                : asignacion.contratadoPosterior
+                  ? 'sí'
+                  : 'no'
+            }}
+          </p>
+          @if (!asignacionesConReview().has(asignacion.id)) {
+            <a
+              class="c-boton"
+              [routerLink]="['/reviews/nueva']"
+              [queryParams]="{ asignacionId: asignacion.id, empresaId: asignacion.empresaId }"
+            >
+              Escribir review en nombre del alumno
+            </a>
+          }
+        </li>
+      }
+    </ul>
+  }
+</main>

@@ -56,3 +56,20 @@ export const profesorGuard: CanActivateFn = async () => {
   }
   return true;
 };
+
+/** Ruta de "mis intereses": solo alumno, simétrico a profesorGuard. */
+export const alumnoGuard: CanActivateFn = async () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const sesion = await auth.asegurarSesion();
+  if (!sesion) {
+    return router.createUrlTree(['/login']);
+  }
+  if (sesion.debeCambiarContrasena) {
+    return router.createUrlTree(['/cambiar-contrasena']);
+  }
+  if (sesion.rol !== 'ALUMNO') {
+    return router.createUrlTree(['/']);
+  }
+  return true;
+};

@@ -154,6 +154,47 @@ class UsuarioControllerIntegrationTest {
     }
 
     @Test
+    void profesorListaTodosLosUsuarios() throws Exception {
+        guardarProfesor("prof-listado@iesejemplo.es", false);
+        guardarAlumno("alumno-listado@iesejemplo.es");
+
+        mockMvc.perform(get("/api/usuarios")
+                        .with(user("prof-listado@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].correo").exists())
+                .andExpect(jsonPath("$[0].rol").exists());
+    }
+
+    @Test
+    void profesorFiltraListadoPorRol() throws Exception {
+        guardarProfesor("prof-filtro@iesejemplo.es", false);
+        guardarAlumno("alumno-filtro@iesejemplo.es");
+
+        mockMvc.perform(get("/api/usuarios")
+                        .queryParam("rol", "ALUMNO")
+                        .with(user("prof-filtro@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].correo").value("alumno-filtro@iesejemplo.es"));
+    }
+
+    @Test
+    void alumnoNoPuedeListarUsuariosDevuelve403() throws Exception {
+        guardarAlumno("alumno-sin-permiso@iesejemplo.es");
+
+        mockMvc.perform(get("/api/usuarios")
+                        .with(user("alumno-sin-permiso@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void sinAutenticarNoAccedeAlListadoDeUsuarios() throws Exception {
+        mockMvc.perform(get("/api/usuarios"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void profesorActualizaGradoDeAlumno() throws Exception {
         guardarProfesor("prof6@iesejemplo.es", false);
         Usuario alumno = usuarioRepository.save(new Usuario("alumno@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
