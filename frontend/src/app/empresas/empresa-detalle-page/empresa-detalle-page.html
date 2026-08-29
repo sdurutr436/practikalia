@@ -32,6 +32,17 @@
         }
       </ul>
 
+      @if (tasaContratacion(); as tasa) {
+        <section class="c-ficha-empresa__gestion">
+          <h2>Tasa de contratación</h2>
+          @if (tasa.asignacionesDecididas === 0) {
+            <p>Sin datos de contratación todavía.</p>
+          } @else {
+            <p>{{ tasa.tasa | percent }} ({{ tasa.contrataciones }} de {{ tasa.asignacionesDecididas }})</p>
+          }
+        </section>
+      }
+
       <section class="c-ficha-empresa__gestion">
         <h2>Reviews</h2>
 

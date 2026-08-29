@@ -1,9 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { PercentPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MENSAJES_ASIGNACION, MENSAJES_INTERES, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
-import { Asignacion } from '../../asignaciones/asignacion.model';
+import { Asignacion, TasaContratacion } from '../../asignaciones/asignacion.model';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { ReviewService } from '../../reviews/review.service';
 import { Review } from '../../reviews/review.model';
@@ -14,7 +15,7 @@ import { Empresa, esVistaProfesor } from '../empresa.model';
 
 @Component({
   selector: 'app-empresa-detalle-page',
-  imports: [RouterLink],
+  imports: [RouterLink, PercentPipe],
   templateUrl: './empresa-detalle-page.html',
 })
 export class EmpresaDetallePage {
@@ -50,6 +51,8 @@ export class EmpresaDetallePage {
   protected readonly cargandoInteresados = signal(false);
   protected readonly errorInteresados = signal<string | null>(null);
 
+  protected readonly tasaContratacion = signal<TasaContratacion | null>(null);
+
   constructor() {
     void this.cargar();
   }
@@ -59,6 +62,7 @@ export class EmpresaDetallePage {
     try {
       const empresa = await this.empresaService.obtener(id);
       this.empresa.set(empresa);
+      void this.cargarTasaContratacion(id);
       if (esVistaProfesor(empresa)) {
         void this.cargarAsignaciones(id);
         void this.cargarInteresados(id);
@@ -115,6 +119,14 @@ export class EmpresaDetallePage {
       this.asignacionesSinReview.set(propias.filter((a) => a.empresaId === empresaId && !conReview.has(a.id)));
     } catch {
       // ponytail: best-effort — si falla, simplemente no se ofrece el atajo de "escribir review" aquí.
+    }
+  }
+
+  private async cargarTasaContratacion(empresaId: number): Promise<void> {
+    try {
+      this.tasaContratacion.set(await this.asignacionService.tasaContratacion(empresaId));
+    } catch {
+      // ponytail: best-effort — si falla, simplemente no se muestra el dato.
     }
   }
 

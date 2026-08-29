@@ -159,6 +159,7 @@ describe('detalle de empresa', () => {
     http.expectOne('/api/empresas/1').flush(EMPRESA_PUBLICADA);
     await esperarMicrotareas();
     // La sesión post-login no trae id/correo (asimetría documentada) — se completa con /me.
+    http.expectOne('/api/empresas/1/tasa-contratacion').flush({ empresaId: 1, asignacionesDecididas: 4, contrataciones: 3, tasa: 0.75 });
     http.expectOne('/api/empresas/1/reviews').flush([]);
     http.expectOne('/api/auth/me').flush({ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
@@ -173,6 +174,8 @@ describe('detalle de empresa', () => {
     expect(texto).toContain('Acme');
     expect(texto).not.toContain('Editar');
     expect(texto).not.toContain('Datos de gestión');
+    // Tasa de contratación visible a cualquier rol, aquí como porcentaje (pipe percent, no cálculo manual).
+    expect(texto).toContain('75%');
   });
 
   it('profesor ve editar, gestión y el badge de no publicada', async () => {
@@ -183,6 +186,7 @@ describe('detalle de empresa', () => {
     await esperarMicrotareas();
     // Vista profesor: dispara además la carga de asignaciones, reviews e interesados
     // de la empresa, y completa la sesión con /me (post-login no trae id/correo).
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
@@ -194,6 +198,9 @@ describe('detalle de empresa', () => {
     expect(texto).toContain('Editar');
     expect(texto).toContain('Datos de gestión');
     expect(texto).toContain('No publicada');
+    // Sin ninguna asignación decidida: texto alternativo, nunca "0%" (induciría a error).
+    expect(texto).toContain('Sin datos de contratación todavía');
+    expect(texto).not.toContain('0%');
   });
 
   it('un 404 muestra un mensaje legible, no un error sin manejar', async () => {
@@ -305,6 +312,7 @@ describe('formulario de empresa', () => {
     // La navegación al detalle monta EmpresaDetallePage, que pide la empresa de nuevo.
     http.expectOne('/api/empresas/2').flush({ ...EMPRESA_NO_PUBLICADA, nombre: 'Beta renombrada' });
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);

@@ -63,6 +63,7 @@ describe('interés en el detalle de empresa (vista alumno)', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_ALUMNO);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/auth/me').flush({
       id: 10,
@@ -157,6 +158,7 @@ describe('interesados en el detalle de empresa (vista profesor)', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([

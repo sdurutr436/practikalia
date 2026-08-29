@@ -88,6 +88,7 @@ describe('formulario de review', () => {
     // Navegación a /empresas/2 monta EmpresaDetallePage, que pide sus propios datos.
     http.expectOne('/api/empresas/2').flush(EMPRESA);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/reviews').flush([REVIEW]);
     http.expectOne('/api/auth/me').flush({
       id: 10,
@@ -153,6 +154,7 @@ describe('formulario de review', () => {
 
     http.expectOne('/api/empresas/2').flush(EMPRESA);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/reviews').flush([{ ...REVIEW, contenido: 'Experiencia editada.', calificacion: 5 }]);
     http.expectOne('/api/auth/me').flush({
       id: 10,
@@ -198,6 +200,7 @@ describe('entrada desde la ficha de empresa (alumno)', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/auth/me').flush({
       id: 10,

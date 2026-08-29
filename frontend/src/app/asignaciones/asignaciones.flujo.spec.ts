@@ -75,6 +75,7 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
@@ -113,6 +114,7 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
@@ -225,6 +227,7 @@ describe('formulario de crear asignación', () => {
 
     http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
     await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
