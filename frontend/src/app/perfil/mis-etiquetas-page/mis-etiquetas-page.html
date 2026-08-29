@@ -1,0 +1,44 @@
+<main class="o-pagina">
+  <a routerLink="/empresas">← Volver al listado</a>
+
+  <header class="c-cabecera">
+    <h1 class="c-cabecera__titulo">Mis etiquetas</h1>
+  </header>
+
+  @if (cargando()) {
+    <p>Cargando…</p>
+  } @else if (error(); as mensaje) {
+    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+  } @else {
+    <form class="c-formulario" (ngSubmit)="guardar()">
+      @if (errorGuardar(); as mensaje) {
+        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+      }
+      @if (guardado()) {
+        <p class="c-alerta" role="status">Etiquetas guardadas.</p>
+      }
+
+      @if (catalogo().length === 0) {
+        <p>Todavía no hay etiquetas en el catálogo.</p>
+      } @else {
+        <fieldset class="c-campo">
+          <legend class="c-campo__etiqueta">Etiquetas de interés</legend>
+          @for (etiqueta of catalogo(); track etiqueta.id) {
+            <label class="c-checkbox">
+              <input
+                type="checkbox"
+                [checked]="seleccionadas().has(etiqueta.id)"
+                (change)="toggle(etiqueta.id, $any($event.target).checked)"
+              />
+              {{ etiqueta.nombre }}
+            </label>
+          }
+        </fieldset>
+      }
+
+      <button class="c-boton" type="submit" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </form>
+  }
+</main>

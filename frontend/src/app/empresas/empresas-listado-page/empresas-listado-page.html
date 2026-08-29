@@ -8,6 +8,7 @@
       }
       @if (sesion()?.rol === 'ALUMNO') {
         <a class="c-boton" routerLink="/mis-intereses">Mis intereses</a>
+        <a class="c-boton" routerLink="/mis-etiquetas">Mis etiquetas</a>
       }
       <button class="c-boton" type="button" (click)="cerrarSesion()">Cerrar sesión</button>
     </div>

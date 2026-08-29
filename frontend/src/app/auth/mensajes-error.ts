@@ -44,6 +44,13 @@ export const MENSAJES_INTERES: Record<string, string> = {
   EMPRESA_NO_ENCONTRADA: 'La empresa no existe, o no está publicada.',
 };
 
+/** Mensajes de UI por código del contrato de PUT /api/usuarios/{id}/etiquetas. */
+export const MENSAJES_PERFIL: Record<string, string> = {
+  ETIQUETA_NO_ENCONTRADA: 'Alguna de las etiquetas seleccionadas ya no existe.',
+  USUARIO_NO_ENCONTRADO: 'Tu usuario no existe.',
+  ACCESO_DENEGADO: 'No tienes permiso para editar estas etiquetas.',
+};
+
 /** Mensajes de UI por código del contrato de /api/reviews. */
 export const MENSAJES_REVIEW: Record<string, string> = {
   ACCESO_DENEGADO: 'No eres el alumno ni el tutor de esa asignación.',
