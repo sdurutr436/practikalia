@@ -1,12 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
+import { MENSAJES_ASIGNACION, MENSAJES_INTERES, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
 import { Asignacion } from '../../asignaciones/asignacion.model';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { ReviewService } from '../../reviews/review.service';
 import { Review } from '../../reviews/review.model';
+import { InteresService } from '../../intereses/interes.service';
+import { Interesado } from '../../intereses/interes.model';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, esVistaProfesor } from '../empresa.model';
 
@@ -20,6 +22,7 @@ export class EmpresaDetallePage {
   private readonly empresaService = inject(EmpresaService);
   private readonly asignacionService = inject(AsignacionService);
   private readonly reviewService = inject(ReviewService);
+  private readonly interesService = inject(InteresService);
   private readonly authService = inject(AuthService);
 
   protected readonly esVistaProfesor = esVistaProfesor;
@@ -39,6 +42,14 @@ export class EmpresaDetallePage {
   protected readonly errorReviews = signal<string | null>(null);
   protected readonly asignacionesSinReview = signal<Asignacion[]>([]);
 
+  protected readonly interesado = signal(false);
+  protected readonly guardandoInteres = signal(false);
+  protected readonly errorInteres = signal<string | null>(null);
+
+  protected readonly interesados = signal<Interesado[]>([]);
+  protected readonly cargandoInteresados = signal(false);
+  protected readonly errorInteresados = signal<string | null>(null);
+
   constructor() {
     void this.cargar();
   }
@@ -50,6 +61,7 @@ export class EmpresaDetallePage {
       this.empresa.set(empresa);
       if (esVistaProfesor(empresa)) {
         void this.cargarAsignaciones(id);
+        void this.cargarInteresados(id);
       }
       const promesaReviews = this.cargarReviews(id);
       const sesion = await this.completarSesionSiHaceFalta();
@@ -57,6 +69,7 @@ export class EmpresaDetallePage {
       if (!esVistaProfesor(empresa) && sesion?.rol === 'ALUMNO' && sesion.id !== null) {
         const alumnoId = sesion.id;
         void promesaReviews.then(() => this.cargarAsignacionesPropiasSinReview(id, alumnoId));
+        void this.cargarEstadoInteres(id, alumnoId);
       }
     } catch (e) {
       this.error.set(
@@ -102,6 +115,47 @@ export class EmpresaDetallePage {
       this.asignacionesSinReview.set(propias.filter((a) => a.empresaId === empresaId && !conReview.has(a.id)));
     } catch {
       // ponytail: best-effort — si falla, simplemente no se ofrece el atajo de "escribir review" aquí.
+    }
+  }
+
+  private async cargarInteresados(empresaId: number): Promise<void> {
+    this.cargandoInteresados.set(true);
+    try {
+      this.interesados.set(await this.interesService.listarInteresados(empresaId));
+    } catch {
+      this.errorInteresados.set('No se pudo cargar la lista de interesados.');
+    } finally {
+      this.cargandoInteresados.set(false);
+    }
+  }
+
+  private async cargarEstadoInteres(empresaId: number, alumnoId: number): Promise<void> {
+    try {
+      const intereses = await this.interesService.listarPorAlumno(alumnoId);
+      this.interesado.set(intereses.some((i) => i.empresaId === empresaId));
+    } catch {
+      // ponytail: best-effort — si falla, el botón queda en su estado inicial "no interesado".
+    }
+  }
+
+  protected async alternarInteres(empresaId: number): Promise<void> {
+    if (this.guardandoInteres()) {
+      return;
+    }
+    this.guardandoInteres.set(true);
+    this.errorInteres.set(null);
+    try {
+      if (this.interesado()) {
+        await this.interesService.desmarcar(empresaId);
+        this.interesado.set(false);
+      } else {
+        await this.interesService.marcar(empresaId);
+        this.interesado.set(true);
+      }
+    } catch (e) {
+      this.errorInteres.set(mensajeDeError(e, MENSAJES_INTERES));
+    } finally {
+      this.guardandoInteres.set(false);
     }
   }
 

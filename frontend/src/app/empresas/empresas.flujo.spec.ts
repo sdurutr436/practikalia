@@ -162,8 +162,10 @@ describe('detalle de empresa', () => {
     http.expectOne('/api/empresas/1/reviews').flush([]);
     http.expectOne('/api/auth/me').flush({ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
-    // Vista alumno: con la sesión ya completa, cruza sus propias asignaciones sin review.
+    // Vista alumno: con la sesión ya completa, cruza sus propias asignaciones sin review
+    // y consulta el estado de interés en esta empresa.
     http.expectOne('/api/alumnos/10/asignaciones').flush([]);
+    http.expectOne('/api/alumnos/10/intereses').flush([]);
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -179,10 +181,11 @@ describe('detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
     await esperarMicrotareas();
-    // Vista profesor: dispara además la carga de asignaciones y reviews de la empresa,
-    // y completa la sesión con /me (post-login no trae id/correo).
+    // Vista profesor: dispara además la carga de asignaciones, reviews e interesados
+    // de la empresa, y completa la sesión con /me (post-login no trae id/correo).
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/empresas/2/interesados').flush([]);
     http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
     harness.detectChanges();
@@ -304,6 +307,7 @@ describe('formulario de empresa', () => {
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/empresas/2/interesados').flush([]);
     http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
 

@@ -85,6 +85,23 @@
         }
       </section>
 
+      @if (!esVistaProfesor(empresa)) {
+        <section class="c-ficha-empresa__gestion">
+          <h2>Interés</h2>
+          @if (errorInteres(); as mensaje) {
+            <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          }
+          <button
+            class="c-boton"
+            type="button"
+            [disabled]="guardandoInteres()"
+            (click)="alternarInteres(empresa.id)"
+          >
+            {{ interesado() ? 'Quitar interés' : 'Marcar interés' }}
+          </button>
+        </section>
+      }
+
       @if (esVistaProfesor(empresa)) {
         <section class="c-ficha-empresa__gestion">
           <h2>Datos de gestión</h2>
@@ -99,6 +116,23 @@
             <dt>Creada por</dt>
             <dd>{{ empresa.creadaPorCorreo }}</dd>
           </dl>
+        </section>
+
+        <section class="c-ficha-empresa__gestion">
+          <h2>Interesados</h2>
+          @if (cargandoInteresados()) {
+            <p>Cargando interesados…</p>
+          } @else if (errorInteresados(); as mensaje) {
+            <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          } @else if (interesados().length === 0) {
+            <p>Todavía no hay alumnos interesados en esta empresa.</p>
+          } @else {
+            <ul>
+              @for (interesado of interesados(); track interesado.alumnoId + '-' + interesado.anio) {
+                <li>{{ interesado.alumnoCorreo }} · {{ interesado.gradoNombre }} ({{ interesado.anio }})</li>
+              }
+            </ul>
+          }
         </section>
 
         <section class="c-ficha-empresa__gestion">

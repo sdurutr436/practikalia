@@ -77,6 +77,7 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/empresas/2/interesados').flush([]);
     http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
     harness.detectChanges();
@@ -114,6 +115,7 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/empresas/2/interesados').flush([]);
     http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
     harness.detectChanges();
@@ -225,6 +227,7 @@ describe('formulario de crear asignación', () => {
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/empresas/2/interesados').flush([]);
     http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
     await esperarMicrotareas();
 

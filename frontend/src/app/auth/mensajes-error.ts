@@ -38,6 +38,12 @@ export const MENSAJES_GRADO: Record<string, string> = {
   CAMPO_INVALIDO: 'Selecciona un grado y un año válidos.',
 };
 
+/** Mensajes de UI por código del contrato de /api/empresas/{id}/interes. */
+export const MENSAJES_INTERES: Record<string, string> = {
+  ALUMNO_SIN_GRADO: 'Primero necesitas que un profesor te asigne un grado.',
+  EMPRESA_NO_ENCONTRADA: 'La empresa no existe, o no está publicada.',
+};
+
 /** Mensajes de UI por código del contrato de /api/reviews. */
 export const MENSAJES_REVIEW: Record<string, string> = {
   ACCESO_DENEGADO: 'No eres el alumno ni el tutor de esa asignación.',

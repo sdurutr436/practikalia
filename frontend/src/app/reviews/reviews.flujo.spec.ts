@@ -99,6 +99,7 @@ describe('formulario de review', () => {
     });
     await esperarMicrotareas();
     http.expectOne('/api/alumnos/10/asignaciones').flush([]);
+    http.expectOne('/api/alumnos/10/intereses').flush([]);
     await esperarMicrotareas();
 
     expect(router.url).toBe('/empresas/2');
@@ -163,6 +164,7 @@ describe('formulario de review', () => {
     });
     await esperarMicrotareas();
     http.expectOne('/api/alumnos/10/asignaciones').flush([]);
+    http.expectOne('/api/alumnos/10/intereses').flush([]);
     await esperarMicrotareas();
 
     expect(router.url).toBe('/empresas/2');
@@ -222,6 +224,7 @@ describe('entrada desde la ficha de empresa (alumno)', () => {
         contratadoPosterior: null,
       },
     ]);
+    http.expectOne('/api/alumnos/10/intereses').flush([]);
     await esperarMicrotareas();
     harness.detectChanges();
 
