@@ -51,6 +51,12 @@ export const MENSAJES_PERFIL: Record<string, string> = {
   ACCESO_DENEGADO: 'No tienes permiso para editar estas etiquetas.',
 };
 
+/** Mensajes de UI por código del contrato de /api/alumnos/{id}/afinidad. */
+export const MENSAJES_AFINIDAD: Record<string, string> = {
+  ACCESO_DENEGADO: 'No eres tutor de ninguna asignación activa de este alumno.',
+  USUARIO_NO_ENCONTRADO: 'El alumno no existe.',
+};
+
 /** Mensajes de UI por código del contrato de /api/reviews. */
 export const MENSAJES_REVIEW: Record<string, string> = {
   ACCESO_DENEGADO: 'No eres el alumno ni el tutor de esa asignación.',
