@@ -3,9 +3,11 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   ActualizarAsignacionRequest,
+  ActualizarGradoRequest,
   Asignacion,
   CrearAsignacionRequest,
   Grado,
+  UsuarioGrado,
   UsuarioResumen,
 } from './asignacion.model';
 
@@ -35,5 +37,9 @@ export class AsignacionService {
 
   listarUsuarios(rol: 'ALUMNO' | 'PROFESOR'): Promise<UsuarioResumen[]> {
     return firstValueFrom(this.http.get<UsuarioResumen[]>('/api/usuarios', { params: { rol } }));
+  }
+
+  actualizarGrado(alumnoId: number, request: ActualizarGradoRequest): Promise<UsuarioGrado> {
+    return firstValueFrom(this.http.put<UsuarioGrado>(`/api/usuarios/${alumnoId}/grado`, request));
   }
 }

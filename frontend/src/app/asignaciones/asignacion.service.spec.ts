@@ -91,4 +91,14 @@ describe('AsignacionService', () => {
     peticion.flush([{ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO' }]);
     expect(await promesa).toEqual([{ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO' }]);
   });
+
+  it('actualizarGrado manda PUT a /api/usuarios/{id}/grado', async () => {
+    const promesa = service.actualizarGrado(10, { gradoId: 40, anio: 2026 });
+    const peticion = httpMock.expectOne('/api/usuarios/10/grado');
+    expect(peticion.request.method).toBe('PUT');
+    expect(peticion.request.body).toEqual({ gradoId: 40, anio: 2026 });
+    const respuesta = { id: 10, correo: 'alumno@centro.es', grado: { id: 40, nombre: 'DAM' }, anio: 2026 };
+    peticion.flush(respuesta);
+    expect(await promesa).toEqual(respuesta);
+  });
 });

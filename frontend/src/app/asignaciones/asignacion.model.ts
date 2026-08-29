@@ -42,3 +42,16 @@ export interface ActualizarAsignacionRequest {
   fechaFin: string;
   contratadoPosterior: boolean | null;
 }
+
+export interface ActualizarGradoRequest {
+  gradoId: number;
+  anio: number;
+}
+
+/** Grado/año fijado a un alumno — respuesta de PUT /api/usuarios/{id}/grado. */
+export interface UsuarioGrado {
+  id: number;
+  correo: string;
+  grado: Grado;
+  anio: number;
+}
