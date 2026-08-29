@@ -11,6 +11,7 @@ import { ReviewFormularioPage } from './reviews/review-formulario-page/review-fo
 import { ReviewsPendientesPage } from './reviews/reviews-pendientes-page/reviews-pendientes-page';
 import { MisInteresesPage } from './intereses/mis-intereses-page/mis-intereses-page';
 import { MisEtiquetasPage } from './perfil/mis-etiquetas-page/mis-etiquetas-page';
+import { AfinidadPage } from './afinidad/afinidad-page/afinidad-page';
 
 export const routes: Routes = [
   { path: 'login', component: LoginPage },
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'empresas', component: EmpresasListadoPage, canActivate: [autenticadoGuard] },
   { path: 'mis-intereses', component: MisInteresesPage, canActivate: [alumnoGuard] },
   { path: 'mis-etiquetas', component: MisEtiquetasPage, canActivate: [alumnoGuard] },
+  { path: 'mi-afinidad', component: AfinidadPage, canActivate: [alumnoGuard] },
   // Rutas literales antes de ':id' — si no, 'nueva' se interpretaría como un id.
   { path: 'empresas/nueva', component: EmpresaFormularioPage, canActivate: [profesorGuard] },
   { path: 'empresas/:id/editar', component: EmpresaFormularioPage, canActivate: [profesorGuard] },
@@ -32,6 +34,7 @@ export const routes: Routes = [
   },
   { path: 'empresas/:id', component: EmpresaDetallePage, canActivate: [autenticadoGuard] },
   { path: 'alumnos/:alumnoId/asignaciones', component: AlumnoAsignacionesPage, canActivate: [profesorGuard] },
+  { path: 'alumnos/:alumnoId/afinidad', component: AfinidadPage, canActivate: [profesorGuard] },
   { path: 'reviews/pendientes', component: ReviewsPendientesPage, canActivate: [profesorGuard] },
   { path: 'reviews/nueva', component: ReviewFormularioPage, canActivate: [autenticadoGuard] },
   { path: 'reviews/:id/editar', component: ReviewFormularioPage, canActivate: [autenticadoGuard] },

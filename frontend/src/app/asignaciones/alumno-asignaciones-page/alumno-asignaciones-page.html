@@ -1,6 +1,7 @@
 <main class="o-pagina">
   <header class="c-cabecera">
     <h1 class="c-cabecera__titulo">Histórico de asignaciones</h1>
+    <a class="c-boton" [routerLink]="['/alumnos', alumnoId, 'afinidad']">Ver afinidad de este alumno</a>
   </header>
 
   @if (!cargando()) {

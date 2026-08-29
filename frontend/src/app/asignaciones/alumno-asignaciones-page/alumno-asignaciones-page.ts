@@ -16,7 +16,7 @@ export class AlumnoAsignacionesPage {
   private readonly asignacionService = inject(AsignacionService);
   private readonly reviewService = inject(ReviewService);
 
-  private readonly alumnoId = Number(this.route.snapshot.paramMap.get('alumnoId'));
+  protected readonly alumnoId = Number(this.route.snapshot.paramMap.get('alumnoId'));
 
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
