@@ -31,6 +31,13 @@ export const MENSAJES_ASIGNACION: Record<string, string> = {
   GRADO_NO_ENCONTRADO: 'El grado seleccionado no existe.',
 };
 
+/** Mensajes de UI por código del contrato de PUT /api/usuarios/{id}/grado. */
+export const MENSAJES_GRADO: Record<string, string> = {
+  USUARIO_NO_ENCONTRADO: 'El alumno no existe.',
+  GRADO_NO_ENCONTRADO: 'El grado seleccionado no existe.',
+  CAMPO_INVALIDO: 'Selecciona un grado y un año válidos.',
+};
+
 /** Mensajes de UI por código del contrato de /api/reviews. */
 export const MENSAJES_REVIEW: Record<string, string> = {
   ACCESO_DENEGADO: 'No eres el alumno ni el tutor de esa asignación.',

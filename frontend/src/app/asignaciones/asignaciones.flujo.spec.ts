@@ -9,6 +9,7 @@ import { authInterceptor } from '../auth/auth.interceptor';
 import { Empresa } from '../empresas/empresa.model';
 import { Asignacion } from './asignacion.model';
 import { AsignacionFormularioPage } from './asignacion-formulario-page/asignacion-formulario-page';
+import { AlumnoAsignacionesPage } from './alumno-asignaciones-page/alumno-asignaciones-page';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -313,6 +314,7 @@ describe('histórico de asignaciones por alumno', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/alumnos/10/asignaciones');
     http.expectOne('/api/alumnos/10/asignaciones').flush([ASIGNACION_ABIERTA]);
+    http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2/reviews').flush([]);
     await esperarMicrotareas();
@@ -322,5 +324,56 @@ describe('histórico de asignaciones por alumno', () => {
     expect(texto).toContain('Beta');
     expect(texto).toContain('DAM');
     expect(texto).toContain('Escribir review en nombre del alumno');
+  });
+
+  it('un profesor puede fijar el grado y año de un alumno y ver la confirmación', async () => {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/alumnos/10/asignaciones', AlumnoAsignacionesPage);
+    http.expectOne('/api/alumnos/10/asignaciones').flush([ASIGNACION_ABIERTA]);
+    http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
+    await esperarMicrotareas();
+    http.expectOne('/api/empresas/2/reviews').flush([]);
+    await esperarMicrotareas();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    c.formGrado.patchValue({ gradoId: 40, anio: 2027 });
+    const guardado = c.guardarGrado() as Promise<void>;
+
+    const peticion = http.expectOne('/api/usuarios/10/grado');
+    expect(peticion.request.method).toBe('PUT');
+    expect(peticion.request.body).toEqual({ gradoId: 40, anio: 2027 });
+    peticion.flush({ id: 10, correo: 'alumno@centro.es', grado: { id: 40, nombre: 'DAM' }, anio: 2027 });
+    await guardado;
+
+    expect(c.gradoActualizado()?.anio).toBe(2027);
+  });
+
+  it('un 404 al fijar el grado de un alumno inexistente se muestra legible', async () => {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/alumnos/999/asignaciones', AlumnoAsignacionesPage);
+    http.expectOne('/api/alumnos/999/asignaciones').flush([]);
+    http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
+    await esperarMicrotareas();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    c.formGrado.patchValue({ gradoId: 40, anio: 2027 });
+    const guardado = c.guardarGrado() as Promise<void>;
+
+    http
+      .expectOne('/api/usuarios/999/grado')
+      .flush({ codigo: 'USUARIO_NO_ENCONTRADO' }, { status: 404, statusText: 'Not Found' });
+    await guardado;
+
+    expect(c.errorGrado()).toContain('El alumno no existe');
   });
 });
