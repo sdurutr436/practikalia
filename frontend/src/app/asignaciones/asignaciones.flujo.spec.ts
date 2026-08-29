@@ -330,6 +330,7 @@ describe('histórico de asignaciones por alumno', () => {
     expect(texto).toContain('Beta');
     expect(texto).toContain('DAM');
     expect(texto).toContain('Escribir review en nombre del alumno');
+    expect(harness.routeNativeElement?.querySelector('a[href="/alumnos/10/afinidad"]')).toBeTruthy();
   });
 
   it('un profesor puede fijar el grado y año de un alumno y ver la confirmación', async () => {
