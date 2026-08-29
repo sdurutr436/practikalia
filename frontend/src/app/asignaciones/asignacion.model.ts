@@ -55,3 +55,15 @@ export interface UsuarioGrado {
   grado: Grado;
   anio: number;
 }
+
+/**
+ * Tasa de contratación de una empresa. `tasa` es un ratio 0.0–1.0, no un
+ * porcentaje. `asignacionesDecididas === 0` significa "sin datos todavía",
+ * no "0% de contratación real".
+ */
+export interface TasaContratacion {
+  empresaId: number;
+  asignacionesDecididas: number;
+  contrataciones: number;
+  tasa: number;
+}

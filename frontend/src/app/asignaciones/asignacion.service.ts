@@ -7,6 +7,7 @@ import {
   Asignacion,
   CrearAsignacionRequest,
   Grado,
+  TasaContratacion,
   UsuarioGrado,
   UsuarioResumen,
 } from './asignacion.model';
@@ -41,5 +42,9 @@ export class AsignacionService {
 
   actualizarGrado(alumnoId: number, request: ActualizarGradoRequest): Promise<UsuarioGrado> {
     return firstValueFrom(this.http.put<UsuarioGrado>(`/api/usuarios/${alumnoId}/grado`, request));
+  }
+
+  tasaContratacion(empresaId: number): Promise<TasaContratacion> {
+    return firstValueFrom(this.http.get<TasaContratacion>(`/api/empresas/${empresaId}/tasa-contratacion`));
   }
 }

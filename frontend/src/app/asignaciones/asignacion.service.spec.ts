@@ -101,4 +101,13 @@ describe('AsignacionService', () => {
     peticion.flush(respuesta);
     expect(await promesa).toEqual(respuesta);
   });
+
+  it('tasaContratacion consulta GET /api/empresas/{id}/tasa-contratacion', async () => {
+    const promesa = service.tasaContratacion(20);
+    const peticion = httpMock.expectOne('/api/empresas/20/tasa-contratacion');
+    expect(peticion.request.method).toBe('GET');
+    const respuesta = { empresaId: 20, asignacionesDecididas: 4, contrataciones: 3, tasa: 0.75 };
+    peticion.flush(respuesta);
+    expect(await promesa).toEqual(respuesta);
+  });
 });
