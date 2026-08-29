@@ -43,9 +43,12 @@ class EtiquetaControllerIntegrationTest {
     }
 
     @Test
-    void alumnoNoAccedeAlCatalogo() throws Exception {
+    void alumnoAccedeAlCatalogo() throws Exception {
+        etiquetaRepository.save(new Etiqueta("Java"));
+
         mockMvc.perform(get("/api/etiquetas").with(comoAlumno))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
     }
 
     @Test

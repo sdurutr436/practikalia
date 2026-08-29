@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 
 /**
  * Catálogo de etiquetas. Solo lectura: el alta/baja sigue gestionándose
- * directamente en base de datos por cada centro, fuera de la app. Restringido
- * a profesor/admin en {@code SecurityConfig}.
+ * directamente en base de datos por cada centro, fuera de la app. Visible a
+ * cualquier autenticado en {@code SecurityConfig}.
  */
 @RestController
 @RequestMapping("/api/etiquetas")
@@ -23,7 +23,7 @@ public class EtiquetaController {
         this.etiquetaRepository = etiquetaRepository;
     }
 
-    @Operation(summary = "Listar etiquetas", description = "Catálogo completo, sin filtros. Solo profesor/admin.")
+    @Operation(summary = "Listar etiquetas", description = "Catálogo completo, sin filtros. Cualquier autenticado.")
     @GetMapping
     public List<EtiquetaDto> listar() {
         return etiquetaRepository.findAll().stream().map(EtiquetaDto::de).toList();
