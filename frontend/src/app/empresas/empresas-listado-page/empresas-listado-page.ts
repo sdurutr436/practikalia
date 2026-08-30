@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { IconoComponent } from '../../compartido/icono/icono';
 import { AuthService } from '../../auth/auth.service';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, esVistaProfesor } from '../empresa.model';
 
 @Component({
   selector: 'app-empresas-listado-page',
-  imports: [RouterLink],
+  imports: [RouterLink, IconoComponent],
   templateUrl: './empresas-listado-page.html',
 })
 export class EmpresasListadoPage {

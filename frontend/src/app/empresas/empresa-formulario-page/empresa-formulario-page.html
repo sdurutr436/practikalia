@@ -1,5 +1,5 @@
 <main class="o-pagina">
-  <a routerLink="/empresas">← Volver al listado</a>
+  <a routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
 
   @if (cargando()) {
     <p>Cargando…</p>
@@ -12,7 +12,7 @@
       }
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="nombre">Nombre</label>
+        <label class="c-campo__etiqueta" for="nombre"><app-icono nombre="empresa" />Nombre</label>
         <input class="c-campo__entrada" id="nombre" type="text" formControlName="nombre" />
         @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
           <p class="c-campo__error">Introduce el nombre.</p>
@@ -20,17 +20,17 @@
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="descripcion">Descripción</label>
+        <label class="c-campo__etiqueta" for="descripcion"><app-icono nombre="nota" />Descripción</label>
         <textarea class="c-campo__entrada" id="descripcion" formControlName="descripcion"></textarea>
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="direccion">Dirección</label>
+        <label class="c-campo__etiqueta" for="direccion"><app-icono nombre="ubicacion" />Dirección</label>
         <input class="c-campo__entrada" id="direccion" type="text" formControlName="direccion" />
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="sector">Sector</label>
+        <label class="c-campo__etiqueta" for="sector"><app-icono nombre="etiqueta" />Sector</label>
         <input
           class="c-campo__entrada"
           id="sector"
@@ -61,7 +61,9 @@
           </label>
         }
         <div class="c-campo">
-          <label class="c-campo__etiqueta" for="etiquetas-manual">IDs adicionales (separados por coma)</label>
+          <label class="c-campo__etiqueta" for="etiquetas-manual">
+            <app-icono nombre="etiqueta" />IDs adicionales (separados por coma)
+          </label>
           <input
             class="c-campo__entrada"
             id="etiquetas-manual"
@@ -72,17 +74,19 @@
       </fieldset>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="observaciones">Observaciones</label>
+        <label class="c-campo__etiqueta" for="observaciones"><app-icono nombre="nota" />Observaciones</label>
         <textarea class="c-campo__entrada" id="observaciones" formControlName="observaciones"></textarea>
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="contacto-nombre">Contacto: nombre</label>
+        <label class="c-campo__etiqueta" for="contacto-nombre"><app-icono nombre="persona" />Contacto: nombre</label>
         <input class="c-campo__entrada" id="contacto-nombre" type="text" formControlName="contactoNombre" />
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="contacto-telefono">Contacto: teléfono</label>
+        <label class="c-campo__etiqueta" for="contacto-telefono">
+          <app-icono nombre="telefono" />Contacto: teléfono
+        </label>
         <input
           class="c-campo__entrada"
           id="contacto-telefono"
@@ -92,7 +96,7 @@
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="contacto-email">Contacto: email</label>
+        <label class="c-campo__etiqueta" for="contacto-email"><app-icono nombre="correo" />Contacto: email</label>
         <input class="c-campo__entrada" id="contacto-email" type="email" formControlName="contactoEmail" />
       </div>
 
@@ -104,6 +108,7 @@
       }
 
       <button class="c-boton" type="submit" [disabled]="guardando()">
+        <app-icono [nombre]="modo() === 'editar' ? 'guardar' : 'anadir'" />
         {{ guardando() ? 'Guardando…' : 'Guardar' }}
       </button>
     </form>
@@ -119,12 +124,16 @@
         @if (errorImagen(); as mensaje) {
           <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
         }
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          [disabled]="subiendoImagen()"
-          (change)="onArchivoSeleccionado($event)"
-        />
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="imagen-empresa"><app-icono nombre="subir" />Subir imagen</label>
+          <input
+            id="imagen-empresa"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            [disabled]="subiendoImagen()"
+            (change)="onArchivoSeleccionado($event)"
+          />
+        </div>
       </section>
     }
   }

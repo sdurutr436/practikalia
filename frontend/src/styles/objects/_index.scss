@@ -19,6 +19,15 @@
   gap: s.$espaciado-grande;
 }
 
+// Lista vertical sin viñetas (asignaciones, reviews, interesados…).
+.o-lista {
+  display: grid;
+  gap: s.$espaciado-base;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
 // Rejilla de tarjetas (listados).
 .o-rejilla {
   display: grid;

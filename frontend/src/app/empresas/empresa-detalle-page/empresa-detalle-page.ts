@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { PercentPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { IconoComponent } from '../../compartido/icono/icono';
 import { MENSAJES_ASIGNACION, MENSAJES_INTERES, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
 import { Asignacion, TasaContratacion } from '../../asignaciones/asignacion.model';
@@ -15,7 +16,7 @@ import { Empresa, esVistaProfesor } from '../empresa.model';
 
 @Component({
   selector: 'app-empresa-detalle-page',
-  imports: [RouterLink, PercentPipe],
+  imports: [RouterLink, PercentPipe, IconoComponent],
   templateUrl: './empresa-detalle-page.html',
 })
 export class EmpresaDetallePage {
