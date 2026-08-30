@@ -1,5 +1,7 @@
 <main class="o-pagina">
-  <a [routerLink]="['/empresas', empresaId]"><app-icono nombre="volver" />Volver a la empresa</a>
+  <a class="c-volver" [routerLink]="['/empresas', empresaId]">
+    <app-icono nombre="volver" />Volver a la empresa
+  </a>
 
   @if (cargando()) {
     <p>Cargando…</p>
