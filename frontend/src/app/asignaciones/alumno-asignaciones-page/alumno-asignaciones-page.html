@@ -1,7 +1,9 @@
 <main class="o-pagina">
   <header class="c-cabecera">
     <h1 class="c-cabecera__titulo">Histórico de asignaciones</h1>
-    <a class="c-boton" [routerLink]="['/alumnos', alumnoId, 'afinidad']">Ver afinidad de este alumno</a>
+    <a class="c-boton c-boton--secundario" [routerLink]="['/alumnos', alumnoId, 'afinidad']">
+      <app-icono nombre="afinidad" />Ver afinidad de este alumno
+    </a>
   </header>
 
   @if (!cargando()) {
@@ -18,7 +20,7 @@
       }
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="grado-alumno">Grado</label>
+        <label class="c-campo__etiqueta" for="grado-alumno"><app-icono nombre="grado" />Grado</label>
         <select class="c-campo__entrada" id="grado-alumno" formControlName="gradoId">
           <option [value]="0" disabled>Selecciona un grado</option>
           @for (grado of grados(); track grado.id) {
@@ -31,7 +33,7 @@
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="anio-alumno">Año</label>
+        <label class="c-campo__etiqueta" for="anio-alumno"><app-icono nombre="numero" />Año</label>
         <input class="c-campo__entrada" id="anio-alumno" type="number" formControlName="anio" />
         @if (formGrado.controls.anio.touched && formGrado.controls.anio.invalid) {
           <p class="c-campo__error">Indica un año válido.</p>
@@ -39,6 +41,7 @@
       </div>
 
       <button class="c-boton" type="submit" [disabled]="guardandoGrado()">
+        <app-icono nombre="guardar" />
         {{ guardandoGrado() ? 'Guardando…' : 'Guardar' }}
       </button>
     </form>
@@ -51,9 +54,9 @@
   } @else if (asignaciones().length === 0) {
     <p>Este alumno no tiene asignaciones todavía.</p>
   } @else {
-    <ul>
+    <ul class="o-lista">
       @for (asignacion of asignaciones(); track asignacion.id) {
-        <li class="c-campo">
+        <li class="c-fila">
           <p>
             {{ asignacion.alumnoCorreo }} en <a [routerLink]="['/empresas', asignacion.empresaId]">{{ asignacion.empresaNombre }}</a>
             · {{ asignacion.grado.nombre }} ({{ asignacion.anio }}) · tutor {{ asignacion.tutorCentroCorreo }}
@@ -70,11 +73,11 @@
           </p>
           @if (!asignacionesConReview().has(asignacion.id)) {
             <a
-              class="c-boton"
+              class="c-boton c-boton--secundario"
               [routerLink]="['/reviews/nueva']"
               [queryParams]="{ asignacionId: asignacion.id, empresaId: asignacion.empresaId }"
             >
-              Escribir review en nombre del alumno
+              <app-icono nombre="comentario" />Escribir review en nombre del alumno
             </a>
           }
         </li>

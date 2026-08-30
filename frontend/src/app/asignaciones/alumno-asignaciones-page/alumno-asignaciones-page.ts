@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { IconoComponent } from '../../compartido/icono/icono';
 import { MENSAJES_GRADO, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../asignacion.service';
 import { Asignacion, Grado, UsuarioGrado } from '../asignacion.model';
@@ -8,7 +9,7 @@ import { ReviewService } from '../../reviews/review.service';
 
 @Component({
   selector: 'app-alumno-asignaciones-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, IconoComponent],
   templateUrl: './alumno-asignaciones-page.html',
 })
 export class AlumnoAsignacionesPage {

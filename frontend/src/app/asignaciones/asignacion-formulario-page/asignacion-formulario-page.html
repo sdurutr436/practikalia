@@ -1,5 +1,5 @@
 <main class="o-pagina">
-  <a [routerLink]="['/empresas', empresaId]">← Volver a la empresa</a>
+  <a [routerLink]="['/empresas', empresaId]"><app-icono nombre="volver" />Volver a la empresa</a>
 
   @if (cargando()) {
     <p>Cargando…</p>
@@ -12,7 +12,7 @@
       }
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="alumno">Alumno</label>
+        <label class="c-campo__etiqueta" for="alumno"><app-icono nombre="persona" />Alumno</label>
         <select class="c-campo__entrada" id="alumno" formControlName="alumnoId">
           <option [value]="0" disabled>Selecciona un alumno</option>
           @for (alumno of alumnos(); track alumno.id) {
@@ -25,7 +25,7 @@
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="tutor">Tutor de centro</label>
+        <label class="c-campo__etiqueta" for="tutor"><app-icono nombre="persona" />Tutor de centro</label>
         <select class="c-campo__entrada" id="tutor" formControlName="tutorCentroId">
           <option [value]="0" disabled>Selecciona un tutor</option>
           @for (tutor of tutores(); track tutor.id) {
@@ -38,7 +38,7 @@
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="grado">Grado</label>
+        <label class="c-campo__etiqueta" for="grado"><app-icono nombre="grado" />Grado</label>
         <select class="c-campo__entrada" id="grado" formControlName="gradoId">
           <option [value]="0" disabled>Selecciona un grado</option>
           @for (grado of grados(); track grado.id) {
@@ -51,7 +51,7 @@
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="anio">Año</label>
+        <label class="c-campo__etiqueta" for="anio"><app-icono nombre="numero" />Año</label>
         <input class="c-campo__entrada" id="anio" type="number" formControlName="anio" />
         @if (form.controls.anio.touched && form.controls.anio.invalid) {
           <p class="c-campo__error">Indica un año válido.</p>
@@ -59,7 +59,7 @@
       </div>
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="fecha-inicio">Fecha de inicio</label>
+        <label class="c-campo__etiqueta" for="fecha-inicio"><app-icono nombre="fecha" />Fecha de inicio</label>
         <input class="c-campo__entrada" id="fecha-inicio" type="date" formControlName="fechaInicio" />
         @if (form.controls.fechaInicio.touched && form.controls.fechaInicio.invalid) {
           <p class="c-campo__error">Indica la fecha de inicio.</p>
@@ -67,6 +67,7 @@
       </div>
 
       <button class="c-boton" type="submit" [disabled]="guardando()">
+        <app-icono nombre="anadir" />
         {{ guardando() ? 'Guardando…' : 'Crear asignación' }}
       </button>
     </form>
