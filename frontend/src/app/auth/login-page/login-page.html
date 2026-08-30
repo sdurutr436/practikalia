@@ -7,7 +7,7 @@
     }
 
     <div class="c-campo">
-      <label class="c-campo__etiqueta" for="correo">Correo</label>
+      <label class="c-campo__etiqueta" for="correo"><app-icono nombre="correo" />Correo</label>
       <input
         class="c-campo__entrada"
         id="correo"
@@ -21,7 +21,7 @@
     </div>
 
     <div class="c-campo">
-      <label class="c-campo__etiqueta" for="contrasena">Contraseña</label>
+      <label class="c-campo__etiqueta" for="contrasena"><app-icono nombre="contrasena" />Contraseña</label>
       <input
         class="c-campo__entrada"
         id="contrasena"
@@ -40,6 +40,7 @@
     </div>
 
     <button class="c-boton" type="submit" [disabled]="enviando()">
+      <app-icono nombre="entrar" />
       {{ enviando() ? 'Entrando…' : 'Entrar' }}
     </button>
   </form>

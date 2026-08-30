@@ -1,5 +1,5 @@
 <main class="o-pagina">
-  <a routerLink="/empresas">← Volver al listado</a>
+  <a routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
 
   <header class="c-cabecera">
     <h1 class="c-cabecera__titulo">Mis etiquetas</h1>
@@ -22,7 +22,7 @@
         <p>Todavía no hay etiquetas en el catálogo.</p>
       } @else {
         <fieldset class="c-campo">
-          <legend class="c-campo__etiqueta">Etiquetas de interés</legend>
+          <legend class="c-campo__etiqueta"><app-icono nombre="etiqueta" />Etiquetas de interés</legend>
           @for (etiqueta of catalogo(); track etiqueta.id) {
             <label class="c-checkbox">
               <input
@@ -37,6 +37,7 @@
       }
 
       <button class="c-boton" type="submit" [disabled]="guardando()">
+        <app-icono nombre="guardar" />
         {{ guardando() ? 'Guardando…' : 'Guardar' }}
       </button>
     </form>

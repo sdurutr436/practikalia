@@ -1,6 +1,10 @@
-// TEMA 2 (paleta en prueba, sistema de tokens definitivo): hoja shadcn/
-// tailwind traducida entera a ITCSS — color, tipografía (DM Sans),
-// espaciado (--spacing), radio, sombras y tracking, no solo la paleta.
+// TEMA DEFINITIVO (Fase 10 — mockups de Claude Design, proyecto "UI mockups
+// for two briefings"): confirmado contra el mockup color por color — la
+// paleta en prueba de F1.5 resultó ser un acierto exacto (mismo indigo/teal/
+// ámbar/rojo/grises que el mockup, hex a hex), así que se mantienen los
+// mismos valores y se retira aquí el aviso de "en prueba". Sigue siendo la
+// hoja shadcn/tailwind entera traducida a ITCSS — color, tipografía
+// (DM Sans), espaciado (--spacing), radio, sombras y tracking.
 // Las custom properties conservan los nombres del generador para poder pegar
 // otra paleta encima sin retraducir; las capas consumen los alias SCSS de abajo.
 // Recortado a conceptos con consumidor real o cercano (fuera chart-*,
@@ -62,6 +66,10 @@ $color-superficie: var(--card);
 $color-superficie-texto: var(--card-foreground);
 $color-primario: var(--primary);
 $color-primario-texto: var(--primary-foreground);
+$color-secundario: var(--secondary); // teal — acciones/estados propios del alumno en el mockup
+$color-secundario-texto: var(--secondary-foreground);
+$color-acento: var(--accent); // ámbar — favorito/destacado en el mockup (estrella)
+$color-acento-texto: var(--accent-foreground);
 $color-apagado: var(--muted);
 $color-texto-apagado: var(--muted-foreground);
 $color-error: var(--destructive);

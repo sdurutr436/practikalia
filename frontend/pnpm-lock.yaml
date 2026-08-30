@@ -26,6 +26,9 @@ importers:
       '@angular/router':
         specifier: ^22.0.0
         version: 22.0.5(@angular/common@22.0.5(@angular/core@22.0.5(@angular/compiler@22.0.5)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.5(@angular/compiler@22.0.5)(rxjs@7.8.2))(@angular/platform-browser@22.0.5(@angular/common@22.0.5(@angular/core@22.0.5(@angular/compiler@22.0.5)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.5(@angular/compiler@22.0.5)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@fluentui/svg-icons':
+        specifier: ^1.1.339
+        version: 1.1.339
       rxjs:
         specifier: ~7.8.0
         version: 7.8.2
@@ -709,6 +712,9 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@fluentui/svg-icons@1.1.339':
+    resolution: {integrity: sha512-qUH14AzJ9xifynp1FvmArVVvldw42OIlKImAMo2MbZsKcvKbFjnUy9TwE/doBplIqMKt4uCRheD/L/P9fCzBRQ==}
 
   '@gar/promise-retry@1.0.3':
     resolution: {integrity: sha512-GmzA9ckNokPypTg10pgpeHNQe7ph+iIKKmhKu3Ob9ANkswreCx7R3cKmY781K8QK3AqVL3xVh9A42JvIAbkkSA==}
@@ -3305,6 +3311,8 @@ snapshots:
     optional: true
 
   '@exodus/bytes@1.15.1': {}
+
+  '@fluentui/svg-icons@1.1.339': {}
 
   '@gar/promise-retry@1.0.3': {}
 

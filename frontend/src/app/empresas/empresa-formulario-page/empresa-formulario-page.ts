@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { IconoComponent } from '../../compartido/icono/icono';
 import { MENSAJES_EMPRESA, mensajeDeError } from '../../auth/mensajes-error';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, EmpresaRequest, Etiqueta } from '../empresa.model';
@@ -19,7 +20,7 @@ function porNombre(a: Etiqueta, b: Etiqueta): number {
 
 @Component({
   selector: 'app-empresa-formulario-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, IconoComponent],
   templateUrl: './empresa-formulario-page.html',
 })
 export class EmpresaFormularioPage {

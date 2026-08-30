@@ -1,5 +1,5 @@
 <main class="o-pagina">
-  <a routerLink="/empresas">← Volver al listado</a>
+  <a routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
 
   <header class="c-cabecera">
     <h1 class="c-cabecera__titulo">Mis intereses</h1>
@@ -12,9 +12,9 @@
   } @else if (intereses().length === 0) {
     <p>Todavía no has marcado interés en ninguna empresa.</p>
   } @else {
-    <ul>
+    <ul class="o-lista">
       @for (interes of intereses(); track interes.empresaId + '-' + interes.anio) {
-        <li class="c-campo">
+        <li class="c-fila">
           <a [routerLink]="['/empresas', interes.empresaId]">{{ interes.empresaNombre }}</a>
           · {{ interes.gradoNombre }} ({{ interes.anio }})
         </li>

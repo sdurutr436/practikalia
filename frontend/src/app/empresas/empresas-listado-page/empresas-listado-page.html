@@ -3,15 +3,25 @@
     <h1 class="c-cabecera__titulo">Empresas</h1>
     <div class="c-cabecera__acciones">
       @if (sesion()?.rol === 'PROFESOR') {
-        <a class="c-boton" routerLink="/empresas/nueva">Nueva empresa</a>
-        <a class="c-boton" routerLink="/reviews/pendientes">Reviews pendientes</a>
+        <a class="c-boton" routerLink="/empresas/nueva"><app-icono nombre="anadir" />Nueva empresa</a>
+        <a class="c-boton c-boton--secundario" routerLink="/reviews/pendientes">
+          <app-icono nombre="moderacion" />Reviews pendientes
+        </a>
       }
       @if (sesion()?.rol === 'ALUMNO') {
-        <a class="c-boton" routerLink="/mis-intereses">Mis intereses</a>
-        <a class="c-boton" routerLink="/mis-etiquetas">Mis etiquetas</a>
-        <a class="c-boton" routerLink="/mi-afinidad">Mi afinidad</a>
+        <a class="c-boton c-boton--secundario" routerLink="/mis-intereses">
+          <app-icono nombre="interes" />Mis intereses
+        </a>
+        <a class="c-boton c-boton--secundario" routerLink="/mis-etiquetas">
+          <app-icono nombre="etiqueta" />Mis etiquetas
+        </a>
+        <a class="c-boton c-boton--secundario" routerLink="/mi-afinidad">
+          <app-icono nombre="afinidad" />Mi afinidad
+        </a>
       }
-      <button class="c-boton" type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+      <button class="c-boton c-boton--secundario" type="button" (click)="cerrarSesion()">
+        <app-icono nombre="salir" />Cerrar sesión
+      </button>
     </div>
   </header>
 
