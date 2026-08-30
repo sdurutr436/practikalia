@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { IconoComponent } from '../../compartido/icono/icono';
 import { AuthService } from '../auth.service';
 import { MENSAJES_LOGIN, mensajeDeError } from '../mensajes-error';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, IconoComponent],
   templateUrl: './login-page.html',
 })
 export class LoginPage {

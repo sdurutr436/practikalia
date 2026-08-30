@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { IconoComponent } from '../../compartido/icono/icono';
 import { AuthService } from '../auth.service';
 import { MENSAJES_CAMBIO_CONTRASENA, mensajeDeError } from '../mensajes-error';
 
@@ -19,7 +20,7 @@ export function politicaContrasena(control: AbstractControl<string>): Validation
 
 @Component({
   selector: 'app-cambiar-contrasena-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, IconoComponent],
   templateUrl: './cambiar-contrasena-page.html',
 })
 export class CambiarContrasenaPage {

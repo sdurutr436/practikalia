@@ -8,7 +8,7 @@
     }
 
     <div class="c-campo">
-      <label class="c-campo__etiqueta" for="contrasena-actual">Contraseña actual</label>
+      <label class="c-campo__etiqueta" for="contrasena-actual"><app-icono nombre="contrasena" />Contraseña actual</label>
       <input
         class="c-campo__entrada"
         id="contrasena-actual"
@@ -22,7 +22,7 @@
     </div>
 
     <div class="c-campo">
-      <label class="c-campo__etiqueta" for="contrasena-nueva">Contraseña nueva</label>
+      <label class="c-campo__etiqueta" for="contrasena-nueva"><app-icono nombre="contrasena" />Contraseña nueva</label>
       <input
         class="c-campo__entrada"
         id="contrasena-nueva"
@@ -38,6 +38,7 @@
     </div>
 
     <button class="c-boton" type="submit" [disabled]="enviando()">
+      <app-icono nombre="guardar" />
       {{ enviando() ? 'Guardando…' : 'Cambiar contraseña' }}
     </button>
   </form>
