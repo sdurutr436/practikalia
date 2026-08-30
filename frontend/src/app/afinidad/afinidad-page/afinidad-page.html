@@ -3,13 +3,9 @@
     <h1 class="c-cabecera__titulo">{{ alumnoId ? 'Afinidad del alumno' : 'Mi afinidad' }}</h1>
   </header>
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
-  } @else {
+  <app-estado [cargando]="cargando()" [error]="error()">
     @if (!alumnoConEtiquetas()) {
-      <p class="c-alerta" role="status">
+      <p class="c-alerta c-alerta--aviso" role="status">
         @if (alumnoId) {
           Este alumno todavía no ha marcado ninguna etiqueta de interés — el listado queda en orden alfabético.
         } @else {
@@ -25,17 +21,9 @@
       <ul class="o-rejilla">
         @for (item of empresas(); track item.empresa.id) {
           <li>
-            <a class="c-tarjeta-empresa" [routerLink]="['/empresas', item.empresa.id]">
-              @if (item.empresa.imagen) {
-                <img class="c-tarjeta-empresa__imagen" [src]="item.empresa.imagen" [alt]="item.empresa.nombre" />
-              }
-              <h2 class="c-tarjeta-empresa__nombre">{{ item.empresa.nombre }}</h2>
-              <p class="c-tarjeta-empresa__meta">
-                {{ item.empresa.sector.nombre }}{{ item.sectorCoincide ? ' · sector afín' : '' }} · score
-                {{ item.score.toFixed(2) }}
-              </p>
+            <app-tarjeta-empresa [empresa]="item.empresa" [meta]="meta(item)">
               @if (item.etiquetasCoincidentes.length > 0) {
-                <ul class="c-etiquetas">
+                <ul class="o-etiquetas">
                   @for (etiqueta of item.etiquetasCoincidentes; track etiqueta.id) {
                     <li class="c-etiqueta">{{ etiqueta.nombre }}</li>
                   }
@@ -43,10 +31,10 @@
               } @else {
                 <p class="c-tarjeta-empresa__meta">Sin etiquetas coincidentes</p>
               }
-            </a>
+            </app-tarjeta-empresa>
           </li>
         }
       </ul>
     }
-  }
+  </app-estado>
 </main>

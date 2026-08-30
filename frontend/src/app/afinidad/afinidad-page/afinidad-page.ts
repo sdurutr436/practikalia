@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MENSAJES_AFINIDAD, mensajeDeError } from '../../auth/mensajes-error';
+import { EstadoComponent } from '../../compartido/estado/estado';
+import { TarjetaEmpresaComponent } from '../../empresas/tarjeta-empresa/tarjeta-empresa';
 import { AfinidadService } from '../afinidad.service';
 import { AfinidadEmpresa } from '../afinidad.model';
 
@@ -12,7 +14,7 @@ import { AfinidadEmpresa } from '../afinidad.model';
  */
 @Component({
   selector: 'app-afinidad-page',
-  imports: [RouterLink],
+  imports: [RouterLink, EstadoComponent, TarjetaEmpresaComponent],
   templateUrl: './afinidad-page.html',
 })
 export class AfinidadPage {
@@ -28,6 +30,12 @@ export class AfinidadPage {
 
   constructor() {
     void this.cargar();
+  }
+
+  /** Línea meta de la tarjeta: sector, si es afín, y el score que lo explica. */
+  protected meta(item: AfinidadEmpresa): string {
+    const sector = item.empresa.sector.nombre + (item.sectorCoincide ? ' · sector afín' : '');
+    return `${sector} · score ${item.score.toFixed(2)}`;
   }
 
   private async cargar(): Promise<void> {
