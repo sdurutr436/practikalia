@@ -3,9 +3,10 @@ import { PercentPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IconoComponent } from '../../compartido/icono/icono';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { MENSAJES_ASIGNACION, MENSAJES_INTERES, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
-import { Asignacion, TasaContratacion } from '../../asignaciones/asignacion.model';
+import { Asignacion, TasaContratacion, textoContratacion } from '../../asignaciones/asignacion.model';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { ReviewService } from '../../reviews/review.service';
 import { Review } from '../../reviews/review.model';
@@ -16,7 +17,7 @@ import { Empresa, esVistaProfesor } from '../empresa.model';
 
 @Component({
   selector: 'app-empresa-detalle-page',
-  imports: [RouterLink, PercentPipe, IconoComponent],
+  imports: [RouterLink, PercentPipe, IconoComponent, EstadoComponent],
   templateUrl: './empresa-detalle-page.html',
 })
 export class EmpresaDetallePage {
@@ -28,6 +29,7 @@ export class EmpresaDetallePage {
   private readonly authService = inject(AuthService);
 
   protected readonly esVistaProfesor = esVistaProfesor;
+  protected readonly textoContratacion = textoContratacion;
   protected readonly sesion = this.authService.sesion;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);

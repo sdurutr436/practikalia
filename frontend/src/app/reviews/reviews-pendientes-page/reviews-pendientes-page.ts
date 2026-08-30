@@ -1,13 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconoComponent } from '../../compartido/icono/icono';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { MENSAJES_REVIEW, mensajeDeError } from '../../auth/mensajes-error';
 import { ReviewService } from '../review.service';
 import { Review } from '../review.model';
 
 @Component({
   selector: 'app-reviews-pendientes-page',
-  imports: [RouterLink, IconoComponent],
+  imports: [RouterLink, IconoComponent, EstadoComponent],
   templateUrl: './reviews-pendientes-page.html',
 })
 export class ReviewsPendientesPage {

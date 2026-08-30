@@ -1,17 +1,16 @@
 <main class="o-pagina">
-  <a routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
+  <a class="c-volver" routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
 
   <header class="c-cabecera">
     <h1 class="c-cabecera__titulo">Mis intereses</h1>
   </header>
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
-  } @else if (intereses().length === 0) {
-    <p>Todavía no has marcado interés en ninguna empresa.</p>
-  } @else {
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="intereses().length === 0"
+    mensajeVacio="Todavía no has marcado interés en ninguna empresa."
+  >
     <ul class="o-lista">
       @for (interes of intereses(); track interes.empresaId + '-' + interes.anio) {
         <li class="c-fila">
@@ -20,5 +19,5 @@
         </li>
       }
     </ul>
-  }
+  </app-estado>
 </main>

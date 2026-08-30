@@ -1,21 +1,17 @@
 <main class="o-pagina">
-  <a routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
+  <a class="c-volver" routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
 
   <header class="c-cabecera">
     <h1 class="c-cabecera__titulo">Mis etiquetas</h1>
   </header>
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
-  } @else {
+  <app-estado [cargando]="cargando()" [error]="error()">
     <form class="c-formulario" (ngSubmit)="guardar()">
       @if (errorGuardar(); as mensaje) {
         <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
       }
       @if (guardado()) {
-        <p class="c-alerta" role="status">Etiquetas guardadas.</p>
+        <p class="c-alerta c-alerta--aviso" role="status">Etiquetas guardadas.</p>
       }
 
       @if (catalogo().length === 0) {
@@ -41,5 +37,5 @@
         {{ guardando() ? 'Guardando…' : 'Guardar' }}
       </button>
     </form>
-  }
+  </app-estado>
 </main>
