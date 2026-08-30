@@ -37,6 +37,23 @@
     0px 0px 0px 0px hsl(0 0% 10.1961% / 0.05), 0px 4px 6px -1px hsl(0 0% 10.1961% / 0.05);
   --tracking-normal: normal;
   --spacing: 0.25rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --font-weight-medium: 500;
+  --radius-full: 999px;
+
+  // Escala de apilamiento: niveles de 1 en 1, no de 10 en 10. Si hacen falta
+  // más capas se insertan renumerando, no dejando huecos "por si acaso".
+  --z-base: 0;
+  --z-elevado: 1;
+  --z-pegajoso: 2;
+  --z-superpuesto: 3;
+  --z-modal: 4;
+  --z-notificacion: 5;
 }
 
 .dark {
@@ -81,7 +98,31 @@ $radio: var(--radius); // tarjetas
 $radio-m: calc(var(--radius) - 2px); // entradas y botones
 $sombra: var(--shadow-sm);
 $sombra-grande: var(--shadow-lg);
+$radio-pildora: var(--radius-full); // chips de etiqueta
+$espaciado-diminuto: calc(var(--spacing) * 1.5); // 0.375rem
+$espaciado-pequeno: calc(var(--spacing) * 2); // 0.5rem
+$espaciado-medio: calc(var(--spacing) * 3); // 0.75rem
 $espaciado-base: calc(var(--spacing) * 4); // 1rem con la unidad del tema
 $espaciado-grande: calc(var(--spacing) * 6); // 1.5rem
 $tracking: var(--tracking-normal);
 $tipografia-sistema: var(--font-sans);
+$texto-diminuto: var(--text-xs);
+$texto-pequeno: var(--text-sm);
+$texto-base: var(--text-base);
+$texto-grande: var(--text-lg);
+$texto-mayor: var(--text-xl);
+$texto-titulo: var(--text-2xl);
+$peso-medio: var(--font-weight-medium);
+
+// Anchos de layout compartidos por varias pantallas.
+$ancho-formulario: 24rem;
+$ancho-pagina: 64rem;
+$ancho-tarjeta-min: 16rem;
+
+// Apilamiento (ver --z-* arriba).
+$z-base: var(--z-base);
+$z-elevado: var(--z-elevado);
+$z-pegajoso: var(--z-pegajoso);
+$z-superpuesto: var(--z-superpuesto);
+$z-modal: var(--z-modal);
+$z-notificacion: var(--z-notificacion);
