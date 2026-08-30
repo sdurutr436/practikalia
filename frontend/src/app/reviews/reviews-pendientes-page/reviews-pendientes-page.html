@@ -10,9 +10,9 @@
   } @else if (reviews().length === 0) {
     <p>No hay reviews pendientes.</p>
   } @else {
-    <ul>
+    <ul class="o-lista">
       @for (review of reviews(); track review.id) {
-        <li class="c-campo">
+        <li class="c-fila">
           <p>
             {{ review.alumnoCorreo }} · {{ review.calificacion }} ·
             <a [routerLink]="['/empresas', review.empresaId]">Ver empresa</a>
@@ -25,16 +25,19 @@
 
           <div class="c-campo">
             <button class="c-boton" type="button" [disabled]="guardandoId() === review.id" (click)="aprobar(review)">
-              Aprobar
+              <app-icono nombre="aprobar" />Aprobar
             </button>
-            <input class="c-campo__entrada" type="text" placeholder="Motivo de rechazo" #motivo />
+            <label class="c-campo__etiqueta" [for]="'motivo-' + review.id">
+              <app-icono nombre="comentario" />Motivo de rechazo
+            </label>
+            <input class="c-campo__entrada" type="text" [id]="'motivo-' + review.id" placeholder="Motivo de rechazo" #motivo />
             <button
-              class="c-boton"
+              class="c-boton c-boton--secundario"
               type="button"
               [disabled]="guardandoId() === review.id"
               (click)="rechazar(review, motivo.value)"
             >
-              Rechazar
+              <app-icono nombre="rechazar" />Rechazar
             </button>
           </div>
         </li>

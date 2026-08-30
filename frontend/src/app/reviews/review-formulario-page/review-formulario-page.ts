@@ -1,13 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { IconoComponent } from '../../compartido/icono/icono';
 import { MENSAJES_REVIEW, mensajeDeError } from '../../auth/mensajes-error';
 import { ReviewService } from '../review.service';
 import { CalificacionConfig } from '../review.model';
 
 @Component({
   selector: 'app-review-formulario-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, IconoComponent],
   templateUrl: './review-formulario-page.html',
 })
 export class ReviewFormularioPage {

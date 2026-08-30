@@ -1,5 +1,5 @@
 <main class="o-pagina">
-  <a [routerLink]="['/empresas', empresaId]">← Volver a la empresa</a>
+  <a [routerLink]="['/empresas', empresaId]"><app-icono nombre="volver" />Volver a la empresa</a>
 
   @if (cargando()) {
     <p>Cargando…</p>
@@ -12,7 +12,7 @@
       }
 
       <div class="c-campo">
-        <label class="c-campo__etiqueta" for="contenido">Contenido</label>
+        <label class="c-campo__etiqueta" for="contenido"><app-icono nombre="comentario" />Contenido</label>
         <textarea class="c-campo__entrada" id="contenido" formControlName="contenido"></textarea>
         @if (form.controls.contenido.touched && form.controls.contenido.invalid) {
           <p class="c-campo__error">Escribe el contenido de la review.</p>
@@ -21,7 +21,7 @@
 
       <div class="c-campo">
         <label class="c-campo__etiqueta" for="calificacion">
-          Calificación ({{ config().min }}–{{ config().max }})
+          <app-icono nombre="calificacion" />Calificación ({{ config().min }}–{{ config().max }})
         </label>
         <input
           class="c-campo__entrada"
@@ -37,6 +37,7 @@
       </div>
 
       <button class="c-boton" type="submit" [disabled]="guardando()">
+        <app-icono [nombre]="esEdicion ? 'guardar' : 'anadir'" />
         {{ guardando() ? 'Guardando…' : esEdicion ? 'Guardar cambios' : 'Crear review' }}
       </button>
     </form>
