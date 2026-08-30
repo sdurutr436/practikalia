@@ -25,6 +25,9 @@
 }
 
 .c-campo__etiqueta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -51,7 +54,10 @@
 
 // Vale tanto para <button> como para <a>.
 .c-boton {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
   padding: 0.5em 1em;
   border: 0;
   border-radius: s.$radio-m;
@@ -76,6 +82,17 @@
     opacity: 0.6;
     cursor: default;
   }
+
+  // Acción secundaria (mockup: botón "outline" junto al primario sólido).
+  &--secundario {
+    background: s.$color-superficie;
+    color: s.$color-superficie-texto;
+    border: 1px solid s.$color-borde;
+
+    &:hover:not(:disabled) {
+      background: s.$color-apagado;
+    }
+  }
 }
 
 .c-checkbox {
@@ -96,4 +113,16 @@
     background: color-mix(in srgb, s.$color-error 10%, transparent);
     border: 1px solid color-mix(in srgb, s.$color-error 40%, transparent);
   }
+}
+
+// Fila de una lista (asignaciones, reviews, interesados…): sustituye el uso
+// de .c-campo como envoltorio genérico por una tarjeta de fila real, como
+// las filas con borde suave del mockup.
+.c-fila {
+  display: grid;
+  gap: 0.5rem;
+  padding: s.$espaciado-base;
+  list-style: none;
+  border: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+  border-radius: s.$radio-m;
 }
