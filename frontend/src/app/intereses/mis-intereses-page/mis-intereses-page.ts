@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { IconoComponent } from '../../compartido/icono/icono';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { InteresService } from '../interes.service';
 import { Interes } from '../interes.model';
 
 @Component({
   selector: 'app-mis-intereses-page',
-  imports: [RouterLink],
+  imports: [RouterLink, IconoComponent],
   templateUrl: './mis-intereses-page.html',
 })
 export class MisInteresesPage {
