@@ -12,7 +12,7 @@
 // Contenedor de página de dominio (ancho máximo + padding), reutilizable por
 // cualquier pantalla que no sea un formulario centrado de auth.
 .o-pagina {
-  max-width: 64rem;
+  max-width: s.$ancho-pagina;
   margin-inline: auto;
   padding: s.$espaciado-grande s.$espaciado-base;
   display: grid;
@@ -28,11 +28,22 @@
   list-style: none;
 }
 
+// Lista horizontal que envuelve (chips de etiquetas). Solo layout: el aspecto
+// de cada chip lo pone .c-etiqueta.
+.o-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: s.$espaciado-diminuto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
 // Rejilla de tarjetas (listados).
 .o-rejilla {
   display: grid;
   gap: s.$espaciado-base;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(s.$ancho-tarjeta-min, 1fr));
   padding: 0;
   margin: 0;
   list-style: none;

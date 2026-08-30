@@ -8,3 +8,8 @@
   height: 1px;
   overflow: hidden;
 }
+
+// Saca de `inline` al host de un componente que envuelve contenido de bloque.
+.u-bloque {
+  display: block;
+}
