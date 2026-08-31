@@ -1,0 +1,22 @@
+<div class="c-carrusel__mandos">
+  <button
+    class="c-carrusel__mando"
+    type="button"
+    [attr.aria-label]="etiqueta() + ' anteriores'"
+    (click)="desplazar(-1)"
+  >
+    <app-icono nombre="volver" />
+  </button>
+  <button
+    class="c-carrusel__mando"
+    type="button"
+    [attr.aria-label]="'Más ' + etiqueta()"
+    (click)="desplazar(1)"
+  >
+    <app-icono nombre="volver" class="c-carrusel__mando-siguiente" />
+  </button>
+</div>
+
+<div class="c-carrusel__pista" #pista tabindex="0" [attr.aria-label]="etiqueta()" role="group">
+  <ng-content />
+</div>
