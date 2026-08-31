@@ -32,8 +32,8 @@ const EMPRESA_PROFESOR: Empresa = {
 };
 
 function botonInteres(harness: RouterTestingHarness): HTMLButtonElement | undefined {
-  return [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find(
-    (b) => b.textContent?.includes('interés'),
+  return [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find((b) =>
+    b.textContent?.includes('interés'),
   ) as HTMLButtonElement | undefined;
 }
 
@@ -55,15 +55,22 @@ describe('interés en el detalle de empresa (vista alumno)', () => {
 
   afterEach(() => http.verify());
 
-  async function abrirFichaComoAlumno(harness: RouterTestingHarness, intereses: unknown[]): Promise<void> {
+  async function abrirFichaComoAlumno(
+    harness: RouterTestingHarness,
+    intereses: unknown[],
+  ): Promise<void> {
     const promesa = auth.login('alumno@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_ALUMNO);
     await esperarMicrotareas();
-    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/auth/me').flush({
       id: 10,
@@ -108,7 +115,13 @@ describe('interés en el detalle de empresa (vista alumno)', () => {
   it('con interés previo en esta empresa, el botón empieza en "Quitar interés"', async () => {
     const harness = await RouterTestingHarness.create();
     await abrirFichaComoAlumno(harness, [
-      { empresaId: 2, empresaNombre: 'Beta', gradoNombre: 'DAM', anio: 2026, fechaCreacion: '2026-08-01T00:00:00Z' },
+      {
+        empresaId: 2,
+        empresaNombre: 'Beta',
+        gradoNombre: 'DAM',
+        anio: 2026,
+        fechaCreacion: '2026-08-01T00:00:00Z',
+      },
     ]);
 
     expect(botonInteres(harness)?.textContent).toContain('Quitar interés');
@@ -151,19 +164,31 @@ describe('interesados en el detalle de empresa (vista profesor)', () => {
 
   it('lista los alumnos interesados con su grado y año', async () => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
     await esperarMicrotareas();
-    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
-    http.expectOne('/api/empresas/2/interesados').flush([
-      { alumnoId: 10, alumnoCorreo: 'alumno@centro.es', gradoNombre: 'DAM', anio: 2026, fechaCreacion: '2026-08-01T00:00:00Z' },
-    ]);
+    http
+      .expectOne('/api/empresas/2/interesados')
+      .flush([
+        {
+          alumnoId: 10,
+          alumnoCorreo: 'alumno@centro.es',
+          gradoNombre: 'DAM',
+          anio: 2026,
+          fechaCreacion: '2026-08-01T00:00:00Z',
+        },
+      ]);
     http.expectOne('/api/auth/me').flush({
       id: 5,
       correo: 'profesor@centro.es',
@@ -232,34 +257,22 @@ describe('página "Mis intereses"', () => {
       etiquetas: [],
     });
     await esperarMicrotareas();
-    http.expectOne('/api/alumnos/10/intereses').flush([
-      { empresaId: 2, empresaNombre: 'Beta', gradoNombre: 'DAM', anio: 2026, fechaCreacion: '2026-08-01T00:00:00Z' },
-    ]);
+    http
+      .expectOne('/api/alumnos/10/intereses')
+      .flush([
+        {
+          empresaId: 2,
+          empresaNombre: 'Beta',
+          gradoNombre: 'DAM',
+          anio: 2026,
+          fechaCreacion: '2026-08-01T00:00:00Z',
+        },
+      ]);
     await esperarMicrotareas();
     harness.detectChanges();
 
     const texto = harness.routeNativeElement?.textContent ?? '';
     expect(texto).toContain('Beta');
     expect(texto).toContain('DAM');
-  });
-
-  it('el listado de empresas enlaza a "Mis intereses" para alumno', async () => {
-    await loginComo('ALUMNO');
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/empresas');
-    http.expectOne('/api/empresas').flush([]);
-    await esperarMicrotareas();
-    harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).toContain('Mis intereses');
-  });
-
-  it('el listado de empresas no enlaza a "Mis intereses" para profesor', async () => {
-    await loginComo('PROFESOR');
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/empresas');
-    http.expectOne('/api/empresas').flush([]);
-    await esperarMicrotareas();
-    harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).not.toContain('Mis intereses');
   });
 });

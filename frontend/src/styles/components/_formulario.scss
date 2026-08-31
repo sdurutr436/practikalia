@@ -158,6 +158,8 @@
   gap: s.$espaciado-pequeno;
   padding: s.$espaciado-base;
   list-style: none;
+  // Superficie propia: por detrás pasan las figuras del fondo.
+  background: s.$color-superficie;
   border: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
   border-radius: s.$radio-m;
 }

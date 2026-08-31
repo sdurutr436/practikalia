@@ -1,28 +1,6 @@
 <main class="o-pagina">
   <header class="c-cabecera">
     <h1 class="c-cabecera__titulo">Empresas</h1>
-    <nav class="c-acciones" aria-label="Acciones de la sesión">
-      @if (sesion()?.rol === 'PROFESOR') {
-        <a class="c-boton" routerLink="/empresas/nueva"><app-icono nombre="anadir" />Nueva empresa</a>
-        <a class="c-boton c-boton--secundario" routerLink="/reviews/pendientes">
-          <app-icono nombre="moderacion" />Reviews pendientes
-        </a>
-      }
-      @if (sesion()?.rol === 'ALUMNO') {
-        <a class="c-boton c-boton--secundario" routerLink="/mis-intereses">
-          <app-icono nombre="interes" />Mis intereses
-        </a>
-        <a class="c-boton c-boton--secundario" routerLink="/mis-etiquetas">
-          <app-icono nombre="etiqueta" />Mis etiquetas
-        </a>
-        <a class="c-boton c-boton--secundario" routerLink="/mi-afinidad">
-          <app-icono nombre="afinidad" />Mi afinidad
-        </a>
-      }
-      <button class="c-boton c-boton--secundario" type="button" (click)="cerrarSesion()">
-        <app-icono nombre="salir" />Cerrar sesión
-      </button>
-    </nav>
   </header>
 
   <app-estado

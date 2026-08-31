@@ -1,0 +1,151 @@
+// Marco de la aplicación: menú lateral y barra superior, ambos como tarjeta
+// sobre el fondo de figuras. La partición la pone .o-marco.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-marco__contenido {
+  display: grid;
+  align-content: start;
+  gap: s.$espaciado-base;
+  // Sin esto la columna 1fr no puede encoger y los listados anchos desbordan.
+  min-width: 0;
+}
+
+.c-menu {
+  @include t.panel;
+  position: sticky;
+  top: s.$espaciado-base;
+  display: grid;
+  align-content: start;
+  gap: s.$espaciado-grande;
+  width: 15rem;
+  padding: s.$espaciado-base;
+
+  // Contraído solo quedan los iconos; los textos se van sin sacar los enlaces
+  // del árbol de accesibilidad, que para eso cada uno lleva su `title`.
+  &--contraido {
+    width: auto;
+
+    .c-menu__texto,
+    .c-menu__marca,
+    .c-menu__titulos {
+      display: none;
+    }
+  }
+}
+
+.c-menu__cabecera {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-menu__alternar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  padding: s.$espaciado-pequeno;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: s.$color-apagado;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+.c-menu__marca {
+  font-weight: s.$peso-fuerte;
+  letter-spacing: s.$tracking-ajustado;
+  white-space: nowrap;
+}
+
+.c-menu__secciones {
+  display: grid;
+  gap: s.$espaciado-diminuto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.c-menu__seccion {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+  padding: s.$espaciado-pequeno s.$espaciado-medio;
+  border-radius: s.$radio-m;
+  color: inherit;
+  font-size: s.$texto-pequeno;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    background: s.$color-apagado;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+
+  &--activa {
+    background: s.$color-primario;
+    color: s.$color-primario-texto;
+
+    &:hover {
+      background: s.$color-primario;
+    }
+  }
+}
+
+.c-menu__cuenta {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+  padding-top: s.$espaciado-base;
+  border-top: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+}
+
+.c-menu__avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: s.$color-apagado;
+}
+
+.c-menu__titulos {
+  display: grid;
+  min-width: 0;
+}
+
+.c-menu__correo {
+  font-size: s.$texto-pequeno;
+  font-weight: s.$peso-medio;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c-menu__rol {
+  font-size: s.$texto-diminuto;
+  color: s.$color-texto-apagado;
+}
+
+.c-barra {
+  @include t.panel;
+  position: sticky;
+  top: s.$espaciado-base;
+  z-index: s.$z-pegajoso;
+  display: flex;
+  justify-content: flex-end;
+  padding: s.$espaciado-medio s.$espaciado-base;
+}
