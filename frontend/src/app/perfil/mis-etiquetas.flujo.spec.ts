@@ -69,7 +69,9 @@ describe('página "Mis etiquetas"', () => {
     harness.detectChanges();
 
     const checkboxes = [
-      ...(harness.routeNativeElement?.querySelectorAll<HTMLInputElement>('input[type="checkbox"]') ?? []),
+      ...(harness.routeNativeElement?.querySelectorAll<HTMLInputElement>(
+        'input[type="checkbox"]',
+      ) ?? []),
     ];
     expect(checkboxes.map((c) => c.checked)).toEqual([false, true]);
   });
@@ -108,15 +110,5 @@ describe('página "Mis etiquetas"', () => {
     harness.detectChanges();
 
     expect(harness.routeNativeElement?.textContent).toContain('Etiquetas guardadas.');
-  });
-
-  it('el listado de empresas enlaza a "Mis etiquetas" para alumno, no para profesor', async () => {
-    await loginComo('ALUMNO');
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/empresas');
-    http.expectOne('/api/empresas').flush([]);
-    await esperarMicrotareas();
-    harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).toContain('Mis etiquetas');
   });
 });

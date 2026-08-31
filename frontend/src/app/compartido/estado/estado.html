@@ -1,0 +1,9 @@
+@if (cargando()) {
+  <p>{{ mensajeCargando() }}</p>
+} @else if (error(); as mensaje) {
+  <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+} @else if (vacio()) {
+  <p>{{ mensajeVacio() }}</p>
+} @else {
+  <ng-content />
+}

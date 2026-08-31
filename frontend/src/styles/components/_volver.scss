@@ -1,0 +1,12 @@
+// Enlace de vuelta al listado, repetido en cabecera de seis pantallas. Sin
+// esto el icono y el texto se alineaban por línea base, no por centro.
+@use '../settings' as s;
+
+.c-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: s.$espaciado-diminuto;
+  align-self: start;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}

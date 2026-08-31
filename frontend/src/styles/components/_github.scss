@@ -1,0 +1,56 @@
+// Esquina de GitHub: el patrón "GitHub Corners" de Tim Holman, el mismo que
+// usa socia.fpciberseguridad.com — triángulo pegado a la esquina con el
+// octocat, que saluda con el brazo al pasar por encima o al recibir el foco.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-github {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: s.$z-elevado;
+  color: s.$color-primario-texto;
+  line-height: 0;
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+.c-github__marca {
+  display: block;
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.c-github__esquina {
+  fill: s.$color-primario;
+}
+
+.c-github__brazo {
+  transform-origin: 130px 106px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c-github:hover .c-github__brazo,
+  .c-github:focus-visible .c-github__brazo {
+    animation: c-github-saludo 0.56s ease-in-out;
+  }
+}
+
+@keyframes c-github-saludo {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  20%,
+  60% {
+    transform: rotate(-25deg);
+  }
+
+  40%,
+  80% {
+    transform: rotate(10deg);
+  }
+}

@@ -1,22 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
-import { AuthService } from '../../auth/auth.service';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, esVistaProfesor } from '../empresa.model';
+import { TarjetaEmpresaComponent } from '../tarjeta-empresa/tarjeta-empresa';
 
 @Component({
   selector: 'app-empresas-listado-page',
-  imports: [RouterLink, IconoComponent],
+  imports: [EstadoComponent, TarjetaEmpresaComponent],
   templateUrl: './empresas-listado-page.html',
 })
 export class EmpresasListadoPage {
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly empresaService = inject(EmpresaService);
 
   protected readonly esVistaProfesor = esVistaProfesor;
-  protected readonly sesion = this.auth.sesion;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly empresas = signal<Empresa[]>([]);
@@ -33,10 +29,5 @@ export class EmpresasListadoPage {
     } finally {
       this.cargando.set(false);
     }
-  }
-
-  protected async cerrarSesion(): Promise<void> {
-    await this.auth.logout();
-    await this.router.navigate(['/login']);
   }
 }

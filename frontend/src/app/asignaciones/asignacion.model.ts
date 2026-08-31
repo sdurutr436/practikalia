@@ -29,6 +29,15 @@ export interface Asignacion {
   contratadoPosterior: boolean | null;
 }
 
+/**
+ * Texto de la contratación posterior. Vive aquí porque la ficha de empresa y
+ * el histórico del alumno pintaban el mismo ternario de tres ramas en plantilla.
+ */
+export function textoContratacion(asignacion: Asignacion): string {
+  if (asignacion.contratadoPosterior === null) return 'sin decidir';
+  return asignacion.contratadoPosterior ? 'sí' : 'no';
+}
+
 export interface CrearAsignacionRequest {
   alumnoId: number;
   empresaId: number;

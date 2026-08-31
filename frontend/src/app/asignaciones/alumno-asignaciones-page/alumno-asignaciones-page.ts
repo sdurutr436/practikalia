@@ -2,14 +2,15 @@ import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IconoComponent } from '../../compartido/icono/icono';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { MENSAJES_GRADO, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../asignacion.service';
-import { Asignacion, Grado, UsuarioGrado } from '../asignacion.model';
+import { Asignacion, Grado, UsuarioGrado, textoContratacion } from '../asignacion.model';
 import { ReviewService } from '../../reviews/review.service';
 
 @Component({
   selector: 'app-alumno-asignaciones-page',
-  imports: [ReactiveFormsModule, RouterLink, IconoComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconoComponent, EstadoComponent],
   templateUrl: './alumno-asignaciones-page.html',
 })
 export class AlumnoAsignacionesPage {
@@ -18,6 +19,7 @@ export class AlumnoAsignacionesPage {
   private readonly reviewService = inject(ReviewService);
 
   protected readonly alumnoId = Number(this.route.snapshot.paramMap.get('alumnoId'));
+  protected readonly textoContratacion = textoContratacion;
 
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);

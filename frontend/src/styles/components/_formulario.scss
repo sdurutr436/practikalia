@@ -1,35 +1,47 @@
-// Átomos/moléculas de formulario (BEM), sobre los tokens del tema en prueba.
+// Átomos/moléculas de formulario (BEM), sobre los tokens del tema.
+// Los valores en `em` que quedan (padding de entrada/botón/alerta, gaps de
+// icono) son deliberados: escalan con la tipografía del propio elemento.
 @use '../settings' as s;
+@use '../tools' as t;
 
 .c-formulario {
+  @include t.panel;
   display: grid;
   gap: s.$espaciado-base;
   width: 100%;
-  max-width: 24rem;
+  max-width: s.$ancho-formulario;
   padding: s.$espaciado-grande;
-  background: s.$color-superficie;
-  color: s.$color-superficie-texto;
-  border: 1px solid s.$color-borde;
-  border-radius: s.$radio;
-  box-shadow: s.$sombra;
 }
 
 .c-formulario__titulo {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: s.$texto-mayor;
+}
+
+// Texto introductorio de la tarjeta (aviso de campos obligatorios, ayudas).
+.c-formulario__descripcion {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
+// Marca de campo obligatorio: el asterisco del mockup. Decorativo, el dato
+// real lo lleva el atributo `required` del control.
+.c-requerido {
+  color: s.$color-error;
 }
 
 .c-campo {
   display: grid;
-  gap: 0.375rem;
+  gap: s.$espaciado-diminuto;
 }
 
 .c-campo__etiqueta {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  gap: s.$espaciado-diminuto;
+  font-size: s.$texto-pequeno;
+  font-weight: s.$peso-medio;
 }
 
 .c-campo__entrada {
@@ -41,15 +53,21 @@
   font: inherit;
 
   &:focus-visible {
-    outline: 3px solid color-mix(in srgb, s.$color-anillo 50%, transparent);
+    @include t.anillo-foco;
     border-color: s.$color-anillo;
   }
+}
+
+.c-campo__ayuda {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
 }
 
 .c-campo__error {
   margin: 0;
   color: s.$color-error;
-  font-size: 0.875rem;
+  font-size: s.$texto-pequeno;
 }
 
 // Vale tanto para <button> como para <a>.
@@ -64,7 +82,7 @@
   background: s.$color-primario;
   color: s.$color-primario-texto;
   font: inherit;
-  font-weight: 500;
+  font-weight: s.$peso-medio;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
@@ -74,7 +92,7 @@
   }
 
   &:focus-visible {
-    outline: 3px solid color-mix(in srgb, s.$color-anillo 50%, transparent);
+    @include t.anillo-foco;
     outline-offset: 2px;
   }
 
@@ -99,8 +117,17 @@
   display: flex;
   align-items: center;
   gap: 0.5em;
-  font-size: 0.875rem;
+  font-size: s.$texto-pequeno;
   font-weight: normal;
+}
+
+// Grupo de controles/botones en línea. Existe porque .c-campo se estaba usando
+// como envoltorio genérico para esto, que no es un campo de formulario.
+.c-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: s.$espaciado-pequeno;
 }
 
 .c-alerta {
@@ -113,6 +140,14 @@
     background: color-mix(in srgb, s.$color-error 10%, transparent);
     border: 1px solid color-mix(in srgb, s.$color-error 40%, transparent);
   }
+
+  // Mensajes role="status" (guardado correcto, aviso informativo): sin
+  // modificador el bloque solo ponía padding y quedaba invisible.
+  &--aviso {
+    color: s.$color-texto-apagado;
+    background: s.$color-apagado;
+    border: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+  }
 }
 
 // Fila de una lista (asignaciones, reviews, interesados…): sustituye el uso
@@ -120,9 +155,11 @@
 // las filas con borde suave del mockup.
 .c-fila {
   display: grid;
-  gap: 0.5rem;
+  gap: s.$espaciado-pequeno;
   padding: s.$espaciado-base;
   list-style: none;
+  // Superficie propia: por detrás pasan las figuras del fondo.
+  background: s.$color-superficie;
   border: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
   border-radius: s.$radio-m;
 }

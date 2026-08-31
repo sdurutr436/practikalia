@@ -1,2 +1,20 @@
-// Capa tools (ITCSS): mixins y funciones compartidas. Vacía por ahora —
-// se añadirán cuando un patrón se repita, no por adelantado.
+// Capa tools (ITCSS): mixins y funciones compartidas. No emite CSS por sí sola.
+@use '../settings' as s;
+
+// Anillo de foco del tema. Repetido ya en entrada, botón y tarjeta, así que
+// deja de ser un valor suelto por componente.
+@mixin anillo-foco {
+  outline: 3px solid color-mix(in srgb, s.$color-anillo 50%, transparent);
+}
+
+// Superficie de tarjeta del mockup, compartida por el formulario y la tarjeta
+// de empresa. Solo las cosméticas comunes — cada bloque pone su propio layout
+// (grid/gap), su padding y sus estados. Los bloques de gestión de la ficha NO
+// la usan: son superficie apagada sin borde ni sombra, otra cosa.
+@mixin panel {
+  background: s.$color-superficie;
+  color: s.$color-superficie-texto;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio;
+  box-shadow: s.$sombra;
+}

@@ -154,16 +154,8 @@ describe('página de afinidad', () => {
     await esperarMicrotareas();
     harness.detectChanges();
 
-    expect(harness.routeNativeElement?.textContent).toContain('No eres tutor de ninguna asignación activa');
-  });
-
-  it('el listado de empresas enlaza a "Mi afinidad" para alumno', async () => {
-    await loginComo('ALUMNO');
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/empresas');
-    http.expectOne('/api/empresas').flush([]);
-    await esperarMicrotareas();
-    harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).toContain('Mi afinidad');
+    expect(harness.routeNativeElement?.textContent).toContain(
+      'No eres tutor de ninguna asignación activa',
+    );
   });
 });

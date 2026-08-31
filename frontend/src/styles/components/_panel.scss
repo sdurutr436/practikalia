@@ -1,0 +1,59 @@
+// Secciones del panel: cada bloque es una tarjeta sobre el fondo de figuras.
+@use '../settings' as s;
+@use '../tools' as t;
+
+// Las secciones se proyectan dentro de <app-estado>, así que el gap de
+// .o-pagina no llega hasta ellas: la separación la pone este contenedor.
+.c-panel {
+  display: grid;
+  gap: s.$espaciado-grande;
+}
+
+.c-panel__seccion {
+  @include t.panel;
+  display: grid;
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-grande;
+}
+
+.c-panel__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-panel__titulo {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+  margin: 0;
+  font-size: s.$texto-grande;
+}
+
+// Fila de reseña pendiente: la empresa manda, la nota a la derecha y la cita
+// destacada del resto del texto.
+.c-resena__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-resena__empresa {
+  font-weight: s.$peso-fuerte;
+}
+
+.c-resena__autor {
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
+.c-resena__texto {
+  margin: 0;
+  padding-inline-start: s.$espaciado-medio;
+  border-inline-start: 2px solid color-mix(in srgb, s.$color-borde 20%, transparent);
+  text-wrap: pretty;
+}

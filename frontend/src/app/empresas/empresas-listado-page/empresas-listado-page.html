@@ -1,52 +1,24 @@
 <main class="o-pagina">
   <header class="c-cabecera">
     <h1 class="c-cabecera__titulo">Empresas</h1>
-    <div class="c-cabecera__acciones">
-      @if (sesion()?.rol === 'PROFESOR') {
-        <a class="c-boton" routerLink="/empresas/nueva"><app-icono nombre="anadir" />Nueva empresa</a>
-        <a class="c-boton c-boton--secundario" routerLink="/reviews/pendientes">
-          <app-icono nombre="moderacion" />Reviews pendientes
-        </a>
-      }
-      @if (sesion()?.rol === 'ALUMNO') {
-        <a class="c-boton c-boton--secundario" routerLink="/mis-intereses">
-          <app-icono nombre="interes" />Mis intereses
-        </a>
-        <a class="c-boton c-boton--secundario" routerLink="/mis-etiquetas">
-          <app-icono nombre="etiqueta" />Mis etiquetas
-        </a>
-        <a class="c-boton c-boton--secundario" routerLink="/mi-afinidad">
-          <app-icono nombre="afinidad" />Mi afinidad
-        </a>
-      }
-      <button class="c-boton c-boton--secundario" type="button" (click)="cerrarSesion()">
-        <app-icono nombre="salir" />Cerrar sesión
-      </button>
-    </div>
   </header>
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
-  } @else if (empresas().length === 0) {
-    <p>Todavía no hay empresas.</p>
-  } @else {
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="empresas().length === 0"
+    mensajeVacio="Todavía no hay empresas."
+  >
     <ul class="o-rejilla">
       @for (empresa of empresas(); track empresa.id) {
         <li>
-          <a class="c-tarjeta-empresa" [routerLink]="['/empresas', empresa.id]">
-            @if (empresa.imagen) {
-              <img class="c-tarjeta-empresa__imagen" [src]="empresa.imagen" [alt]="empresa.nombre" />
-            }
-            <h2 class="c-tarjeta-empresa__nombre">{{ empresa.nombre }}</h2>
-            <p class="c-tarjeta-empresa__meta">{{ empresa.sector.nombre }}</p>
+          <app-tarjeta-empresa [empresa]="empresa" [meta]="empresa.sector.nombre">
             @if (esVistaProfesor(empresa) && !empresa.publicada) {
               <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
             }
-          </a>
+          </app-tarjeta-empresa>
         </li>
       }
     </ul>
-  }
+  </app-estado>
 </main>

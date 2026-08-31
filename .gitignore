@@ -4,6 +4,7 @@
 
 # Notas internas, no se comparten en el repo
 docs/todo/
+docs/prompts/
 
 # Entorno local
 .env

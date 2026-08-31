@@ -1,16 +1,13 @@
 // Átomos/moléculas del dominio Empresa: tarjeta de listado, ficha de
-// detalle, y las etiquetas/badges que comparten ambas pantallas.
+// detalle, y el chip de etiqueta que comparten ambas pantallas.
 @use '../settings' as s;
+@use '../tools' as t;
 
 .c-tarjeta-empresa {
+  @include t.panel;
   display: grid;
-  gap: 0.5rem;
+  gap: s.$espaciado-pequeno;
   padding: s.$espaciado-base;
-  background: s.$color-superficie;
-  color: s.$color-superficie-texto;
-  border: 1px solid s.$color-borde;
-  border-radius: s.$radio;
-  box-shadow: s.$sombra;
   text-decoration: none;
 
   &:hover {
@@ -18,7 +15,7 @@
   }
 
   &:focus-visible {
-    outline: 3px solid color-mix(in srgb, s.$color-anillo 50%, transparent);
+    @include t.anillo-foco;
     outline-offset: 2px;
   }
 }
@@ -33,12 +30,12 @@
 
 .c-tarjeta-empresa__nombre {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: s.$texto-grande;
 }
 
 .c-tarjeta-empresa__meta {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: s.$texto-pequeno;
   color: s.$color-texto-apagado;
 }
 
@@ -49,46 +46,43 @@
 
 .c-ficha-empresa__imagen {
   width: 100%;
-  max-height: 20rem;
+  max-height: 20rem; // recorte propio de esta pantalla, no un token del tema
   object-fit: cover;
   border-radius: s.$radio;
   background: s.$color-apagado;
 }
 
+// Superficie apagada, sin borde ni sombra: no es el panel de t.panel.
 .c-ficha-empresa__gestion {
   display: grid;
-  gap: 0.5rem;
+  gap: s.$espaciado-pequeno;
   padding: s.$espaciado-base;
   background: s.$color-apagado;
   border-radius: s.$radio;
-
-  dt {
-    font-weight: 500;
-    font-size: 0.875rem;
-    color: s.$color-texto-apagado;
-  }
-
-  dd {
-    margin: 0 0 0.5rem;
-  }
 }
 
-.c-etiquetas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-  padding: 0;
+.c-ficha-empresa__titulo {
   margin: 0;
-  list-style: none;
+  font-size: s.$texto-grande;
+}
+
+.c-ficha-empresa__dato {
+  font-weight: s.$peso-medio;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
+.c-ficha-empresa__valor {
+  margin: 0 0 s.$espaciado-pequeno;
 }
 
 .c-etiqueta {
   display: inline-block;
   padding: 0.125em 0.625em;
-  border-radius: 999px;
+  border-radius: s.$radio-pildora;
   background: s.$color-apagado;
   color: s.$color-texto-apagado;
-  font-size: 0.75rem;
+  font-size: s.$texto-diminuto;
 
   &--no-publicada {
     background: color-mix(in srgb, s.$color-error 15%, transparent);

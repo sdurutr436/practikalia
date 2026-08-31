@@ -1,0 +1,8 @@
+<a class="c-tarjeta-empresa" [routerLink]="['/empresas', empresa().id]">
+  @if (empresa().imagen) {
+    <img class="c-tarjeta-empresa__imagen" [src]="empresa().imagen" [alt]="empresa().nombre" />
+  }
+  <h2 class="c-tarjeta-empresa__nombre">{{ empresa().nombre }}</h2>
+  <p class="c-tarjeta-empresa__meta">{{ meta() }}</p>
+  <ng-content />
+</a>

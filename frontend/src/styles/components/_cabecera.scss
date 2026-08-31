@@ -1,5 +1,6 @@
 // Cabecera de página de dominio: título + acciones (reutilizable por
-// cualquier pantalla que use .o-pagina).
+// cualquier pantalla que use .o-pagina). El grupo de botones ya no es un
+// elemento propio: lo cubre .c-acciones, que es el mismo patrón.
 @use '../settings' as s;
 
 .c-cabecera {
@@ -12,10 +13,5 @@
 
 .c-cabecera__titulo {
   margin: 0;
-  font-size: 1.5rem;
-}
-
-.c-cabecera__acciones {
-  display: flex;
-  gap: 0.5rem;
+  font-size: s.$texto-titulo;
 }

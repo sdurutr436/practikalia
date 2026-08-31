@@ -3,13 +3,12 @@
     <h1 class="c-cabecera__titulo">Reviews pendientes de moderación</h1>
   </header>
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
-  } @else if (reviews().length === 0) {
-    <p>No hay reviews pendientes.</p>
-  } @else {
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="reviews().length === 0"
+    mensajeVacio="No hay reviews pendientes."
+  >
     <ul class="o-lista">
       @for (review of reviews(); track review.id) {
         <li class="c-fila">
@@ -23,14 +22,16 @@
             <p class="c-alerta c-alerta--error" role="alert">{{ errorModeracion()?.mensaje }}</p>
           }
 
-          <div class="c-campo">
+          <div class="c-acciones">
             <button class="c-boton" type="button" [disabled]="guardandoId() === review.id" (click)="aprobar(review)">
               <app-icono nombre="aprobar" />Aprobar
             </button>
-            <label class="c-campo__etiqueta" [for]="'motivo-' + review.id">
-              <app-icono nombre="comentario" />Motivo de rechazo
-            </label>
-            <input class="c-campo__entrada" type="text" [id]="'motivo-' + review.id" placeholder="Motivo de rechazo" #motivo />
+            <div class="c-campo">
+              <label class="c-campo__etiqueta" [for]="'motivo-' + review.id">
+                <app-icono nombre="comentario" />Motivo de rechazo
+              </label>
+              <input class="c-campo__entrada" type="text" [id]="'motivo-' + review.id" placeholder="Motivo de rechazo" #motivo />
+            </div>
             <button
               class="c-boton c-boton--secundario"
               type="button"
@@ -43,5 +44,5 @@
         </li>
       }
     </ul>
-  }
+  </app-estado>
 </main>

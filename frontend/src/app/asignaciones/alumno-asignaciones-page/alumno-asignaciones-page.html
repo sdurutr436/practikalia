@@ -14,7 +14,7 @@
         <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
       }
       @if (gradoActualizado(); as actualizado) {
-        <p class="c-alerta" role="status">
+        <p class="c-alerta c-alerta--aviso" role="status">
           Grado fijado: {{ actualizado.grado.nombre }} ({{ actualizado.anio }}).
         </p>
       }
@@ -47,13 +47,12 @@
     </form>
   }
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
-  } @else if (asignaciones().length === 0) {
-    <p>Este alumno no tiene asignaciones todavía.</p>
-  } @else {
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="asignaciones().length === 0"
+    mensajeVacio="Este alumno no tiene asignaciones todavía."
+  >
     <ul class="o-lista">
       @for (asignacion of asignaciones(); track asignacion.id) {
         <li class="c-fila">
@@ -63,13 +62,7 @@
           </p>
           <p>
             Inicio {{ asignacion.fechaInicio }} · Fin {{ asignacion.fechaFin || 'abierta' }} · Contratación
-            {{
-              asignacion.contratadoPosterior === null
-                ? 'sin decidir'
-                : asignacion.contratadoPosterior
-                  ? 'sí'
-                  : 'no'
-            }}
+            {{ textoContratacion(asignacion) }}
           </p>
           @if (!asignacionesConReview().has(asignacion.id)) {
             <a
@@ -83,5 +76,5 @@
         </li>
       }
     </ul>
-  }
+  </app-estado>
 </main>

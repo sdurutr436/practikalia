@@ -8,3 +8,14 @@
   height: 1px;
   overflow: hidden;
 }
+
+// Saca de `inline` al host de un componente que envuelve contenido de bloque.
+.u-bloque {
+  display: block;
+}
+
+// Ocupa el hueco sobrante de una fila flex sin desbordarla (entrada + botón).
+.u-crecer {
+  flex: 1;
+  min-width: 0;
+}

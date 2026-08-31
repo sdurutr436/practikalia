@@ -1,5 +1,5 @@
 <main class="o-pagina">
-  <a routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
+  <a class="c-volver" routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
 
   @if (cargando()) {
     <p>Cargando…</p>
@@ -49,7 +49,7 @@
       </div>
 
       <fieldset class="c-campo">
-        <legend class="c-campo__etiqueta">Etiquetas</legend>
+        <legend class="c-campo__etiqueta"><app-icono nombre="etiqueta" />Etiquetas</legend>
         @for (etiqueta of etiquetasDisponibles(); track etiqueta.id) {
           <label class="c-checkbox">
             <input
@@ -60,18 +60,19 @@
             {{ etiqueta.nombre }}
           </label>
         }
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="etiquetas-manual">
-            <app-icono nombre="etiqueta" />IDs adicionales (separados por coma)
-          </label>
-          <input
-            class="c-campo__entrada"
-            id="etiquetas-manual"
-            type="text"
-            formControlName="etiquetasManual"
-          />
-        </div>
       </fieldset>
+
+      <div class="c-campo">
+        <label class="c-campo__etiqueta" for="etiquetas-manual">
+          <app-icono nombre="etiqueta" />IDs adicionales (separados por coma)
+        </label>
+        <input
+          class="c-campo__entrada"
+          id="etiquetas-manual"
+          type="text"
+          formControlName="etiquetasManual"
+        />
+      </div>
 
       <div class="c-campo">
         <label class="c-campo__etiqueta" for="observaciones"><app-icono nombre="nota" />Observaciones</label>
@@ -117,7 +118,7 @@
       <section class="c-formulario">
         <h2 class="c-formulario__titulo">Imagen</h2>
         @if (imagenActual(); as imagen) {
-          <img class="c-tarjeta-empresa__imagen" [src]="imagen" alt="Imagen actual de la empresa" />
+          <img class="c-ficha-empresa__imagen" [src]="imagen" alt="Imagen actual de la empresa" />
         } @else {
           <p>Sin imagen todavía.</p>
         }

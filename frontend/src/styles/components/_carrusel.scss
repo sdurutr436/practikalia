@@ -1,0 +1,59 @@
+// Tira horizontal con imán de parada (ver app/compartido/carrusel).
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-carrusel {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-carrusel__mandos {
+  display: flex;
+  justify-content: flex-end;
+  gap: s.$espaciado-diminuto;
+}
+
+.c-carrusel__mando {
+  display: grid;
+  place-items: center;
+  padding: s.$espaciado-pequeno;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio-m;
+  background: s.$color-superficie;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: s.$color-apagado;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+// Reutiliza la flecha de volver girada, en vez de meter un icono más.
+.c-carrusel__mando-siguiente {
+  rotate: 180deg;
+}
+
+.c-carrusel__pista {
+  display: flex;
+  gap: s.$espaciado-base;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  // Sitio para la barra de desplazamiento sin recortar la sombra de las tarjetas.
+  padding-bottom: s.$espaciado-pequeno;
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+
+  // Los ítems los proyecta quien use el carrusel; aquí solo se les fija el
+  // ancho y el punto de parada.
+  > * {
+    flex: 0 0 s.$ancho-tarjeta-min;
+    scroll-snap-align: start;
+  }
+}

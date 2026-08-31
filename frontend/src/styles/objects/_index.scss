@@ -12,7 +12,7 @@
 // Contenedor de página de dominio (ancho máximo + padding), reutilizable por
 // cualquier pantalla que no sea un formulario centrado de auth.
 .o-pagina {
-  max-width: 64rem;
+  max-width: s.$ancho-pagina;
   margin-inline: auto;
   padding: s.$espaciado-grande s.$espaciado-base;
   display: grid;
@@ -28,12 +28,55 @@
   list-style: none;
 }
 
+// Lista horizontal que envuelve (chips de etiquetas). Solo layout: el aspecto
+// de cada chip lo pone .c-etiqueta.
+.o-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: s.$espaciado-diminuto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
 // Rejilla de tarjetas (listados).
 .o-rejilla {
   display: grid;
   gap: s.$espaciado-base;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(s.$ancho-tarjeta-min, 1fr));
   padding: 0;
   margin: 0;
   list-style: none;
+}
+
+// Acceso en dos mitades exactas (mockup 2a). La barra de la división y el
+// color de cada mitad los pone .c-acceso: aquí solo la partición.
+.o-acceso {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  @media (width < 64rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Cada mitad centra lo suyo.
+.o-acceso__mitad {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: s.$espaciado-mayor s.$espaciado-grande;
+}
+
+// Marco de la aplicación: cabecera a todo el ancho y debajo la página, las
+// dos separadas de los bordes por el padding.
+.o-marco {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  align-content: start;
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-base;
 }

@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconoComponent } from '../../compartido/icono/icono';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { MENSAJES_PERFIL, mensajeDeError } from '../../auth/mensajes-error';
 import { PerfilService } from '../perfil.service';
@@ -8,7 +9,7 @@ import { Etiqueta } from '../../empresas/empresa.model';
 
 @Component({
   selector: 'app-mis-etiquetas-page',
-  imports: [RouterLink, IconoComponent],
+  imports: [RouterLink, IconoComponent, EstadoComponent],
   templateUrl: './mis-etiquetas-page.html',
 })
 export class MisEtiquetasPage {
