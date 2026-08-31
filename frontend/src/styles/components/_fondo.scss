@@ -8,6 +8,8 @@
   z-index: s.$z-fondo;
   // Se recorta solo: quien lo use únicamente tiene que ser `position: relative`.
   overflow: hidden;
+  // Decoración: nunca se lleva un clic ni una selección de texto.
+  pointer-events: none;
 }
 
 // Sopa de figuras: la geometría por modificador (se repite entre figuras) y
