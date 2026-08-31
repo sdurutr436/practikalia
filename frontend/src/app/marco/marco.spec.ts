@@ -58,21 +58,26 @@ describe('marco de la aplicación', () => {
     expect(texto).not.toContain('Mis intereses');
   });
 
-  it('el acordeón del menú se abre y se cierra desde la hamburguesa', () => {
+  it('el menú arranca cerrado y la hamburguesa lo abre y lo cierra', () => {
     const fixture = pintar('ALUMNO');
     const menu: HTMLElement = fixture.nativeElement.querySelector('#menu-principal');
     const hamburguesa: HTMLButtonElement =
       fixture.nativeElement.querySelector('.c-barra__alternar');
 
-    expect(menu.hidden).toBe(false);
-    expect(hamburguesa.getAttribute('aria-expanded')).toBe('true');
+    expect(menu.hidden).toBe(true);
+    expect(hamburguesa.getAttribute('aria-expanded')).toBe('false');
     expect(hamburguesa.getAttribute('aria-controls')).toBe('menu-principal');
 
     hamburguesa.click();
     fixture.detectChanges();
 
+    expect(menu.hidden).toBe(false);
+    expect(hamburguesa.getAttribute('aria-expanded')).toBe('true');
+
+    hamburguesa.click();
+    fixture.detectChanges();
+
     expect(menu.hidden).toBe(true);
-    expect(hamburguesa.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('cerrar sesión desde el marco limpia la sesión y vuelve a login', async () => {

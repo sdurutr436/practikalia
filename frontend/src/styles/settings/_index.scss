@@ -57,9 +57,10 @@
   --z-base: 0;
   --z-elevado: 1;
   --z-pegajoso: 2;
-  --z-superpuesto: 3;
-  --z-modal: 4;
-  --z-notificacion: 5;
+  --z-cabecera: 3;
+  --z-superpuesto: 4;
+  --z-modal: 5;
+  --z-notificacion: 6;
 }
 
 .dark {
@@ -136,6 +137,7 @@ $z-fondo: var(--z-fondo); // decoración detrás del contenido
 $z-base: var(--z-base);
 $z-elevado: var(--z-elevado);
 $z-pegajoso: var(--z-pegajoso);
+$z-cabecera: var(--z-cabecera); // la cabecera pasa por encima del contenido
 $z-superpuesto: var(--z-superpuesto);
 $z-modal: var(--z-modal);
 $z-notificacion: var(--z-notificacion);

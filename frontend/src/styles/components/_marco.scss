@@ -11,15 +11,14 @@
   min-width: 0;
 }
 
-// Cabecera completa: una tarjeta que ocupa todo el ancho disponible y que
-// crece hacia abajo cuando el menú está abierto.
+// Cabecera completa: la barra horizontal de la Γ. Ocupa todo el ancho y pasa
+// por encima de todo lo que se mueva por debajo. Es `sticky`, así que ya hace
+// de contexto de posicionamiento para el menú, que cuelga de ella.
 .c-barra {
   @include t.panel;
   position: sticky;
   top: s.$espaciado-base;
-  z-index: s.$z-pegajoso;
-  display: grid;
-  gap: s.$espaciado-base;
+  z-index: s.$z-cabecera;
   padding: s.$espaciado-medio s.$espaciado-base;
 }
 
@@ -63,23 +62,32 @@
   margin-inline-start: auto;
 }
 
-// Acordeón del menú. `[hidden]` necesita su propia regla porque `display: grid`
-// gana a la del agente de usuario y el menú se quedaría visible siempre.
+// El palo vertical de la Γ: cuelga del extremo izquierdo de la cabecera.
+// `top: 100%` lo pega justo debajo del borde inferior de la barra sin tener
+// que saber cuánto mide, así que la cabecera nunca se le queda encima.
+// `[hidden]` necesita su propia regla: `display: grid` gana a la del agente
+// de usuario y el menú se quedaría visible siempre.
 .c-menu {
+  @include t.panel;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: s.$z-superpuesto;
   display: grid;
   gap: s.$espaciado-base;
-  padding-top: s.$espaciado-base;
-  border-top: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+  width: 16rem;
+  max-width: 100%;
+  margin-top: s.$espaciado-pequeno;
+  padding: s.$espaciado-base;
 
   &[hidden] {
     display: none;
   }
 }
 
-// Las secciones fluyen en filas: en ancho es una tira, en estrecho se apilan.
+// En el palo las secciones van una debajo de otra.
 .c-menu__secciones {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: s.$espaciado-diminuto;
   padding: 0;
   margin: 0;
@@ -119,6 +127,8 @@
   display: flex;
   align-items: center;
   gap: s.$espaciado-pequeno;
+  padding-top: s.$espaciado-base;
+  border-top: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
 }
 
 .c-menu__avatar {

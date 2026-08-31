@@ -64,7 +64,9 @@ export class MarcoComponent {
   private readonly router = inject(Router);
 
   protected readonly sesion = this.auth.sesion;
-  protected readonly abierto = signal(true);
+  // Cerrado al entrar: el menú flota sobre la página, y abierto por defecto
+  // taparía el contenido nada más cargar.
+  protected readonly abierto = signal(false);
 
   protected readonly secciones = computed(() =>
     this.sesion()?.rol === 'ALUMNO' ? SECCIONES_ALUMNO : SECCIONES_PROFESOR,
