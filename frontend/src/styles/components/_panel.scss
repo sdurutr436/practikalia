@@ -1,0 +1,26 @@
+// Secciones del panel: cada bloque es una tarjeta sobre el fondo de figuras.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-panel__seccion {
+  @include t.panel;
+  display: grid;
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-base;
+}
+
+.c-panel__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-panel__titulo {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+  margin: 0;
+  font-size: s.$texto-grande;
+}
