@@ -1,0 +1,119 @@
+// Pantalla de acceso: barra de división, mitad de marca (sopa de figuras +
+// nombre + carrusel de frases) y mitad opaca del formulario.
+// La partición 50/50 la pone .o-acceso.
+@use '../settings' as s;
+
+// Barra de la división. Va como ::after al 50% del contenedor en vez de un
+// borde en una de las mitades: un borde se come el ancho de su propia columna
+// y la barra acaba 2,5px descentrada.
+.c-acceso::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  width: 5px;
+  transform: translateX(-50%);
+  background: s.$color-borde;
+}
+
+// Mitad del formulario: el color de fondo del tema, opaco y quieto.
+.c-acceso__mitad--entrada {
+  background: s.$color-fondo;
+}
+
+@media (width < 64rem) {
+  // Apiladas, la barra pasa a ser el borde entre las dos filas.
+  .c-acceso::after {
+    display: none;
+  }
+
+  .c-acceso__mitad--marca {
+    border-bottom: 5px solid s.$color-borde;
+  }
+}
+
+.c-acceso__marca {
+  display: grid;
+  gap: s.$espaciado-mayor;
+  max-width: 26ch;
+}
+
+.c-acceso__identidad {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-base;
+}
+
+.c-acceso__logo {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: s.$radio;
+  background: s.$color-primario;
+  color: s.$color-primario-texto;
+  font-size: 2.25rem; // .c-icono mide 1.1em: escala el icono, no el cuadro
+}
+
+.c-acceso__titulos {
+  display: grid;
+}
+
+.c-acceso__nombre {
+  font-size: s.$texto-marca;
+  font-weight: s.$peso-fuerte;
+  letter-spacing: s.$tracking-ajustado;
+  line-height: 1.1;
+}
+
+.c-acceso__lema {
+  font-size: s.$texto-base;
+  color: s.$color-texto-apagado;
+}
+
+// Carrusel de frases del día. Las sirve una constante del componente; si algún
+// día vienen de la API, el bloque no se entera.
+.c-frase {
+  display: grid;
+  gap: s.$espaciado-base;
+  margin: 0;
+}
+
+.c-frase__rotulo {
+  font-size: s.$texto-pequeno;
+  font-weight: s.$peso-medio;
+  letter-spacing: s.$tracking-amplio;
+  text-transform: uppercase;
+  color: s.$color-primario;
+}
+
+.c-frase__texto {
+  margin: 0;
+  // Reserva cuatro líneas para que el carrusel no dé saltos al pasar de una
+  // frase corta a una larga.
+  min-height: 4lh;
+  font-size: s.$texto-display;
+  font-weight: s.$peso-medio;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+.c-frase__autor {
+  font-size: s.$texto-base;
+  color: s.$color-texto-apagado;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c-frase__texto,
+  .c-frase__autor {
+    animation: c-frase-entrada 0.5s ease-out;
+  }
+}
+
+@keyframes c-frase-entrada {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+}

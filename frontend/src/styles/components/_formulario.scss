@@ -18,6 +18,19 @@
   font-size: s.$texto-mayor;
 }
 
+// Texto introductorio de la tarjeta (aviso de campos obligatorios, ayudas).
+.c-formulario__descripcion {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
+// Marca de campo obligatorio: el asterisco del mockup. Decorativo, el dato
+// real lo lleva el atributo `required` del control.
+.c-requerido {
+  color: s.$color-error;
+}
+
 .c-campo {
   display: grid;
   gap: s.$espaciado-diminuto;
@@ -43,6 +56,12 @@
     @include t.anillo-foco;
     border-color: s.$color-anillo;
   }
+}
+
+.c-campo__ayuda {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
 }
 
 .c-campo__error {

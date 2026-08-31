@@ -48,3 +48,24 @@
   margin: 0;
   list-style: none;
 }
+
+// Acceso en dos mitades exactas (mockup 2a). La barra de la división y el
+// color de cada mitad los pone .c-acceso: aquí solo la partición.
+.o-acceso {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  @media (width < 64rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Cada mitad centra lo suyo.
+.o-acceso__mitad {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: s.$espaciado-mayor s.$espaciado-grande;
+}
