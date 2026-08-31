@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { CarruselComponent } from '../compartido/carrusel/carrusel';
 import { EstadoComponent } from '../compartido/estado/estado';
 import { IconoComponent } from '../compartido/icono/icono';
 import { AsignacionService } from '../asignaciones/asignacion.service';
@@ -16,7 +17,13 @@ const RESUMEN = 4;
 
 @Component({
   selector: 'app-panel-page',
-  imports: [RouterLink, IconoComponent, EstadoComponent, TarjetaEmpresaComponent],
+  imports: [
+    RouterLink,
+    IconoComponent,
+    EstadoComponent,
+    TarjetaEmpresaComponent,
+    CarruselComponent,
+  ],
   templateUrl: './panel-page.html',
 })
 export class PanelPage {
@@ -25,7 +32,6 @@ export class PanelPage {
   private readonly reviewService = inject(ReviewService);
   private readonly asignacionService = inject(AsignacionService);
 
-  protected readonly esVistaProfesor = esVistaProfesor;
   protected readonly sesion = this.auth.sesion;
   protected readonly esAlumno = computed(() => this.sesion()?.rol === 'ALUMNO');
 
@@ -35,7 +41,14 @@ export class PanelPage {
   protected readonly pendientes = signal<Review[]>([]);
   protected readonly asignaciones = signal<Asignacion[]>([]);
 
-  protected readonly empresasResumen = computed(() => this.empresas().slice(0, RESUMEN));
+  /**
+   * El carrusel solo enseña empresas publicadas. Al alumnado el backend ya le
+   * manda solo esas (su DTO ni trae `publicada`); al profesorado le llegan
+   * todas, y las que están sin publicar son trabajo a medias, no escaparate.
+   */
+  protected readonly empresasCarrusel = computed(() =>
+    this.empresas().filter((empresa) => !esVistaProfesor(empresa) || empresa.publicada),
+  );
   protected readonly pendientesResumen = computed(() => this.pendientes().slice(0, RESUMEN));
   /** La asignación abierta es la que el alumnado ve como "mi empresa". */
   protected readonly asignacionAbierta = computed(() =>

@@ -10,101 +10,97 @@
   </header>
 
   <app-estado [cargando]="cargando()" [error]="error()">
-    @if (!esAlumno()) {
-      <!-- Contadores del centro. Los cuatro salen de un agregado que el backend
+    <div class="c-panel">
+      @if (!esAlumno()) {
+        <!-- Contadores del centro. Los cuatro salen de un agregado que el backend
            todavía no expone; hasta entonces el bloque queda maquetado y vacío. -->
-      <section class="c-panel__seccion" aria-labelledby="panel-contadores">
-        <h2 class="c-panel__titulo" id="panel-contadores">
-          <app-icono nombre="actividad" />Resumen del centro
-        </h2>
-        <p class="c-alerta c-alerta--aviso" role="status">
-          Empresas publicadas, sin publicar, alumnado activo y sin asignar: pendientes del endpoint
-          de resumen.
-        </p>
-      </section>
-    }
-
-    <section class="c-panel__seccion" aria-labelledby="panel-empresas">
-      <div class="c-panel__cabecera">
-        <h2 class="c-panel__titulo" id="panel-empresas">
-          <app-icono nombre="empresa" />
-          @if (esAlumno()) {
-            Empresas publicadas
-          } @else {
-            Empresas
-          }
-        </h2>
-        <a class="c-boton c-boton--secundario" routerLink="/empresas">Ver todas</a>
-      </div>
-
-      @if (empresas().length === 0) {
-        <p class="c-alerta c-alerta--aviso" role="status">Todavía no hay empresas.</p>
-      } @else {
-        <ul class="o-rejilla">
-          @for (empresa of empresasResumen(); track empresa.id) {
-            <li>
-              <app-tarjeta-empresa [empresa]="empresa" [meta]="empresa.sector.nombre">
-                @if (esVistaProfesor(empresa) && !empresa.publicada) {
-                  <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
-                }
-              </app-tarjeta-empresa>
-            </li>
-          }
-        </ul>
-      }
-    </section>
-
-    @if (esAlumno()) {
-      <section class="c-panel__seccion" aria-labelledby="panel-mi-empresa">
-        <h2 class="c-panel__titulo" id="panel-mi-empresa">
-          <app-icono nombre="asignaciones" />Mi empresa asignada
-        </h2>
-        @if (asignacionAbierta(); as asignacion) {
-          <div class="c-fila">
-            <strong>{{ asignacion.empresaNombre }}</strong>
-            <span>
-              Desde el {{ asignacion.fechaInicio }} · {{ asignacion.grado.nombre }}
-              {{ asignacion.anio }} · Tutor: {{ asignacion.tutorCentroCorreo }}
-            </span>
-            <a
-              class="c-boton c-boton--secundario"
-              [routerLink]="['/empresas', asignacion.empresaId]"
-            >
-              <app-icono nombre="empresa" />Ver ficha
-            </a>
-          </div>
-        } @else {
+        <section class="c-panel__seccion" aria-labelledby="panel-contadores">
+          <h2 class="c-panel__titulo" id="panel-contadores">
+            <app-icono nombre="actividad" />Resumen del centro
+          </h2>
           <p class="c-alerta c-alerta--aviso" role="status">
-            Todavía no tienes una empresa asignada.
+            Empresas publicadas, sin publicar, alumnado activo y sin asignar: pendientes del
+            endpoint de resumen.
           </p>
-        }
-      </section>
-    } @else {
-      <section class="c-panel__seccion" aria-labelledby="panel-resenas">
+        </section>
+      }
+
+      <section class="c-panel__seccion" aria-labelledby="panel-empresas">
         <div class="c-panel__cabecera">
-          <h2 class="c-panel__titulo" id="panel-resenas">
-            <app-icono nombre="moderacion" />Reseñas
-            @if (pendientes().length > 0) {
-              <span class="c-etiqueta">{{ pendientes().length }} por moderar</span>
+          <h2 class="c-panel__titulo" id="panel-empresas">
+            <app-icono nombre="empresa" />
+            @if (esAlumno()) {
+              Empresas publicadas
+            } @else {
+              Empresas
             }
           </h2>
-          <a class="c-boton c-boton--secundario" routerLink="/reviews/pendientes">Ver todas</a>
+          <a class="c-boton c-boton--secundario" routerLink="/empresas">Ver todas</a>
         </div>
 
-        @if (pendientes().length === 0) {
-          <p class="c-alerta c-alerta--aviso" role="status">No hay reseñas pendientes.</p>
+        @if (empresasCarrusel().length === 0) {
+          <p class="c-alerta c-alerta--aviso" role="status">Todavía no hay empresas publicadas.</p>
         } @else {
-          <ul class="o-lista">
-            @for (review of pendientesResumen(); track review.id) {
-              <li class="c-fila">
-                <strong>{{ review.alumnoCorreo }}</strong>
-                <span>«{{ review.contenido }}»</span>
-                <span>{{ review.calificacion }}</span>
-              </li>
+          <app-carrusel etiqueta="empresas">
+            @for (empresa of empresasCarrusel(); track empresa.id) {
+              <app-tarjeta-empresa [empresa]="empresa" [meta]="empresa.sector.nombre" />
             }
-          </ul>
+          </app-carrusel>
         }
       </section>
-    }
+
+      @if (esAlumno()) {
+        <section class="c-panel__seccion" aria-labelledby="panel-mi-empresa">
+          <h2 class="c-panel__titulo" id="panel-mi-empresa">
+            <app-icono nombre="asignaciones" />Mi empresa asignada
+          </h2>
+          @if (asignacionAbierta(); as asignacion) {
+            <div class="c-fila">
+              <strong>{{ asignacion.empresaNombre }}</strong>
+              <span>
+                Desde el {{ asignacion.fechaInicio }} · {{ asignacion.grado.nombre }}
+                {{ asignacion.anio }} · Tutor: {{ asignacion.tutorCentroCorreo }}
+              </span>
+              <a
+                class="c-boton c-boton--secundario"
+                [routerLink]="['/empresas', asignacion.empresaId]"
+              >
+                <app-icono nombre="empresa" />Ver ficha
+              </a>
+            </div>
+          } @else {
+            <p class="c-alerta c-alerta--aviso" role="status">
+              Todavía no tienes una empresa asignada.
+            </p>
+          }
+        </section>
+      } @else {
+        <section class="c-panel__seccion" aria-labelledby="panel-resenas">
+          <div class="c-panel__cabecera">
+            <h2 class="c-panel__titulo" id="panel-resenas">
+              <app-icono nombre="moderacion" />Reseñas
+              @if (pendientes().length > 0) {
+                <span class="c-etiqueta">{{ pendientes().length }} por moderar</span>
+              }
+            </h2>
+            <a class="c-boton c-boton--secundario" routerLink="/reviews/pendientes">Ver todas</a>
+          </div>
+
+          @if (pendientes().length === 0) {
+            <p class="c-alerta c-alerta--aviso" role="status">No hay reseñas pendientes.</p>
+          } @else {
+            <ul class="o-lista">
+              @for (review of pendientesResumen(); track review.id) {
+                <li class="c-fila">
+                  <strong>{{ review.alumnoCorreo }}</strong>
+                  <span>«{{ review.contenido }}»</span>
+                  <span>{{ review.calificacion }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    </div>
   </app-estado>
 </main>

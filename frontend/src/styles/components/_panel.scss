@@ -2,11 +2,18 @@
 @use '../settings' as s;
 @use '../tools' as t;
 
+// Las secciones se proyectan dentro de <app-estado>, así que el gap de
+// .o-pagina no llega hasta ellas: la separación la pone este contenedor.
+.c-panel {
+  display: grid;
+  gap: s.$espaciado-grande;
+}
+
 .c-panel__seccion {
   @include t.panel;
   display: grid;
   gap: s.$espaciado-base;
-  padding: s.$espaciado-base;
+  padding: s.$espaciado-grande;
 }
 
 .c-panel__cabecera {
