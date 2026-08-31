@@ -1,0 +1,16 @@
+// Calificación en estrellas (ver app/compartido/estrellas).
+@use '../settings' as s;
+
+.c-estrellas {
+  display: inline-flex;
+  gap: 0.1em;
+  white-space: nowrap;
+}
+
+.c-estrellas__estrella {
+  color: color-mix(in srgb, s.$color-borde 25%, transparent);
+
+  &--llena {
+    color: s.$color-acento;
+  }
+}
