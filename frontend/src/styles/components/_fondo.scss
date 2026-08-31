@@ -1,0 +1,206 @@
+// Fondo de figuras en movimiento (ver app/compartido/fondo): la misma sopa
+// detrás de las tarjetas y los menús de todas las pantallas.
+@use '../settings' as s;
+
+.c-fondo {
+  position: absolute;
+  inset: 0;
+  z-index: s.$z-fondo;
+  // Se recorta solo: quien lo use únicamente tiene que ser `position: relative`.
+  overflow: hidden;
+}
+
+// Sopa de figuras: la geometría por modificador (se repite entre figuras) y
+// la posición, el tamaño, el color y el ritmo por :nth-child (no se repite).
+// Todas de esquina viva salvo los círculos, que no tienen puntas que redondear.
+.c-fondo__forma {
+  position: absolute;
+  background: s.$color-primario;
+  animation: c-fondo-sopa 26s ease-in-out infinite alternate;
+
+  &--circulo {
+    border-radius: 50%;
+  }
+
+  &--triangulo {
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  }
+
+  &--pentagono {
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  }
+
+  &--hexagono {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  }
+
+  &--rombo {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  // Barra fina: la "línea" de la sopa. La inclinación va en el nth-child.
+  &--linea {
+    height: 0.4rem;
+  }
+
+  &:nth-child(1) {
+    left: 2%;
+    top: 4%;
+    width: 17rem;
+    height: 17rem;
+    opacity: 0.4;
+  }
+
+  &:nth-child(2) {
+    left: 46%;
+    top: -6%;
+    width: 11rem;
+    height: 11rem;
+    background: s.$color-acento;
+    opacity: 0.45;
+    animation-duration: 34s;
+    animation-delay: -8s;
+    animation-direction: alternate-reverse;
+  }
+
+  &:nth-child(3) {
+    left: 8%;
+    top: 58%;
+    width: 14rem;
+    height: 15rem;
+    background: s.$color-secundario;
+    opacity: 0.45;
+    animation-duration: 41s;
+    animation-delay: -19s;
+  }
+
+  &:nth-child(4) {
+    left: 62%;
+    top: 26%;
+    width: 13rem;
+    height: 13rem;
+    background: s.$color-error;
+    opacity: 0.3;
+    animation-duration: 30s;
+    animation-delay: -12s;
+    animation-direction: alternate-reverse;
+  }
+
+  &:nth-child(5) {
+    left: 24%;
+    top: 30%;
+    width: 15rem;
+    height: 14rem;
+    background: s.$color-secundario;
+    opacity: 0.3;
+    animation-duration: 37s;
+    animation-delay: -5s;
+  }
+
+  &:nth-child(6) {
+    left: -6%;
+    top: 42%;
+    width: 24rem;
+    background: s.$color-borde;
+    opacity: 0.35;
+    rotate: -18deg;
+    animation-duration: 44s;
+    animation-delay: -23s;
+    animation-direction: alternate-reverse;
+  }
+
+  &:nth-child(7) {
+    left: 70%;
+    top: 72%;
+    width: 12rem;
+    height: 12rem;
+    background: s.$color-acento;
+    opacity: 0.4;
+    animation-duration: 39s;
+    animation-delay: -15s;
+  }
+
+  &:nth-child(8) {
+    left: 34%;
+    top: 80%;
+    width: 10rem;
+    height: 10rem;
+    opacity: 0.35;
+    animation-duration: 28s;
+    animation-delay: -3s;
+    animation-direction: alternate-reverse;
+  }
+
+  &:nth-child(9) {
+    left: 52%;
+    top: 52%;
+    width: 18rem;
+    background: s.$color-primario;
+    opacity: 0.4;
+    rotate: 34deg;
+    animation-duration: 46s;
+    animation-delay: -27s;
+  }
+
+  &:nth-child(10) {
+    left: 80%;
+    top: 2%;
+    width: 9rem;
+    height: 9rem;
+    background: s.$color-error;
+    opacity: 0.35;
+    animation-duration: 32s;
+    animation-delay: -17s;
+    animation-direction: alternate-reverse;
+  }
+
+  &:nth-child(11) {
+    left: 14%;
+    top: 18%;
+    width: 8rem;
+    height: 8rem;
+    background: s.$color-acento;
+    opacity: 0.3;
+    animation-duration: 43s;
+    animation-delay: -31s;
+  }
+
+  &:nth-child(12) {
+    left: 86%;
+    top: 46%;
+    width: 20rem;
+    background: s.$color-secundario;
+    opacity: 0.35;
+    rotate: 72deg;
+    animation-duration: 36s;
+    animation-delay: -9s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c-fondo__forma {
+    animation: none;
+  }
+}
+
+@keyframes c-fondo-sopa {
+  0% {
+    translate: 0 0;
+    transform: rotate(0deg);
+  }
+
+  33% {
+    translate: 7vw -5vh;
+    transform: rotate(65deg);
+  }
+
+  66% {
+    translate: -5vw 6vh;
+    transform: rotate(-50deg);
+  }
+
+  100% {
+    translate: 4vw 3vh;
+    transform: rotate(30deg);
+  }
+}
