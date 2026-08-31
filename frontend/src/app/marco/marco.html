@@ -1,48 +1,22 @@
 <div class="o-marco c-marco">
   <app-fondo />
 
-  <nav class="c-menu" [class.c-menu--contraido]="!abierto()" aria-label="Menú principal">
-    <div class="c-menu__cabecera">
+  <header class="c-barra">
+    <div class="c-barra__fila">
       <button
-        class="c-menu__alternar"
+        class="c-barra__alternar"
         type="button"
+        aria-controls="menu-principal"
         [attr.aria-expanded]="abierto()"
-        [attr.aria-label]="abierto() ? 'Contraer el menú' : 'Desplegar el menú'"
+        [attr.aria-label]="abierto() ? 'Cerrar el menú' : 'Abrir el menú'"
         (click)="abierto.set(!abierto())"
       >
         <app-icono nombre="menu" />
       </button>
-      <span class="c-menu__marca">Practikalia</span>
-    </div>
 
-    <ul class="c-menu__secciones">
-      @for (seccion of secciones(); track seccion.ruta) {
-        <li>
-          <a
-            class="c-menu__seccion"
-            routerLinkActive="c-menu__seccion--activa"
-            [routerLink]="seccion.ruta"
-            [title]="seccion.etiqueta"
-          >
-            <app-icono [nombre]="seccion.icono" />
-            <span class="c-menu__texto">{{ seccion.etiqueta }}</span>
-          </a>
-        </li>
-      }
-    </ul>
+      <span class="c-barra__marca">Practikalia</span>
 
-    <div class="c-menu__cuenta">
-      <span class="c-menu__avatar" aria-hidden="true"><app-icono nombre="persona" /></span>
-      <span class="c-menu__titulos">
-        <span class="c-menu__correo">{{ sesion()?.correo ?? 'Mi cuenta' }}</span>
-        <span class="c-menu__rol">{{ rolLegible() }}</span>
-      </span>
-    </div>
-  </nav>
-
-  <div class="c-marco__contenido">
-    <header class="c-barra">
-      <nav class="c-acciones" aria-label="Acciones de la sesión">
+      <nav class="c-acciones c-barra__acciones" aria-label="Acciones de la sesión">
         @if (sesion()?.rol === 'PROFESOR') {
           <a class="c-boton" routerLink="/empresas/nueva"
             ><app-icono nombre="anadir" />Nueva empresa</a
@@ -52,8 +26,35 @@
           <app-icono nombre="salir" />Cerrar sesión
         </button>
       </nav>
-    </header>
+    </div>
 
+    <nav class="c-menu" id="menu-principal" aria-label="Menú principal" [hidden]="!abierto()">
+      <ul class="c-menu__secciones">
+        @for (seccion of secciones(); track seccion.ruta) {
+          <li>
+            <a
+              class="c-menu__seccion"
+              routerLinkActive="c-menu__seccion--activa"
+              [routerLink]="seccion.ruta"
+            >
+              <app-icono [nombre]="seccion.icono" />
+              <span class="c-menu__texto">{{ seccion.etiqueta }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+
+      <div class="c-menu__cuenta">
+        <span class="c-menu__avatar" aria-hidden="true"><app-icono nombre="persona" /></span>
+        <span class="c-menu__titulos">
+          <span class="c-menu__correo">{{ sesion()?.correo ?? 'Mi cuenta' }}</span>
+          <span class="c-menu__rol">{{ rolLegible() }}</span>
+        </span>
+      </div>
+    </nav>
+  </header>
+
+  <div class="c-marco__contenido">
     <ng-content />
   </div>
 </div>

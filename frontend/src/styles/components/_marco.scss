@@ -1,46 +1,37 @@
-// Marco de la aplicación: menú lateral y barra superior, ambos como tarjeta
-// sobre el fondo de figuras. La partición la pone .o-marco.
+// Marco de la aplicación: barra superior a todo el ancho, con el menú
+// principal desplegándose debajo como acordeón. La partición la pone .o-marco.
 @use '../settings' as s;
 @use '../tools' as t;
 
 .c-marco__contenido {
   display: grid;
   align-content: start;
-  gap: s.$espaciado-base;
-  // Sin esto la columna 1fr no puede encoger y los listados anchos desbordan.
+  gap: s.$espaciado-grande;
+  // Sin esto los listados anchos desbordan la columna en vez de encogerla.
   min-width: 0;
 }
 
-.c-menu {
+// Cabecera completa: una tarjeta que ocupa todo el ancho disponible y que
+// crece hacia abajo cuando el menú está abierto.
+.c-barra {
   @include t.panel;
   position: sticky;
   top: s.$espaciado-base;
+  z-index: s.$z-pegajoso;
   display: grid;
-  align-content: start;
-  gap: s.$espaciado-grande;
-  width: 15rem;
-  padding: s.$espaciado-base;
-
-  // Contraído solo quedan los iconos; los textos se van sin sacar los enlaces
-  // del árbol de accesibilidad, que para eso cada uno lleva su `title`.
-  &--contraido {
-    width: auto;
-
-    .c-menu__texto,
-    .c-menu__marca,
-    .c-menu__titulos {
-      display: none;
-    }
-  }
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-medio s.$espaciado-base;
 }
 
-.c-menu__cabecera {
+// La línea de siempre: hamburguesa a la izquierda, marca, y acciones al fondo.
+.c-barra__fila {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: s.$espaciado-pequeno;
 }
 
-.c-menu__alternar {
+.c-barra__alternar {
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -50,6 +41,7 @@
   background: transparent;
   color: inherit;
   font: inherit;
+  font-size: s.$texto-grande;
   cursor: pointer;
 
   &:hover {
@@ -61,14 +53,33 @@
   }
 }
 
-.c-menu__marca {
+.c-barra__marca {
   font-weight: s.$peso-fuerte;
   letter-spacing: s.$tracking-ajustado;
-  white-space: nowrap;
 }
 
-.c-menu__secciones {
+// Empuja las acciones al extremo opuesto de la hamburguesa.
+.c-barra__acciones {
+  margin-inline-start: auto;
+}
+
+// Acordeón del menú. `[hidden]` necesita su propia regla porque `display: grid`
+// gana a la del agente de usuario y el menú se quedaría visible siempre.
+.c-menu {
   display: grid;
+  gap: s.$espaciado-base;
+  padding-top: s.$espaciado-base;
+  border-top: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// Las secciones fluyen en filas: en ancho es una tira, en estrecho se apilan.
+.c-menu__secciones {
+  display: flex;
+  flex-wrap: wrap;
   gap: s.$espaciado-diminuto;
   padding: 0;
   margin: 0;
@@ -108,8 +119,6 @@
   display: flex;
   align-items: center;
   gap: s.$espaciado-pequeno;
-  padding-top: s.$espaciado-base;
-  border-top: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
 }
 
 .c-menu__avatar {
@@ -138,14 +147,4 @@
 .c-menu__rol {
   font-size: s.$texto-diminuto;
   color: s.$color-texto-apagado;
-}
-
-.c-barra {
-  @include t.panel;
-  position: sticky;
-  top: s.$espaciado-base;
-  z-index: s.$z-pegajoso;
-  display: flex;
-  justify-content: flex-end;
-  padding: s.$espaciado-medio s.$espaciado-base;
 }

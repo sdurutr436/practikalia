@@ -70,18 +70,13 @@
   padding: s.$espaciado-mayor s.$espaciado-grande;
 }
 
-// Marco de la aplicación: menú lateral a lo ancho de su contenido y el resto
-// para la página. En estrecho, el menú pasa arriba.
+// Marco de la aplicación: cabecera a todo el ancho y debajo la página, las
+// dos separadas de los bordes por el padding.
 .o-marco {
   position: relative;
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
+  align-content: start;
   gap: s.$espaciado-base;
   padding: s.$espaciado-base;
-
-  @media (width < 56rem) {
-    grid-template-columns: 1fr;
-  }
 }
