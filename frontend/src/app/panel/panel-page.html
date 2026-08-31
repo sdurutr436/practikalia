@@ -91,10 +91,71 @@
           } @else {
             <ul class="o-lista">
               @for (review of pendientesResumen(); track review.id) {
-                <li class="c-fila">
-                  <strong>{{ review.alumnoCorreo }}</strong>
-                  <span>«{{ review.contenido }}»</span>
-                  <span>{{ review.calificacion }}</span>
+                <li class="c-fila c-resena">
+                  <div class="c-resena__cabecera">
+                    <span class="c-resena__empresa">{{ nombreEmpresa(review) }}</span>
+                    @if (calificacion(); as rango) {
+                      <app-estrellas [valor]="review.calificacion" [maximo]="rango.max" />
+                    }
+                  </div>
+                  <span class="c-resena__autor">{{ review.alumnoCorreo }}</span>
+                  <blockquote class="c-resena__texto">«{{ review.contenido }}»</blockquote>
+
+                  @if (errorModeracion()?.id === review.id) {
+                    <p class="c-alerta c-alerta--error" role="alert">
+                      {{ errorModeracion()?.mensaje }}
+                    </p>
+                  }
+
+                  @if (rechazandoId() === review.id) {
+                    <div class="c-acciones">
+                      <div class="c-campo u-crecer">
+                        <label class="c-campo__etiqueta" [for]="'motivo-' + review.id">
+                          Motivo del rechazo
+                        </label>
+                        <input
+                          class="c-campo__entrada"
+                          type="text"
+                          [id]="'motivo-' + review.id"
+                          #motivo
+                        />
+                      </div>
+                      <button
+                        class="c-boton"
+                        type="button"
+                        [disabled]="moderandoId() !== null"
+                        (click)="rechazar(review, motivo.value)"
+                      >
+                        <app-icono nombre="rechazar" />Confirmar rechazo
+                      </button>
+                      <button
+                        class="c-boton c-boton--secundario"
+                        type="button"
+                        (click)="rechazandoId.set(null)"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="c-acciones">
+                      <button
+                        class="c-boton"
+                        type="button"
+                        [disabled]="moderandoId() !== null"
+                        (click)="aprobar(review)"
+                      >
+                        <app-icono nombre="aprobar" />Aprobar
+                      </button>
+                      <button
+                        class="c-boton c-boton--secundario"
+                        type="button"
+                        [disabled]="moderandoId() !== null"
+                        (click)="rechazandoId.set(review.id)"
+                      >
+                        <app-icono nombre="rechazar" />Rechazar
+                      </button>
+                    </div>
+                  }
                 </li>
               }
             </ul>
