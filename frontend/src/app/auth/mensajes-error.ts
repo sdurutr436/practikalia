@@ -76,6 +76,13 @@ export const MENSAJES_REVIEW: Record<string, string> = {
   REVIEW_YA_MODERADA: 'Esta review ya ha sido moderada.',
 };
 
+/** Mensajes de UI por código del contrato de POST /api/usuarios. */
+export const MENSAJES_ALTA_ALUMNO: Record<string, string> = {
+  CORREO_NO_PERMITIDO: 'Ese correo no está permitido en este centro.',
+  CORREO_YA_REGISTRADO: 'Ya hay una cuenta con ese correo.',
+  ACCESO_DENEGADO: 'No tienes permiso para dar de alta cuentas.',
+};
+
 /** Código conocido → su mensaje; si no, el mensaje del backend; si no, genérico. */
 export function mensajeDeError(error: unknown, mensajes: Record<string, string>): string {
   if (error instanceof HttpErrorResponse) {

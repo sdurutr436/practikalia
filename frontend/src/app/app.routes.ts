@@ -19,6 +19,7 @@ import { ReviewsPendientesPage } from './reviews/reviews-pendientes-page/reviews
 import { MisInteresesPage } from './intereses/mis-intereses-page/mis-intereses-page';
 import { MisEtiquetasPage } from './perfil/mis-etiquetas-page/mis-etiquetas-page';
 import { AfinidadPage } from './afinidad/afinidad-page/afinidad-page';
+import { AlumnoFormularioPage } from './alumnado/alumno-formulario-page/alumno-formulario-page';
 
 export const routes: Routes = [
   // El marco (menú lateral + barra superior) lo pone app.ts alrededor del
@@ -84,6 +85,12 @@ export const routes: Routes = [
     component: EmpresaDetallePage,
     title: 'Ficha de empresa',
     canActivate: [autenticadoGuard],
+  },
+  {
+    path: 'alumnos/nuevo',
+    component: AlumnoFormularioPage,
+    title: 'Nuevo alumno',
+    canActivate: [profesorGuard],
   },
   {
     path: 'alumnos/:alumnoId/asignaciones',
