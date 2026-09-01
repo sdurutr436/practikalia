@@ -59,7 +59,9 @@ describe('formulario de review', () => {
 
   async function loginComoAlumno(): Promise<void> {
     const promesa = auth.login('alumno@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
   }
 
@@ -81,14 +83,20 @@ describe('formulario de review', () => {
 
     const creacion = http.expectOne('/api/reviews');
     expect(creacion.request.method).toBe('POST');
-    expect(creacion.request.body).toEqual({ asignacionId: 5, contenido: 'Buena experiencia.', calificacion: 4 });
+    expect(creacion.request.body).toEqual({
+      asignacionId: 5,
+      contenido: 'Buena experiencia.',
+      calificacion: 4,
+    });
     creacion.flush(REVIEW);
     await envio;
 
     // Navegación a /empresas/2 monta EmpresaDetallePage, que pide sus propios datos.
     http.expectOne('/api/empresas/2').flush(EMPRESA);
     await esperarMicrotareas();
-    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/reviews').flush([REVIEW]);
     http.expectOne('/api/auth/me').flush({
       id: 10,
@@ -122,7 +130,9 @@ describe('formulario de review', () => {
     c.form.patchValue({ contenido: 'Buena experiencia.', calificacion: 4 });
     const envio = c.enviar() as Promise<void>;
 
-    http.expectOne('/api/reviews').flush({ codigo: 'REVIEW_YA_EXISTE' }, { status: 409, statusText: 'Conflict' });
+    http
+      .expectOne('/api/reviews')
+      .flush({ codigo: 'REVIEW_YA_EXISTE' }, { status: 409, statusText: 'Conflict' });
     await envio;
 
     expect(c.error()).toContain('Ya existe una review');
@@ -131,7 +141,10 @@ describe('formulario de review', () => {
   it('carga la review existente y edita con PUT', async () => {
     await loginComoAlumno();
     const harness = await RouterTestingHarness.create();
-    const componente = await harness.navigateByUrl('/reviews/1/editar?empresaId=2', ReviewFormularioPage);
+    const componente = await harness.navigateByUrl(
+      '/reviews/1/editar?empresaId=2',
+      ReviewFormularioPage,
+    );
 
     http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
     await esperarMicrotareas();
@@ -154,8 +167,12 @@ describe('formulario de review', () => {
 
     http.expectOne('/api/empresas/2').flush(EMPRESA);
     await esperarMicrotareas();
-    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/2/reviews').flush([{ ...REVIEW, contenido: 'Experiencia editada.', calificacion: 5 }]);
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http
+      .expectOne('/api/empresas/2/reviews')
+      .flush([{ ...REVIEW, contenido: 'Experiencia editada.', calificacion: 5 }]);
     http.expectOne('/api/auth/me').flush({
       id: 10,
       correo: 'alumno@centro.es',
@@ -193,14 +210,18 @@ describe('entrada desde la ficha de empresa (alumno)', () => {
 
   it('muestra "Escribir review" para una asignación propia sin review todavía', async () => {
     const promesa = auth.login('alumno@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA);
     await esperarMicrotareas();
-    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/auth/me').flush({
       id: 10,
@@ -258,7 +279,9 @@ describe('cola de moderación', () => {
 
   it('un alumno no puede acceder a la cola de pendientes', async () => {
     const promesa = auth.login('alumno@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
@@ -271,7 +294,9 @@ describe('cola de moderación', () => {
 
   it('profesor aprueba una review pendiente', async () => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
@@ -283,7 +308,7 @@ describe('cola de moderación', () => {
     const boton = [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find((b) =>
       b.textContent?.includes('Aprobar'),
     );
-    boton?.dispatchEvent(new Event('click'));
+    boton?.click();
 
     const peticion = http.expectOne('/api/reviews/1/moderar');
     expect(peticion.request.method).toBe('PUT');
@@ -297,7 +322,9 @@ describe('cola de moderación', () => {
 
   it('rechazar sin motivo muestra un error sin llamar al backend', async () => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
@@ -309,7 +336,7 @@ describe('cola de moderación', () => {
     const boton = [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find((b) =>
       b.textContent?.includes('Rechazar'),
     );
-    boton?.dispatchEvent(new Event('click'));
+    boton?.click();
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -318,7 +345,9 @@ describe('cola de moderación', () => {
 
   it('rechazar con motivo manda el PUT con el motivo', async () => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
@@ -330,11 +359,16 @@ describe('cola de moderación', () => {
     const contenedor = harness.routeNativeElement as HTMLElement;
     const input = contenedor.querySelector('input[type="text"]') as HTMLInputElement;
     input.value = 'Poco detallada.';
-    const boton = [...contenedor.querySelectorAll('button')].find((b) => b.textContent?.includes('Rechazar'));
-    boton?.dispatchEvent(new Event('click'));
+    const boton = [...contenedor.querySelectorAll('button')].find((b) =>
+      b.textContent?.includes('Rechazar'),
+    );
+    boton?.click();
 
     const peticion = http.expectOne('/api/reviews/1/moderar');
-    expect(peticion.request.body).toEqual({ estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
+    expect(peticion.request.body).toEqual({
+      estado: 'RECHAZADA',
+      motivoRechazo: 'Poco detallada.',
+    });
     peticion.flush({ ...REVIEW, estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
     await esperarMicrotareas();
   });

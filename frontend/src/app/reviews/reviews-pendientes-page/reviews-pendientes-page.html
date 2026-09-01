@@ -1,7 +1,5 @@
 <main class="o-pagina">
-  <header class="c-cabecera">
-    <h1 class="c-cabecera__titulo">Reviews pendientes de moderación</h1>
-  </header>
+  <app-cabecera titulo="Reviews pendientes de moderación" />
 
   <app-estado
     [cargando]="cargando()"
@@ -19,27 +17,38 @@
           <p>{{ review.contenido }}</p>
 
           @if (errorModeracion()?.id === review.id) {
-            <p class="c-alerta c-alerta--error" role="alert">{{ errorModeracion()?.mensaje }}</p>
+            <app-alerta>{{ errorModeracion()?.mensaje }}</app-alerta>
           }
 
           <div class="c-acciones">
-            <button class="c-boton" type="button" [disabled]="guardandoId() === review.id" (click)="aprobar(review)">
-              <app-icono nombre="aprobar" />Aprobar
-            </button>
-            <div class="c-campo">
-              <label class="c-campo__etiqueta" [for]="'motivo-' + review.id">
-                <app-icono nombre="comentario" />Motivo de rechazo
-              </label>
-              <input class="c-campo__entrada" type="text" [id]="'motivo-' + review.id" placeholder="Motivo de rechazo" #motivo />
-            </div>
-            <button
-              class="c-boton c-boton--secundario"
-              type="button"
-              [disabled]="guardandoId() === review.id"
+            <app-boton
+              icono="aprobar"
+              [deshabilitado]="guardandoId() === review.id"
+              (click)="aprobar(review)"
+            >
+              Aprobar
+            </app-boton>
+            <app-campo
+              etiqueta="Motivo de rechazo"
+              icono="comentario"
+              [para]="'motivo-' + review.id"
+            >
+              <input
+                class="c-campo__entrada"
+                type="text"
+                [id]="'motivo-' + review.id"
+                placeholder="Motivo de rechazo"
+                #motivo
+              />
+            </app-campo>
+            <app-boton
+              icono="rechazar"
+              [secundario]="true"
+              [deshabilitado]="guardandoId() === review.id"
               (click)="rechazar(review, motivo.value)"
             >
-              <app-icono nombre="rechazar" />Rechazar
-            </button>
+              Rechazar
+            </app-boton>
           </div>
         </li>
       }

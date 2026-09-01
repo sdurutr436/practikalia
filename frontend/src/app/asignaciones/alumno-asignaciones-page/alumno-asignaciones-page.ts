@@ -1,16 +1,27 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { MENSAJES_GRADO, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../asignacion.service';
 import { Asignacion, Grado, UsuarioGrado, textoContratacion } from '../asignacion.model';
 import { ReviewService } from '../../reviews/review.service';
+import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 @Component({
   selector: 'app-alumno-asignaciones-page',
-  imports: [ReactiveFormsModule, RouterLink, IconoComponent, EstadoComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    EstadoComponent,
+    CabeceraComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+  ],
   templateUrl: './alumno-asignaciones-page.html',
 })
 export class AlumnoAsignacionesPage {
@@ -84,7 +95,9 @@ export class AlumnoAsignacionesPage {
   private async cargarReviewsExistentes(asignaciones: Asignacion[]): Promise<void> {
     try {
       const empresaIds = [...new Set(asignaciones.map((a) => a.empresaId))];
-      const listas = await Promise.all(empresaIds.map((id) => this.reviewService.listarPorEmpresa(id)));
+      const listas = await Promise.all(
+        empresaIds.map((id) => this.reviewService.listarPorEmpresa(id)),
+      );
       this.asignacionesConReview.set(new Set(listas.flat().map((r) => r.asignacionId)));
     } catch {
       // ponytail: best-effort — si falla, se ofrece el atajo de más y el backend igual protege con 409.

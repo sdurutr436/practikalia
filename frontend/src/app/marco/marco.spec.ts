@@ -86,7 +86,7 @@ describe('marco de la aplicación', () => {
     const boton = [...fixture.nativeElement.querySelectorAll('button')].find(
       (b: HTMLButtonElement) => b.textContent?.includes('Cerrar sesión'),
     );
-    boton?.dispatchEvent(new Event('click'));
+    boton?.click();
     http.expectOne('/api/auth/logout').flush(null, { status: 204, statusText: 'No Content' });
     await esperarMicrotareas();
 

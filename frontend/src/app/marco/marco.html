@@ -18,13 +18,11 @@
 
       <nav class="c-acciones c-barra__acciones" aria-label="Acciones de la sesión">
         @if (sesion()?.rol === 'PROFESOR') {
-          <a class="c-boton" routerLink="/empresas/nueva"
-            ><app-icono nombre="anadir" />Nueva empresa</a
-          >
+          <app-boton icono="anadir" enlace="/empresas/nueva">Nueva empresa</app-boton>
         }
-        <button class="c-boton c-boton--secundario" type="button" (click)="cerrarSesion()">
-          <app-icono nombre="salir" />Cerrar sesión
-        </button>
+        <app-boton icono="salir" [secundario]="true" (click)="cerrarSesion()">
+          Cerrar sesión
+        </app-boton>
       </nav>
     </div>
 

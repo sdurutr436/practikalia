@@ -5,6 +5,8 @@ import { EstadoComponent } from '../../compartido/estado/estado';
 import { TarjetaEmpresaComponent } from '../../empresas/tarjeta-empresa/tarjeta-empresa';
 import { AfinidadService } from '../afinidad.service';
 import { AfinidadEmpresa } from '../afinidad.model';
+import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
 
 /**
  * Página única para las dos rutas del contrato de afinidad: autoservicio
@@ -14,7 +16,13 @@ import { AfinidadEmpresa } from '../afinidad.model';
  */
 @Component({
   selector: 'app-afinidad-page',
-  imports: [RouterLink, EstadoComponent, TarjetaEmpresaComponent],
+  imports: [
+    RouterLink,
+    EstadoComponent,
+    TarjetaEmpresaComponent,
+    CabeceraComponent,
+    AlertaComponent,
+  ],
   templateUrl: './afinidad-page.html',
 })
 export class AfinidadPage {

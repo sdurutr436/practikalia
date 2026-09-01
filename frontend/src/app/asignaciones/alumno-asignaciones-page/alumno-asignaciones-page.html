@@ -1,49 +1,49 @@
 <main class="o-pagina">
-  <header class="c-cabecera">
-    <h1 class="c-cabecera__titulo">Histórico de asignaciones</h1>
-    <a class="c-boton c-boton--secundario" [routerLink]="['/alumnos', alumnoId, 'afinidad']">
-      <app-icono nombre="afinidad" />Ver afinidad de este alumno
-    </a>
-  </header>
+  <app-cabecera titulo="Histórico de asignaciones">
+    <app-boton icono="afinidad" [secundario]="true" [enlace]="['/alumnos', alumnoId, 'afinidad']">
+      Ver afinidad de este alumno
+    </app-boton>
+  </app-cabecera>
 
   @if (!cargando()) {
     <form class="c-formulario" [formGroup]="formGrado" (ngSubmit)="guardarGrado()">
       <h2 class="c-formulario__titulo">Fijar grado y año</h2>
 
       @if (errorGrado(); as mensaje) {
-        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+        <app-alerta>{{ mensaje }}</app-alerta>
       }
       @if (gradoActualizado(); as actualizado) {
-        <p class="c-alerta c-alerta--aviso" role="status">
+        <app-alerta tipo="aviso">
           Grado fijado: {{ actualizado.grado.nombre }} ({{ actualizado.anio }}).
-        </p>
+        </app-alerta>
       }
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="grado-alumno"><app-icono nombre="grado" />Grado</label>
+      <app-campo
+        etiqueta="Grado"
+        icono="grado"
+        para="grado-alumno"
+        [control]="formGrado.controls.gradoId"
+        error="Selecciona un grado."
+      >
         <select class="c-campo__entrada" id="grado-alumno" formControlName="gradoId">
           <option [value]="0" disabled>Selecciona un grado</option>
           @for (grado of grados(); track grado.id) {
             <option [value]="grado.id">{{ grado.nombre }}</option>
           }
         </select>
-        @if (formGrado.controls.gradoId.touched && formGrado.controls.gradoId.invalid) {
-          <p class="c-campo__error">Selecciona un grado.</p>
-        }
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="anio-alumno"><app-icono nombre="numero" />Año</label>
+      <app-campo
+        etiqueta="Año"
+        icono="numero"
+        para="anio-alumno"
+        [control]="formGrado.controls.anio"
+        error="Indica un año válido."
+      >
         <input class="c-campo__entrada" id="anio-alumno" type="number" formControlName="anio" />
-        @if (formGrado.controls.anio.touched && formGrado.controls.anio.invalid) {
-          <p class="c-campo__error">Indica un año válido.</p>
-        }
-      </div>
+      </app-campo>
 
-      <button class="c-boton" type="submit" [disabled]="guardandoGrado()">
-        <app-icono nombre="guardar" />
-        {{ guardandoGrado() ? 'Guardando…' : 'Guardar' }}
-      </button>
+      <app-boton tipo="submit" icono="guardar" [cargando]="guardandoGrado()">Guardar</app-boton>
     </form>
   }
 
@@ -57,21 +57,25 @@
       @for (asignacion of asignaciones(); track asignacion.id) {
         <li class="c-fila">
           <p>
-            {{ asignacion.alumnoCorreo }} en <a [routerLink]="['/empresas', asignacion.empresaId]">{{ asignacion.empresaNombre }}</a>
-            · {{ asignacion.grado.nombre }} ({{ asignacion.anio }}) · tutor {{ asignacion.tutorCentroCorreo }}
+            {{ asignacion.alumnoCorreo }} en
+            <a [routerLink]="['/empresas', asignacion.empresaId]">{{ asignacion.empresaNombre }}</a>
+            · {{ asignacion.grado.nombre }} ({{ asignacion.anio }}) · tutor
+            {{ asignacion.tutorCentroCorreo }}
           </p>
           <p>
-            Inicio {{ asignacion.fechaInicio }} · Fin {{ asignacion.fechaFin || 'abierta' }} · Contratación
+            Inicio {{ asignacion.fechaInicio }} · Fin {{ asignacion.fechaFin || 'abierta' }} ·
+            Contratación
             {{ textoContratacion(asignacion) }}
           </p>
           @if (!asignacionesConReview().has(asignacion.id)) {
-            <a
-              class="c-boton c-boton--secundario"
-              [routerLink]="['/reviews/nueva']"
-              [queryParams]="{ asignacionId: asignacion.id, empresaId: asignacion.empresaId }"
+            <app-boton
+              icono="comentario"
+              [secundario]="true"
+              enlace="/reviews/nueva"
+              [params]="{ asignacionId: asignacion.id, empresaId: asignacion.empresaId }"
             >
-              <app-icono nombre="comentario" />Escribir review en nombre del alumno
-            </a>
+              Escribir review en nombre del alumno
+            </app-boton>
           }
         </li>
       }

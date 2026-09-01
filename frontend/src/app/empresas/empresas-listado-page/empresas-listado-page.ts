@@ -3,10 +3,11 @@ import { EstadoComponent } from '../../compartido/estado/estado';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, esVistaProfesor } from '../empresa.model';
 import { TarjetaEmpresaComponent } from '../tarjeta-empresa/tarjeta-empresa';
+import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 
 @Component({
   selector: 'app-empresas-listado-page',
-  imports: [EstadoComponent, TarjetaEmpresaComponent],
+  imports: [EstadoComponent, TarjetaEmpresaComponent, CabeceraComponent],
   templateUrl: './empresas-listado-page.html',
 })
 export class EmpresasListadoPage {

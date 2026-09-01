@@ -1,14 +1,24 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { MENSAJES_REVIEW, mensajeDeError } from '../../auth/mensajes-error';
 import { ReviewService } from '../review.service';
 import { Review } from '../review.model';
+import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 @Component({
   selector: 'app-reviews-pendientes-page',
-  imports: [RouterLink, IconoComponent, EstadoComponent],
+  imports: [
+    RouterLink,
+    EstadoComponent,
+    CabeceraComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+  ],
   templateUrl: './reviews-pendientes-page.html',
 })
 export class ReviewsPendientesPage {

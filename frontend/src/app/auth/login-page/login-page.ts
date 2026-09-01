@@ -12,6 +12,9 @@ import { IconoComponent } from '../../compartido/icono/icono';
 import { AuthService } from '../auth.service';
 import { MENSAJES_LOGIN, MENSAJES_REGISTRO, mensajeDeError } from '../mensajes-error';
 import { GradoOpcion, RegistroService } from '../registro.service';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 // Catálogo local de frases. Si algún día las sirve la API, esta constante es
 // lo único que cambia: el resto ya trabaja contra una señal.
@@ -77,7 +80,14 @@ export function correoInstitucional(control: AbstractControl<string>): Validatio
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, IconoComponent, FondoComponent],
+  imports: [
+    ReactiveFormsModule,
+    IconoComponent,
+    FondoComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+  ],
   templateUrl: './login-page.html',
 })
 export class LoginPage {

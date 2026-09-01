@@ -2,11 +2,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { PercentPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { MENSAJES_ASIGNACION, MENSAJES_INTERES, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
-import { Asignacion, TasaContratacion, textoContratacion } from '../../asignaciones/asignacion.model';
+import {
+  Asignacion,
+  TasaContratacion,
+  textoContratacion,
+} from '../../asignaciones/asignacion.model';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { ReviewService } from '../../reviews/review.service';
 import { Review } from '../../reviews/review.model';
@@ -14,10 +17,24 @@ import { InteresService } from '../../intereses/interes.service';
 import { Interesado } from '../../intereses/interes.model';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, esVistaProfesor } from '../empresa.model';
+import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
+import { VolverComponent } from '../../compartido/volver/volver';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 @Component({
   selector: 'app-empresa-detalle-page',
-  imports: [RouterLink, PercentPipe, IconoComponent, EstadoComponent],
+  imports: [
+    RouterLink,
+    PercentPipe,
+    EstadoComponent,
+    CabeceraComponent,
+    VolverComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+  ],
   templateUrl: './empresa-detalle-page.html',
 })
 export class EmpresaDetallePage {
@@ -115,11 +132,16 @@ export class EmpresaDetallePage {
   }
 
   /** Cruza las asignaciones propias del alumno en esta empresa contra las reviews ya cargadas. */
-  private async cargarAsignacionesPropiasSinReview(empresaId: number, alumnoId: number): Promise<void> {
+  private async cargarAsignacionesPropiasSinReview(
+    empresaId: number,
+    alumnoId: number,
+  ): Promise<void> {
     try {
       const propias = await this.asignacionService.listarPorAlumno(alumnoId);
       const conReview = new Set(this.reviews().map((r) => r.asignacionId));
-      this.asignacionesSinReview.set(propias.filter((a) => a.empresaId === empresaId && !conReview.has(a.id)));
+      this.asignacionesSinReview.set(
+        propias.filter((a) => a.empresaId === empresaId && !conReview.has(a.id)),
+      );
     } catch {
       // ponytail: best-effort — si falla, simplemente no se ofrece el atajo de "escribir review" aquí.
     }
@@ -185,7 +207,11 @@ export class EmpresaDetallePage {
     }
   }
 
-  protected async cerrarAsignacion(asignacion: Asignacion, fechaFin: string, contratadoTexto: string): Promise<void> {
+  protected async cerrarAsignacion(
+    asignacion: Asignacion,
+    fechaFin: string,
+    contratadoTexto: string,
+  ): Promise<void> {
     if (!fechaFin || this.guardandoId() !== null) {
       return;
     }
@@ -193,8 +219,13 @@ export class EmpresaDetallePage {
     this.errorCierre.set(null);
     const contratadoPosterior = contratadoTexto === '' ? null : contratadoTexto === 'true';
     try {
-      const actualizada = await this.asignacionService.cerrar(asignacion.id, { fechaFin, contratadoPosterior });
-      this.asignaciones.update((lista) => lista.map((a) => (a.id === actualizada.id ? actualizada : a)));
+      const actualizada = await this.asignacionService.cerrar(asignacion.id, {
+        fechaFin,
+        contratadoPosterior,
+      });
+      this.asignaciones.update((lista) =>
+        lista.map((a) => (a.id === actualizada.id ? actualizada : a)),
+      );
     } catch (e) {
       this.errorCierre.set({ id: asignacion.id, mensaje: mensajeDeError(e, MENSAJES_ASIGNACION) });
     } finally {

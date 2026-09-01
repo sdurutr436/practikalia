@@ -1,14 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { InteresService } from '../interes.service';
 import { Interes } from '../interes.model';
+import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
+import { VolverComponent } from '../../compartido/volver/volver';
 
 @Component({
   selector: 'app-mis-intereses-page',
-  imports: [RouterLink, IconoComponent, EstadoComponent],
+  imports: [RouterLink, EstadoComponent, CabeceraComponent, VolverComponent],
   templateUrl: './mis-intereses-page.html',
 })
 export class MisInteresesPage {

@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { CarruselComponent } from '../compartido/carrusel/carrusel';
 import { EstadoComponent } from '../compartido/estado/estado';
@@ -13,6 +12,10 @@ import { TarjetaEmpresaComponent } from '../empresas/tarjeta-empresa/tarjeta-emp
 import { ReviewService } from '../reviews/review.service';
 import { CalificacionConfig, Review } from '../reviews/review.model';
 import { MENSAJES_REVIEW, mensajeDeError } from '../auth/mensajes-error';
+import { CabeceraComponent } from '../compartido/cabecera/cabecera';
+import { AlertaComponent } from '../compartido/alerta/alerta';
+import { CampoComponent } from '../compartido/campo/campo';
+import { BotonComponent } from '../compartido/boton/boton';
 
 /** Cuántas filas/tarjetas caben en un resumen antes de mandar al listado completo. */
 const RESUMEN = 4;
@@ -20,12 +23,15 @@ const RESUMEN = 4;
 @Component({
   selector: 'app-panel-page',
   imports: [
-    RouterLink,
     IconoComponent,
     EstadoComponent,
     TarjetaEmpresaComponent,
     CarruselComponent,
     EstrellasComponent,
+    CabeceraComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
   ],
   templateUrl: './panel-page.html',
 })
@@ -37,6 +43,11 @@ export class PanelPage {
 
   protected readonly sesion = this.auth.sesion;
   protected readonly esAlumno = computed(() => this.sesion()?.rol === 'ALUMNO');
+  protected readonly titulo = computed(() => {
+    if (!this.esAlumno()) return 'Panel del centro';
+    const correo = this.sesion()?.correo;
+    return correo ? `Hola, ${correo}` : 'Hola';
+  });
 
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);

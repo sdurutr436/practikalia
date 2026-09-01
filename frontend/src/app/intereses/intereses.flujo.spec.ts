@@ -93,7 +93,7 @@ describe('interés en el detalle de empresa (vista alumno)', () => {
 
     expect(botonInteres(harness)?.textContent).toContain('Marcar interés');
 
-    botonInteres(harness)?.dispatchEvent(new Event('click'));
+    botonInteres(harness)?.click();
     const marcar = http.expectOne('/api/empresas/2/interes');
     expect(marcar.request.method).toBe('PUT');
     marcar.flush(null);
@@ -102,7 +102,7 @@ describe('interés en el detalle de empresa (vista alumno)', () => {
 
     expect(botonInteres(harness)?.textContent).toContain('Quitar interés');
 
-    botonInteres(harness)?.dispatchEvent(new Event('click'));
+    botonInteres(harness)?.click();
     const desmarcar = http.expectOne('/api/empresas/2/interes');
     expect(desmarcar.request.method).toBe('DELETE');
     desmarcar.flush(null, { status: 204, statusText: 'No Content' });
@@ -131,7 +131,7 @@ describe('interés en el detalle de empresa (vista alumno)', () => {
     const harness = await RouterTestingHarness.create();
     await abrirFichaComoAlumno(harness, []);
 
-    botonInteres(harness)?.dispatchEvent(new Event('click'));
+    botonInteres(harness)?.click();
     http
       .expectOne('/api/empresas/2/interes')
       .flush({ codigo: 'ALUMNO_SIN_GRADO' }, { status: 400, statusText: 'Bad Request' });
@@ -178,17 +178,15 @@ describe('interesados en el detalle de empresa (vista profesor)', () => {
       .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
-    http
-      .expectOne('/api/empresas/2/interesados')
-      .flush([
-        {
-          alumnoId: 10,
-          alumnoCorreo: 'alumno@centro.es',
-          gradoNombre: 'DAM',
-          anio: 2026,
-          fechaCreacion: '2026-08-01T00:00:00Z',
-        },
-      ]);
+    http.expectOne('/api/empresas/2/interesados').flush([
+      {
+        alumnoId: 10,
+        alumnoCorreo: 'alumno@centro.es',
+        gradoNombre: 'DAM',
+        anio: 2026,
+        fechaCreacion: '2026-08-01T00:00:00Z',
+      },
+    ]);
     http.expectOne('/api/auth/me').flush({
       id: 5,
       correo: 'profesor@centro.es',
@@ -257,17 +255,15 @@ describe('página "Mis intereses"', () => {
       etiquetas: [],
     });
     await esperarMicrotareas();
-    http
-      .expectOne('/api/alumnos/10/intereses')
-      .flush([
-        {
-          empresaId: 2,
-          empresaNombre: 'Beta',
-          gradoNombre: 'DAM',
-          anio: 2026,
-          fechaCreacion: '2026-08-01T00:00:00Z',
-        },
-      ]);
+    http.expectOne('/api/alumnos/10/intereses').flush([
+      {
+        empresaId: 2,
+        empresaNombre: 'Beta',
+        gradoNombre: 'DAM',
+        anio: 2026,
+        fechaCreacion: '2026-08-01T00:00:00Z',
+      },
+    ]);
     await esperarMicrotareas();
     harness.detectChanges();
 
