@@ -32,6 +32,35 @@
   font-size: s.$texto-grande;
 }
 
+// La sección con carrusel sube los mandos a la fila de la cabecera: "Ver
+// todas" y las flechas comparten línea en vez de gastar dos. Para colocar las
+// dos partes del carrusel como celdas de esta rejilla hay que sacar su
+// anfitrión del flujo, de ahí el display: contents (y que esta sección
+// conozca sus clases internas).
+.c-panel__seccion:has(.c-carrusel) {
+  grid-template-columns: minmax(0, 1fr) auto;
+
+  > .c-carrusel {
+    display: contents;
+  }
+
+  > .c-panel__cabecera {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .c-carrusel__mandos {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .c-carrusel__pista {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
 // Contadores del centro: tantos por fila como quepan, cada uno con la cifra
 // mandando sobre su rótulo.
 .c-panel__contadores {
