@@ -1,4 +1,4 @@
-<div class="o-marco c-marco">
+<div class="o-marco">
   <app-fondo />
 
   <header class="c-barra">
@@ -38,7 +38,7 @@
               [routerLink]="seccion.ruta"
             >
               <app-icono [nombre]="seccion.icono" />
-              <span class="c-menu__texto">{{ seccion.etiqueta }}</span>
+              <span>{{ seccion.etiqueta }}</span>
             </a>
           </li>
         }

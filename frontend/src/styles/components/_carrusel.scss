@@ -36,11 +36,11 @@
   &:focus-visible {
     @include t.anillo-foco;
   }
-}
 
-// Reutiliza la flecha de volver girada, en vez de meter un icono más.
-.c-carrusel__mando-siguiente {
-  rotate: 180deg;
+  // Reutiliza la flecha de volver girada, en vez de meter un icono más.
+  &--siguiente {
+    rotate: 180deg;
+  }
 }
 
 .c-carrusel__pista {
