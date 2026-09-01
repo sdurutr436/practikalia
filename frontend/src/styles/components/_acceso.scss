@@ -138,7 +138,19 @@
     text-align: center;
   }
 
+  // Mismo motivo que arriba, un nivel más adentro: .c-acceso__identidad es el
+  // que de verdad contiene el logo y el título, y sin width:100% se encoge a
+  // su contenido igual que le pasaba a .c-acceso__marca — su
+  // justify-content:center no tenía ningún hueco donde centrar.
   .c-acceso__identidad {
+    width: 100%;
     justify-content: center;
+  }
+
+  // El corner de GitHub es fixed, 5.5rem de lado, pegado arriba a la
+  // derecha (ver .c-github__marca): sin este hueco se monta encima del
+  // título en vez de quedar por encima de él.
+  .c-acceso__mitad--marca {
+    padding-top: 5.5rem;
   }
 }
