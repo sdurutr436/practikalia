@@ -1,6 +1,7 @@
 // Pantalla de acceso: barra de división, mitad de marca (sopa de figuras +
-// nombre + carrusel de frases) y mitad opaca del formulario.
-// La partición 50/50 la pone .o-acceso.
+// nombre + carrusel de frases) y mitad opaca del formulario. En escritorio,
+// separadas 50/50 por .o-acceso; en móvil se funden en una sola columna
+// sobre el mismo fondo (ver el bloque de media query al final del archivo).
 @use '../settings' as s;
 
 // Barra de la división. Va como ::after al 50% del contenedor en vez de un
@@ -16,21 +17,10 @@
   background: s.$color-borde;
 }
 
-// Mitad del formulario: el color de fondo del tema, opaco y quieto.
+// Mitad del formulario en escritorio: opaca, tapa las figuras del fondo
+// compartido. En móvil se anula más abajo — ahí vive junto a la marca.
 .c-acceso__mitad--entrada {
   background: s.$color-fondo;
-}
-
-@media (width < 64rem) {
-  // Apiladas: sin barra de división (ni la vertical ni un borde que la
-  // sustituya) y sin el carrusel de frases, que ya no cabe cómodo.
-  .c-acceso::after {
-    display: none;
-  }
-
-  .c-frase {
-    display: none;
-  }
 }
 
 .c-acceso__marca {
@@ -116,5 +106,36 @@
   from {
     opacity: 0;
     translate: 0 0.5rem;
+  }
+}
+
+// Anulaciones de móvil AL FINAL a propósito: .c-frase con display:none aquí
+// tiene la misma especificidad que su regla base de arriba, así que si este
+// bloque va antes en el archivo, la base (que se declara después) gana la
+// cascada y el carrusel se queda visible pese al media query.
+@media (width < 64rem) {
+  // Sin las dos mitades ni separador: marca y formulario comparten una sola
+  // columna sobre el mismo fondo de figuras.
+  .c-acceso::after {
+    display: none;
+  }
+
+  .c-acceso__mitad--entrada {
+    background: transparent;
+  }
+
+  .c-frase {
+    display: none;
+  }
+
+  // Logo + nombre + lema centrados como bloque, no alineados a la izquierda
+  // del contenedor de 26ch.
+  .c-acceso__marca {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .c-acceso__identidad {
+    justify-content: center;
   }
 }
