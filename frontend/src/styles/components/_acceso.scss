@@ -1,6 +1,7 @@
 // Pantalla de acceso: barra de división, mitad de marca (sopa de figuras +
-// nombre + carrusel de frases) y mitad opaca del formulario.
-// La partición 50/50 la pone .o-acceso.
+// nombre + carrusel de frases) y mitad opaca del formulario. En escritorio,
+// separadas 50/50 por .o-acceso; en móvil se funden en una sola columna
+// sobre el mismo fondo (ver el bloque de media query al final del archivo).
 @use '../settings' as s;
 
 // Barra de la división. Va como ::after al 50% del contenedor en vez de un
@@ -16,20 +17,10 @@
   background: s.$color-borde;
 }
 
-// Mitad del formulario: el color de fondo del tema, opaco y quieto.
+// Mitad del formulario en escritorio: opaca, tapa las figuras del fondo
+// compartido. En móvil se anula más abajo — ahí vive junto a la marca.
 .c-acceso__mitad--entrada {
   background: s.$color-fondo;
-}
-
-@media (width < 64rem) {
-  // Apiladas, la barra pasa a ser el borde entre las dos filas.
-  .c-acceso::after {
-    display: none;
-  }
-
-  .c-acceso__mitad--marca {
-    border-bottom: 5px solid s.$color-borde;
-  }
 }
 
 .c-acceso__marca {
@@ -115,5 +106,59 @@
   from {
     opacity: 0;
     translate: 0 0.5rem;
+  }
+}
+
+// Anulaciones de móvil AL FINAL a propósito: .c-frase con display:none aquí
+// tiene la misma especificidad que su regla base de arriba, así que si este
+// bloque va antes en el archivo, la base (que se declara después) gana la
+// cascada y el carrusel se queda visible pese al media query.
+@media (width < 64rem) {
+  // Sin las dos mitades ni separador: marca y formulario comparten una sola
+  // columna sobre el mismo fondo de figuras.
+  .c-acceso::after {
+    display: none;
+  }
+
+  .c-acceso__mitad--entrada {
+    background: transparent;
+  }
+
+  .c-frase {
+    display: none;
+  }
+
+  // Logo + nombre + lema centrados como bloque, no alineados a la izquierda
+  // del contenedor de 26ch. width:100% es necesario: sin él, .c-acceso__marca
+  // se encoge a su propio contenido (fit-content) y "centrar dentro de la
+  // caja" no mueve nada porque la caja ya mide justo lo que su contenido.
+  //
+  // max-width:none anula el 26ch de la regla base: ese "ch" se calcula con el
+  // tamaño de letra DE .c-acceso__marca (el base, ~1rem), no con el de
+  // $texto-marca (3rem) al que se pinta el título — 26ch así son ~208px,
+  // bastante menos que el ancho real de "Practikalia" a ese tamaño. La fila
+  // desbordaba esa caja y, como flex no encoge por debajo de su contenido, el
+  // texto se salía por la derecha en vez de quedar centrado.
+  .c-acceso__marca {
+    width: 100%;
+    max-width: none;
+    justify-items: center;
+    text-align: center;
+  }
+
+  // Mismo motivo que arriba, un nivel más adentro: .c-acceso__identidad es el
+  // que de verdad contiene el logo y el título, y sin width:100% se encoge a
+  // su contenido igual que le pasaba a .c-acceso__marca — su
+  // justify-content:center no tenía ningún hueco donde centrar.
+  .c-acceso__identidad {
+    width: 100%;
+    justify-content: center;
+  }
+
+  // El corner de GitHub es fixed, 5.5rem de lado, pegado arriba a la
+  // derecha (ver .c-github__marca): sin este hueco se monta encima del
+  // título en vez de quedar por encima de él.
+  .c-acceso__mitad--marca {
+    padding-top: 5.5rem;
   }
 }

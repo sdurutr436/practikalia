@@ -5,7 +5,9 @@
 @use '../tools' as t;
 
 .c-github {
-  position: absolute;
+  // Fijo al viewport, no a la mitad de entrada: en móvil (mitades apiladas)
+  // debe seguir visible sin hacer scroll.
+  position: fixed;
   top: 0;
   right: 0;
   z-index: s.$z-elevado;

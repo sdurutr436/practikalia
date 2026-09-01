@@ -1,7 +1,7 @@
 <main class="o-acceso c-acceso">
-  <section class="o-acceso__mitad c-acceso__mitad--marca">
-    <app-fondo />
+  <app-fondo />
 
+  <section class="o-acceso__mitad c-acceso__mitad--marca">
     <div class="c-acceso__marca">
       <div class="c-acceso__identidad">
         <span class="c-acceso__logo"><app-icono nombre="grado" /></span>
@@ -43,75 +43,217 @@
       </svg>
     </a>
 
-    <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
-      <h1 class="c-formulario__titulo">Iniciar sesión</h1>
-      <p class="c-formulario__descripcion">
-        Los campos marcados con <span class="c-requerido" aria-hidden="true">*</span> son
-        obligatorios.
-      </p>
+    @if (vista() === 'login') {
+      <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
+        <h1 class="c-formulario__titulo">Iniciar sesión</h1>
+        <p class="c-formulario__descripcion">
+          Los campos marcados con <span class="c-requerido" aria-hidden="true">*</span> son
+          obligatorios.
+        </p>
 
-      @if (error(); as mensaje) {
-        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
-      }
-
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="correo">
-          <app-icono nombre="correo" />Correo del centro
-          <span class="c-requerido" aria-hidden="true">*</span>
-        </label>
-        <input
-          class="c-campo__entrada"
-          id="correo"
-          type="email"
-          formControlName="correo"
-          autocomplete="email"
-          spellcheck="false"
-          placeholder="nombre@g.educaand.es"
-          aria-describedby="correo-ayuda"
-        />
-        <p class="c-campo__ayuda" id="correo-ayuda">Usa la cuenta del centro, no una personal.</p>
-        @if (form.controls.correo.touched && form.controls.correo.invalid) {
-          <p class="c-campo__error">Introduce un correo válido.</p>
+        @if (error(); as mensaje) {
+          <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
         }
-      </div>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="contrasena">
-          <app-icono nombre="contrasena" />Contraseña
-          <span class="c-requerido" aria-hidden="true">*</span>
-        </label>
-        <div class="c-acciones">
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="correo">
+            <app-icono nombre="correo" />Correo del centro
+            <span class="c-requerido" aria-hidden="true">*</span>
+          </label>
           <input
-            class="c-campo__entrada u-crecer"
-            id="contrasena"
-            [type]="verContrasena() ? 'text' : 'password'"
-            formControlName="contrasena"
-            autocomplete="current-password"
+            class="c-campo__entrada"
+            id="correo"
+            type="email"
+            formControlName="correo"
+            autocomplete="email"
+            spellcheck="false"
+            placeholder="nombre@g.educaand.es"
+            aria-describedby="correo-ayuda"
           />
-          <button
-            class="c-boton c-boton--secundario"
-            type="button"
-            [attr.aria-pressed]="verContrasena()"
-            (click)="verContrasena.set(!verContrasena())"
-          >
-            <app-icono nombre="ver" />
-            {{ verContrasena() ? 'Ocultar' : 'Mostrar' }}
-          </button>
+          <p class="c-campo__ayuda" id="correo-ayuda">Usa la cuenta del centro, no una personal.</p>
+          @if (form.controls.correo.touched && form.controls.correo.invalid) {
+            <p class="c-campo__error">Introduce un correo válido.</p>
+          }
         </div>
-        @if (form.controls.contrasena.touched && form.controls.contrasena.invalid) {
-          <p class="c-campo__error">Introduce la contraseña.</p>
+
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="contrasena">
+            <app-icono nombre="contrasena" />Contraseña
+            <span class="c-requerido" aria-hidden="true">*</span>
+          </label>
+          <div class="c-campo__envoltorio">
+            <input
+              class="c-campo__entrada"
+              id="contrasena"
+              [type]="verContrasena() ? 'text' : 'password'"
+              formControlName="contrasena"
+              autocomplete="current-password"
+            />
+            <button
+              class="c-campo__accion"
+              type="button"
+              [attr.aria-label]="verContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="verContrasena()"
+              (click)="verContrasena.set(!verContrasena())"
+            >
+              <app-icono nombre="ver" />
+            </button>
+          </div>
+          @if (form.controls.contrasena.touched && form.controls.contrasena.invalid) {
+            <p class="c-campo__error">Introduce la contraseña.</p>
+          }
+        </div>
+
+        <div class="u-honeypot" aria-hidden="true">
+          <label for="web">Web</label>
+          <input id="web" type="text" formControlName="web" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <button class="c-boton" type="submit" [disabled]="enviando()">
+          <app-icono nombre="entrar" />
+          {{ enviando() ? 'Entrando…' : 'Entrar' }}
+        </button>
+
+        <p class="c-formulario__pie">
+          ¿No tienes cuenta?
+          <button class="c-enlace" type="button" (click)="abrirRegistro()">Crea una</button>
+        </p>
+      </form>
+    } @else if (registroEnviado()) {
+      <div class="c-formulario">
+        <h1 class="c-formulario__titulo">Solicitud enviada</h1>
+        <p class="c-alerta c-alerta--aviso" role="status">
+          Un administrador revisará tu alta y activará la cuenta cuando confirme la matriculación.
+          Te avisará por el correo indicado.
+        </p>
+        <button class="c-boton" type="button" (click)="abrirLogin()">
+          <app-icono nombre="entrar" />
+          Volver a iniciar sesión
+        </button>
+      </div>
+    } @else {
+      <form class="c-formulario" [formGroup]="formRegistro" (ngSubmit)="enviarRegistro()">
+        <h1 class="c-formulario__titulo">Crear cuenta</h1>
+        <p class="c-formulario__descripcion">
+          Los campos marcados con <span class="c-requerido" aria-hidden="true">*</span> son
+          obligatorios.
+        </p>
+
+        @if (errorRegistro(); as mensaje) {
+          <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
         }
-      </div>
 
-      <div class="u-honeypot" aria-hidden="true">
-        <label for="web">Web</label>
-        <input id="web" type="text" formControlName="web" tabindex="-1" autocomplete="off" />
-      </div>
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="nombre">
+            <app-icono nombre="persona" />Nombre completo
+            <span class="c-requerido" aria-hidden="true">*</span>
+          </label>
+          <input class="c-campo__entrada" id="nombre" formControlName="nombre" />
+          @if (formRegistro.controls.nombre.touched && formRegistro.controls.nombre.invalid) {
+            <p class="c-campo__error">Introduce tu nombre.</p>
+          }
+        </div>
 
-      <button class="c-boton" type="submit" [disabled]="enviando()">
-        <app-icono nombre="entrar" />
-        {{ enviando() ? 'Entrando…' : 'Entrar' }}
-      </button>
-    </form>
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="apellido1">
+            Primer apellido<span class="c-requerido" aria-hidden="true">*</span>
+          </label>
+          <input class="c-campo__entrada" id="apellido1" formControlName="apellido1" />
+          @if (formRegistro.controls.apellido1.touched && formRegistro.controls.apellido1.invalid) {
+            <p class="c-campo__error">Introduce el primer apellido.</p>
+          }
+        </div>
+
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="apellido2">Segundo apellido</label>
+          <input class="c-campo__entrada" id="apellido2" formControlName="apellido2" />
+        </div>
+
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="dni">
+            <app-icono nombre="numero" />DNI
+            <span class="c-requerido" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="c-campo__entrada"
+            id="dni"
+            formControlName="dni"
+            placeholder="12345678Z"
+            maxlength="9"
+            aria-describedby="dni-ayuda"
+          />
+          <p class="c-campo__ayuda" id="dni-ayuda">
+            Se comprueba el formato (número y letra), no la matriculación real: eso lo confirma el
+            centro al aprobar la cuenta.
+          </p>
+          @if (formRegistro.controls.dni.touched && formRegistro.controls.dni.invalid) {
+            <p class="c-campo__error">El DNI no es válido.</p>
+          }
+        </div>
+
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="gradoId">
+            <app-icono nombre="grado" />Clase
+            <span class="c-requerido" aria-hidden="true">*</span>
+          </label>
+          <select class="c-campo__entrada" id="gradoId" formControlName="gradoId">
+            <option value="" disabled>Selecciona tu clase</option>
+            @for (grado of grados(); track grado.id) {
+              <option [value]="grado.id">{{ grado.nombre }}</option>
+            }
+          </select>
+          @if (errorGrados(); as mensaje) {
+            <p class="c-campo__error">{{ mensaje }}</p>
+          }
+          @if (formRegistro.controls.gradoId.touched && formRegistro.controls.gradoId.invalid) {
+            <p class="c-campo__error">Selecciona tu clase.</p>
+          }
+        </div>
+
+        <div class="c-campo">
+          <label class="c-campo__etiqueta" for="correoRegistro">
+            <app-icono nombre="correo" />Correo institucional
+            <span class="c-requerido" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="c-campo__entrada"
+            id="correoRegistro"
+            type="email"
+            formControlName="correo"
+            autocomplete="email"
+            spellcheck="false"
+            placeholder="nombre@g.educaand.es"
+            aria-describedby="correoRegistro-ayuda"
+          />
+          <p class="c-campo__ayuda" id="correoRegistro-ayuda">
+            El de &#64;g.educaand.es, o el propio del centro si lo tienes.
+          </p>
+          @if (formRegistro.controls.correo.touched && formRegistro.controls.correo.invalid) {
+            <p class="c-campo__error">Usa tu correo institucional.</p>
+          }
+        </div>
+
+        <div class="u-honeypot" aria-hidden="true">
+          <label for="webRegistro">Web</label>
+          <input
+            id="webRegistro"
+            type="text"
+            formControlName="web"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
+        <button class="c-boton" type="submit" [disabled]="enviandoRegistro()">
+          <app-icono nombre="entrar" />
+          {{ enviandoRegistro() ? 'Enviando…' : 'Crear cuenta' }}
+        </button>
+
+        <p class="c-formulario__pie">
+          ¿Ya tienes cuenta?
+          <button class="c-enlace" type="button" (click)="abrirLogin()">Inicia sesión</button>
+        </p>
+      </form>
+    }
   </section>
 </main>

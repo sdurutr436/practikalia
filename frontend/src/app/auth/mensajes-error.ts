@@ -7,6 +7,14 @@ export const MENSAJES_LOGIN: Record<string, string> = {
   DEMASIADOS_INTENTOS: 'Demasiados intentos fallidos. Espera 15 minutos y vuelve a intentarlo.',
 };
 
+/** Mensajes de UI por código del contrato de POST /api/auth/registro. */
+export const MENSAJES_REGISTRO: Record<string, string> = {
+  CORREO_YA_EXISTE: 'Ya hay una cuenta con ese correo.',
+  CORREO_DOMINIO_NO_PERMITIDO: 'Usa tu correo institucional del centro.',
+  DNI_INVALIDO: 'El DNI no es válido: revisa el número y la letra.',
+  GRADO_NO_ENCONTRADO: 'Selecciona una clase de la lista.',
+};
+
 export const MENSAJES_CAMBIO_CONTRASENA: Record<string, string> = {
   CONTRASENA_ACTUAL_INCORRECTA: 'La contraseña actual no es correcta.',
   CONTRASENA_NO_CUMPLE_POLITICA:
@@ -22,7 +30,8 @@ export const MENSAJES_EMPRESA: Record<string, string> = {
 /** Mensajes de UI por código del contrato de /api/asignaciones. */
 export const MENSAJES_ASIGNACION: Record<string, string> = {
   ASIGNACION_NO_ENCONTRADA: 'La asignación no existe.',
-  ASIGNACION_YA_EXISTE: 'Ya existe una asignación de ese alumno a esa empresa para ese grado y año.',
+  ASIGNACION_YA_EXISTE:
+    'Ya existe una asignación de ese alumno a esa empresa para ese grado y año.',
   ALUMNO_INVALIDO: 'El usuario seleccionado como alumno no tiene rol de alumno.',
   TUTOR_INVALIDO: 'El usuario seleccionado como tutor no tiene rol de profesor.',
   ALUMNO_NO_ENCONTRADO: 'El alumno seleccionado no existe.',

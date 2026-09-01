@@ -121,6 +121,68 @@
   font-weight: normal;
 }
 
+// Envuelve una entrada con un botón de acción dentro (mostrar contraseña).
+// La entrada ocupa todo el ancho del envoltorio (si no, al sacar el botón
+// del flujo con position:absolute, la entrada se queda a su ancho de
+// contenido y el botón acaba flotando fuera de ella).
+.c-campo__envoltorio {
+  position: relative;
+
+  .c-campo__entrada {
+    width: 100%;
+    padding-right: 2.25em;
+  }
+}
+
+.c-campo__accion {
+  position: absolute;
+  top: 50%;
+  right: 0.4em;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  padding: 0.3em;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: transparent;
+  color: s.$color-texto-apagado;
+  cursor: pointer;
+
+  &:hover {
+    color: s.$color-texto;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+// Botón con aspecto de enlace de texto (alternar login/registro). No es
+// un <a>: no navega, solo cambia qué formulario se ve.
+.c-enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: s.$color-primario;
+  font: inherit;
+  font-weight: s.$peso-medio;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+// Pie del formulario (enlace para alternar login/registro): centrado, a
+// diferencia de .c-formulario__descripcion que es el aviso de "obligatorios"
+// alineado a la izquierda.
+.c-formulario__pie {
+  margin: 0;
+  text-align: center;
+  font-size: s.$texto-pequeno;
+}
+
 // Grupo de controles/botones en línea. Existe porque .c-campo se estaba usando
 // como envoltorio genérico para esto, que no es un campo de formulario.
 .c-acciones {

@@ -59,6 +59,11 @@
 
   @media (width < 64rem) {
     grid-template-columns: 1fr;
+    // Sin esto, cada mitad reparte 100dvh a medias y se centra por separado
+    // dentro de su mitad, dejando un hueco enorme entre la marca y el
+    // formulario. De arriba a abajo, pegado, como en el resto de la app
+    // (mismo criterio que .o-marco).
+    align-content: start;
   }
 }
 
@@ -68,6 +73,10 @@
   display: grid;
   place-items: center;
   padding: s.$espaciado-mayor s.$espaciado-grande;
+
+  @media (width < 64rem) {
+    padding: s.$espaciado-grande s.$espaciado-base;
+  }
 }
 
 // Marco de la aplicación: cabecera a todo el ancho y debajo la página, las
