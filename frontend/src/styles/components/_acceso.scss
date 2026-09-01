@@ -132,8 +132,16 @@
   // del contenedor de 26ch. width:100% es necesario: sin él, .c-acceso__marca
   // se encoge a su propio contenido (fit-content) y "centrar dentro de la
   // caja" no mueve nada porque la caja ya mide justo lo que su contenido.
+  //
+  // max-width:none anula el 26ch de la regla base: ese "ch" se calcula con el
+  // tamaño de letra DE .c-acceso__marca (el base, ~1rem), no con el de
+  // $texto-marca (3rem) al que se pinta el título — 26ch así son ~208px,
+  // bastante menos que el ancho real de "Practikalia" a ese tamaño. La fila
+  // desbordaba esa caja y, como flex no encoge por debajo de su contenido, el
+  // texto se salía por la derecha en vez de quedar centrado.
   .c-acceso__marca {
     width: 100%;
+    max-width: none;
     justify-items: center;
     text-align: center;
   }
