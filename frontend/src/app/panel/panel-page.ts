@@ -16,6 +16,7 @@ import { CabeceraComponent } from '../compartido/cabecera/cabecera';
 import { AlertaComponent } from '../compartido/alerta/alerta';
 import { CampoComponent } from '../compartido/campo/campo';
 import { BotonComponent } from '../compartido/boton/boton';
+import { PanelService, ResumenCentro } from './panel.service';
 
 /** Cuántas filas/tarjetas caben en un resumen antes de mandar al listado completo. */
 const RESUMEN = 4;
@@ -40,6 +41,7 @@ export class PanelPage {
   private readonly empresaService = inject(EmpresaService);
   private readonly reviewService = inject(ReviewService);
   private readonly asignacionService = inject(AsignacionService);
+  private readonly panelService = inject(PanelService);
 
   protected readonly sesion = this.auth.sesion;
   protected readonly esAlumno = computed(() => this.sesion()?.rol === 'ALUMNO');
@@ -54,6 +56,7 @@ export class PanelPage {
   protected readonly empresas = signal<Empresa[]>([]);
   protected readonly pendientes = signal<Review[]>([]);
   protected readonly asignaciones = signal<Asignacion[]>([]);
+  protected readonly resumen = signal<ResumenCentro | null>(null);
   /** El rango lo fija cada instituto; sin él no se pueden pintar las estrellas. */
   protected readonly calificacion = signal<CalificacionConfig | null>(null);
   protected readonly moderandoId = signal<number | null>(null);
@@ -127,6 +130,14 @@ export class PanelPage {
           this.asignaciones.set(await this.asignacionService.listarPorAlumno(sesion.id));
         }
       } else {
+        // Solo el profesorado: al alumnado el resumen le da 403 y ni lo pinta.
+        // Y si falla, se queda sin bloque de contadores, pero el resto del
+        // panel (empresas, reseñas) tiene que seguir cargando igual.
+        try {
+          this.resumen.set(await this.panelService.resumen());
+        } catch {
+          this.resumen.set(null);
+        }
         this.pendientes.set(await this.reviewService.listarPendientes());
         this.calificacion.set(await this.reviewService.calificacionConfig());
       }

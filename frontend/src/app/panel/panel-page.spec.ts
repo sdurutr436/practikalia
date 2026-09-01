@@ -33,6 +33,13 @@ const PENDIENTE = {
   fechaModeracion: null,
 };
 
+const RESUMEN = {
+  empresasPublicadas: 12,
+  empresasSinPublicar: 3,
+  alumnadoActivo: 40,
+  alumnadoSinAsignar: 9,
+};
+
 describe('panel del profesorado', () => {
   let http: HttpTestingController;
 
@@ -56,6 +63,8 @@ describe('panel del profesorado', () => {
     const fixture = TestBed.createComponent(PanelPage);
     http.expectOne('/api/empresas').flush([EMPRESA]);
     await esperarMicrotareas();
+    http.expectOne('/api/panel/resumen').flush(RESUMEN);
+    await esperarMicrotareas();
     http.expectOne('/api/reviews/pendientes').flush([PENDIENTE]);
     await esperarMicrotareas();
     http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
@@ -78,6 +87,28 @@ describe('panel del profesorado', () => {
     expect(fixture.nativeElement.querySelector('app-estrellas')?.getAttribute('aria-label')).toBe(
       '4 de 5',
     );
+  });
+
+  it('pinta los cuatro contadores del centro', async () => {
+    const fixture = await pintar();
+    const contadores = [...fixture.nativeElement.querySelectorAll('.c-panel__cifra')];
+
+    expect(contadores.map((c: HTMLElement) => c.textContent)).toEqual(['12', '3', '40', '9']);
+  });
+
+  it('un resumen que falla no impide pintar el resto del panel', async () => {
+    const fixture = TestBed.createComponent(PanelPage);
+    http.expectOne('/api/empresas').flush([EMPRESA]);
+    await esperarMicrotareas();
+    http.expectOne('/api/panel/resumen').flush('', { status: 500, statusText: 'Error' });
+    await esperarMicrotareas();
+    http.expectOne('/api/reviews/pendientes').flush([PENDIENTE]);
+    await esperarMicrotareas();
+    http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
+    await esperarMicrotareas();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Grupo Ondara Software');
   });
 
   it('aprobar saca la reseña de la lista', async () => {

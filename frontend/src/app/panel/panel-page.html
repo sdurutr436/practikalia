@@ -4,16 +4,32 @@
   <app-estado [cargando]="cargando()" [error]="error()">
     <div class="c-panel">
       @if (!esAlumno()) {
-        <!-- Contadores del centro. Los cuatro salen de un agregado que el backend
-           todavía no expone; hasta entonces el bloque queda maquetado y vacío. -->
         <section class="c-panel__seccion" aria-labelledby="panel-contadores">
           <h2 class="c-panel__titulo" id="panel-contadores">
             <app-icono nombre="actividad" />Resumen del centro
           </h2>
-          <app-alerta tipo="aviso">
-            Empresas publicadas, sin publicar, alumnado activo y sin asignar: pendientes del
-            endpoint de resumen.
-          </app-alerta>
+          @if (resumen(); as contadores) {
+            <ul class="c-panel__contadores">
+              <li class="c-panel__contador">
+                <span class="c-panel__cifra">{{ contadores.empresasPublicadas }}</span>
+                <span class="c-panel__rotulo">Empresas publicadas</span>
+              </li>
+              <li class="c-panel__contador">
+                <span class="c-panel__cifra">{{ contadores.empresasSinPublicar }}</span>
+                <span class="c-panel__rotulo">Empresas sin publicar</span>
+              </li>
+              <li class="c-panel__contador">
+                <span class="c-panel__cifra">{{ contadores.alumnadoActivo }}</span>
+                <span class="c-panel__rotulo">Alumnado activo</span>
+              </li>
+              <li class="c-panel__contador">
+                <span class="c-panel__cifra">{{ contadores.alumnadoSinAsignar }}</span>
+                <span class="c-panel__rotulo">Alumnado sin asignar</span>
+              </li>
+            </ul>
+          } @else {
+            <app-alerta tipo="aviso">No se pudo cargar el resumen del centro.</app-alerta>
+          }
         </section>
       }
 

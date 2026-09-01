@@ -32,6 +32,35 @@
   font-size: s.$texto-grande;
 }
 
+// Contadores del centro: tantos por fila como quepan, cada uno con la cifra
+// mandando sobre su rótulo.
+.c-panel__contadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(s.$ancho-contador-min, 1fr));
+  gap: s.$espaciado-base;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.c-panel__contador {
+  display: grid;
+  gap: s.$espaciado-diminuto;
+  padding: s.$espaciado-medio;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio-m;
+}
+
+.c-panel__cifra {
+  font-size: s.$texto-titulo;
+  font-weight: s.$peso-fuerte;
+}
+
+.c-panel__rotulo {
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
 // Fila de reseña pendiente: la empresa manda, la nota a la derecha y la cita
 // destacada del resto del texto.
 .c-resena__cabecera {
