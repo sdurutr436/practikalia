@@ -16,7 +16,12 @@
 .c-carrusel__mando {
   display: grid;
   place-items: center;
-  padding: s.$espaciado-pequeno;
+  // Ancho y alto fijos (no solo padding + contenido): así los dos mandos
+  // miden lo mismo con total seguridad, sin depender de que el icono
+  // "siguiente" rotado 180deg acabe midiendo pixel a pixel igual que el de
+  // "anterior" sin rotar.
+  width: 2.25rem;
+  height: 2.25rem;
   border: 1px solid s.$color-borde;
   border-radius: s.$radio-m;
   background: s.$color-superficie;

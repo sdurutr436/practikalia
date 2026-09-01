@@ -34,13 +34,14 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  padding: s.$espaciado-pequeno;
+  padding: s.$espaciado-diminuto;
   border: 0;
   border-radius: s.$radio-m;
   background: transparent;
   color: inherit;
   font: inherit;
   font-size: s.$texto-grande;
+  line-height: 1;
   cursor: pointer;
 
   &:hover {
@@ -57,9 +58,19 @@
   letter-spacing: s.$tracking-ajustado;
 }
 
-// Empuja las acciones al extremo opuesto de la hamburguesa.
+// Empuja las acciones al extremo opuesto de la hamburguesa. align-items:center
+// en vez del end heredado de .c-acciones (pensado para alinear un botón con
+// el borde inferior de una entrada de formulario, no para una barra de
+// cabecera) y botones más compactos: el padding de .c-boton está pensado
+// para formularios y aquí, junto al texto suelto de la marca, se veían
+// mucho más altos que él.
 .c-barra__acciones {
   margin-inline-start: auto;
+  align-items: center;
+
+  .c-boton {
+    padding-block: s.$espaciado-diminuto;
+  }
 }
 
 // El palo vertical de la Γ: cuelga del extremo izquierdo de la cabecera.
