@@ -1,0 +1,30 @@
+// Pastillas de filtro de un listado: enlaces que cambian el parámetro de la
+// URL, no botones. Más grandes que .c-etiqueta a propósito — son un destino
+// pulsable, no una marca decorativa.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-filtro {
+  display: inline-block;
+  padding: s.$espaciado-diminuto s.$espaciado-medio;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio-pildora;
+  color: s.$color-texto-apagado;
+  font-size: s.$texto-pequeno;
+  text-decoration: none;
+
+  &:hover {
+    color: s.$color-texto;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
+
+  &--activo {
+    background: s.$color-primario;
+    border-color: s.$color-primario;
+    color: s.$color-primario-texto;
+  }
+}

@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { CarruselComponent } from '../compartido/carrusel/carrusel';
 import { EstadoComponent } from '../compartido/estado/estado';
@@ -24,6 +25,7 @@ const RESUMEN = 4;
 @Component({
   selector: 'app-panel-page',
   imports: [
+    RouterLink,
     IconoComponent,
     EstadoComponent,
     TarjetaEmpresaComponent,

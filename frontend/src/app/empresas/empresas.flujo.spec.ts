@@ -94,6 +94,30 @@ describe('listado de empresas', () => {
     expect(texto).toContain('No publicada');
   });
 
+  it('el filtro de la URL deja solo las empresas sin publicar', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas?publicada=false');
+    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA, EMPRESA_NO_PUBLICADA]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const texto = harness.routeNativeElement?.textContent ?? '';
+    expect(texto).toContain('Beta');
+    expect(texto).not.toContain('Acme');
+  });
+
+  it('el alumnado no ve las pastillas de filtro', async () => {
+    await loginComo('ALUMNO');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas');
+    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    expect(harness.routeNativeElement?.querySelector('.c-filtro')).toBeNull();
+  });
+
   it('un fallo de red al listar muestra un mensaje de error legible', async () => {
     await loginComo('ALUMNO');
     const harness = await RouterTestingHarness.create();

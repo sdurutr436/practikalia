@@ -10,13 +10,25 @@
           </h2>
           @if (resumen(); as contadores) {
             <ul class="c-panel__contadores">
-              <li class="c-panel__contador">
-                <span class="c-panel__cifra">{{ contadores.empresasPublicadas }}</span>
-                <span class="c-panel__rotulo">Empresas publicadas</span>
+              <li>
+                <a
+                  class="c-panel__contador c-panel__contador--enlace"
+                  routerLink="/empresas"
+                  [queryParams]="{ publicada: true }"
+                >
+                  <span class="c-panel__cifra">{{ contadores.empresasPublicadas }}</span>
+                  <span class="c-panel__rotulo">Empresas publicadas</span>
+                </a>
               </li>
-              <li class="c-panel__contador">
-                <span class="c-panel__cifra">{{ contadores.empresasSinPublicar }}</span>
-                <span class="c-panel__rotulo">Empresas sin publicar</span>
+              <li>
+                <a
+                  class="c-panel__contador c-panel__contador--enlace"
+                  routerLink="/empresas"
+                  [queryParams]="{ publicada: false }"
+                >
+                  <span class="c-panel__cifra">{{ contadores.empresasSinPublicar }}</span>
+                  <span class="c-panel__rotulo">Empresas sin publicar</span>
+                </a>
               </li>
               <li class="c-panel__contador">
                 <span class="c-panel__cifra">{{ contadores.alumnadoActivo }}</span>

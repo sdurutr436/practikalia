@@ -1,14 +1,44 @@
 <main class="o-pagina">
   <app-cabecera titulo="Empresas" />
 
+  @if (esProfesor()) {
+    <ul class="o-etiquetas">
+      <li>
+        <a class="c-filtro" [class.c-filtro--activo]="filtro() === null" routerLink="/empresas">
+          Todas
+        </a>
+      </li>
+      <li>
+        <a
+          class="c-filtro"
+          [class.c-filtro--activo]="filtro() === 'true'"
+          routerLink="/empresas"
+          [queryParams]="{ publicada: true }"
+        >
+          Publicadas
+        </a>
+      </li>
+      <li>
+        <a
+          class="c-filtro"
+          [class.c-filtro--activo]="filtro() === 'false'"
+          routerLink="/empresas"
+          [queryParams]="{ publicada: false }"
+        >
+          Sin publicar
+        </a>
+      </li>
+    </ul>
+  }
+
   <app-estado
     [cargando]="cargando()"
     [error]="error()"
-    [vacio]="empresas().length === 0"
-    mensajeVacio="Todavía no hay empresas."
+    [vacio]="empresasFiltradas().length === 0"
+    [mensajeVacio]="mensajeVacio()"
   >
     <ul class="o-rejilla">
-      @for (empresa of empresas(); track empresa.id) {
+      @for (empresa of empresasFiltradas(); track empresa.id) {
         <li>
           <app-tarjeta-empresa [empresa]="empresa" [meta]="empresa.sector.nombre">
             @if (esVistaProfesor(empresa) && !empresa.publicada) {

@@ -51,6 +51,22 @@
   border-radius: s.$radio-m;
 }
 
+// Los dos contadores de empresa llevan al listado ya filtrado; los de
+// alumnado todavía no tienen pantalla a la que llevar, así que no son enlace.
+.c-panel__contador--enlace {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    border-color: s.$color-primario;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
+}
+
 .c-panel__cifra {
   font-size: s.$texto-titulo;
   font-weight: s.$peso-fuerte;
