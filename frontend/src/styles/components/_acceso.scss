@@ -22,13 +22,14 @@
 }
 
 @media (width < 64rem) {
-  // Apiladas, la barra pasa a ser el borde entre las dos filas.
+  // Apiladas: sin barra de división (ni la vertical ni un borde que la
+  // sustituya) y sin el carrusel de frases, que ya no cabe cómodo.
   .c-acceso::after {
     display: none;
   }
 
-  .c-acceso__mitad--marca {
-    border-bottom: 5px solid s.$color-borde;
+  .c-frase {
+    display: none;
   }
 }
 
