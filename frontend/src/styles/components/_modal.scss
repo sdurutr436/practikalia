@@ -6,8 +6,16 @@
 @use '../tools' as t;
 
 .c-modal {
-  max-width: min(34rem, calc(100vw - #{s.$espaciado-grande} * 2));
-  max-height: calc(100vh - #{s.$espaciado-grande} * 2);
+  // display:flex para que .c-modal__caja sea ítem y respete el max-height: con
+  // el <dialog> en block, la caja crece a su contenido y se sale por abajo en
+  // vez de scrollear por dentro (móvil apaisado, o con el teclado abierto).
+  display: flex;
+  // El margen que se le deja a los lados, en una custom property porque lo
+  // usan el ancho y el alto. No hace falta calc() al consumirla: min() y el
+  // calc() de max-height ya abren contexto matemático.
+  --margen-modal: calc(#{s.$espaciado-grande} * 2);
+  max-width: min(34rem, calc(100dvw - var(--margen-modal)));
+  max-height: calc(100dvh - var(--margen-modal));
   padding: 0;
   border: 1px solid s.$color-borde;
   border-radius: s.$radio;
@@ -23,6 +31,10 @@
 .c-modal__caja {
   display: flex;
   flex-direction: column;
+  // Sin min-height:0 un ítem flex no baja de su contenido y el scroll no llega
+  // nunca al cuerpo.
+  min-height: 0;
+  width: 100%;
   gap: s.$espaciado-base;
   padding: s.$espaciado-grande;
 }
@@ -65,10 +77,32 @@
 .c-modal__cuerpo {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   gap: s.$espaciado-base;
   overflow-y: auto;
+  // Una reseña puede traer una URL larga sin espacios; sin esto ensancha el
+  // modal y saca scroll horizontal.
+  overflow-wrap: anywhere;
 }
 
 .c-modal__acciones:empty {
   display: none;
+}
+
+// En móvil el modal deja de ser una caja centrada y se pega al borde inferior:
+// el pulgar llega a los botones sin estirarse, y el teclado no lo parte por la
+// mitad.
+@media (width < 30rem) {
+  .c-modal {
+    max-width: 100%;
+    width: 100%;
+    max-height: 90dvh;
+    margin: auto auto 0;
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .c-modal__caja {
+    padding: s.$espaciado-base;
+  }
 }

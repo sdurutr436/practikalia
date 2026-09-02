@@ -58,6 +58,13 @@
   }
 }
 
+// Área de texto: alto cómodo y sin agarradera horizontal — arrastrarla a lo
+// ancho dentro de un modal estrecho lo desborda.
+.c-campo__entrada--area {
+  min-height: 6rem;
+  resize: vertical;
+}
+
 .c-campo__ayuda {
   margin: 0;
   font-size: s.$texto-pequeno;

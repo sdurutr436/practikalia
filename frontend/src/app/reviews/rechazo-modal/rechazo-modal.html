@@ -6,7 +6,7 @@
     </div>
     <p class="c-resena__autor">
       @if (review().alumnoNombre; as nombre) {
-        <strong>{{ nombre }}</strong>
+        <strong class="c-resena__nombre">{{ nombre }}</strong>
       }
       <span class="c-resena__correo">{{ review().alumnoCorreo }}</span>
     </p>
