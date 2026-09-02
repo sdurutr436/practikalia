@@ -20,6 +20,7 @@ import { MisInteresesPage } from './intereses/mis-intereses-page/mis-intereses-p
 import { MisEtiquetasPage } from './perfil/mis-etiquetas-page/mis-etiquetas-page';
 import { AfinidadPage } from './afinidad/afinidad-page/afinidad-page';
 import { AlumnoFormularioPage } from './alumnado/alumno-formulario-page/alumno-formulario-page';
+import { AlumnadoPage } from './alumnado/alumnado-page/alumnado-page';
 
 export const routes: Routes = [
   // El marco (menú lateral + barra superior) lo pone app.ts alrededor del
@@ -130,7 +131,7 @@ export const routes: Routes = [
   // una pantalla es cambiar su `component` aquí y nada más.
   {
     path: 'alumnado',
-    component: ProximamentePage,
+    component: AlumnadoPage,
     title: 'Alumnado',
     canActivate: [profesorGuard],
   },

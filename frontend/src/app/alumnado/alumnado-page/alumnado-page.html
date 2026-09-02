@@ -1,0 +1,153 @@
+<main class="o-pagina">
+  <app-cabecera titulo="Alumnado" />
+
+  <!-- Pastillas a la izquierda y los dos botones a la derecha del todo, con
+       "Descargar plantilla" como el más a la derecha. -->
+  <div class="c-barra-alumnado">
+    <ul class="o-etiquetas">
+      @for (pastilla of pastillas; track pastilla.clave) {
+        <li>
+          <a
+            class="c-filtro"
+            [class.c-filtro--activo]="clave() === pastilla.clave"
+            routerLink="/alumnado"
+            [queryParams]="{ estado: pastilla.clave, pagina: null }"
+          >
+            {{ pastilla.etiqueta }}
+          </a>
+        </li>
+      }
+    </ul>
+
+    <div class="c-barra-alumnado__acciones">
+      <app-boton icono="subir" [secundario]="true" (click)="elegirFichero()">
+        Subida masiva
+      </app-boton>
+      <app-boton icono="nota" [secundario]="true" (click)="descargarPlantilla()">
+        Descargar plantilla
+      </app-boton>
+    </div>
+  </div>
+
+  <!-- Fuera de pantalla: el botón de arriba es quien lo abre. -->
+  <input
+    #selector
+    class="u-honeypot"
+    type="file"
+    accept=".csv,text/csv"
+    aria-hidden="true"
+    tabindex="-1"
+    (change)="importar($event)"
+  />
+
+  @if (errorImportacion(); as mensaje) {
+    <app-alerta>{{ mensaje }}</app-alerta>
+  }
+  @if (aviso(); as mensaje) {
+    <app-alerta tipo="aviso">{{ mensaje }}</app-alerta>
+  }
+
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="alumnos().length === 0"
+    [mensajeVacio]="mensajeVacio()"
+  >
+    <ul class="o-rejilla">
+      @for (alumno of alumnos(); track alumno.id) {
+        <li class="c-fila c-alumno">
+          <div class="c-alumno__cabecera">
+            <p class="c-alumno__nombre">{{ nombreCompleto(alumno) }}</p>
+
+            <!-- En estrecho el lápiz se queda solo con su icono para no saturar
+                 la tarjeta; el rótulo sigue existiendo para el lector de pantalla. -->
+            <button
+              class="c-alumno__editar"
+              type="button"
+              [attr.aria-label]="'Editar la ficha de ' + nombreCompleto(alumno)"
+              (click)="abrirFicha(alumno)"
+            >
+              <app-icono nombre="editar" />
+              <span class="c-alumno__editar-texto">Editar</span>
+            </button>
+          </div>
+
+          <p class="c-alumno__correo">{{ alumno.correo }}</p>
+          <p class="c-alumno__clase">
+            @if (alumno.grado; as grado) {
+              {{ grado.nombre }}
+              @if (alumno.anio) {
+                · {{ alumno.anio }}
+              }
+            } @else {
+              Sin clase asignada
+            }
+          </p>
+
+          <div class="c-alumno__pies">
+            @if (alumno.empresaNombre; as empresa) {
+              <a
+                class="c-etiqueta c-etiqueta--empresa"
+                [routerLink]="['/empresas', alumno.empresaId]"
+              >
+                {{ empresa }}
+              </a>
+            } @else {
+              <span class="c-etiqueta">Sin asignar</span>
+            }
+
+            @if (!alumno.activo) {
+              <span class="c-etiqueta c-etiqueta--pendiente">Por confirmar</span>
+            }
+          </div>
+
+          @if (!alumno.activo && esAdmin()) {
+            <div class="c-acciones">
+              <app-boton
+                icono="aprobar"
+                [deshabilitado]="confirmandoId() !== null"
+                (click)="confirmar(alumno)"
+              >
+                Confirmar alumno
+              </app-boton>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  </app-estado>
+
+  @if (paginas() > 1) {
+    <nav class="c-paginacion" aria-label="Páginas de alumnado">
+      <app-boton
+        [secundario]="true"
+        icono="volver"
+        [deshabilitado]="paginaActual() === 0"
+        (click)="irAPagina(paginaActual() - 1)"
+      >
+        Anterior
+      </app-boton>
+      <span class="c-paginacion__posicion" aria-live="polite">
+        Página {{ paginaActual() + 1 }} de {{ paginas() }} · {{ total() }} alumnos
+      </span>
+      <app-boton
+        [secundario]="true"
+        [deshabilitado]="paginaActual() + 1 >= paginas()"
+        (click)="irAPagina(paginaActual() + 1)"
+      >
+        Siguiente
+      </app-boton>
+    </nav>
+  }
+</main>
+
+@if (editando(); as alumno) {
+  <app-alumno-modal
+    [alumno]="alumno"
+    [grados]="grados()"
+    [guardando]="guardando()"
+    [error]="errorFicha()"
+    (guardar)="guardarFicha($event)"
+    (cerrar)="cerrarFicha()"
+  />
+}
