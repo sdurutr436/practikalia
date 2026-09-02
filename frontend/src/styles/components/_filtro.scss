@@ -5,8 +5,15 @@
 @use '../tools' as t;
 
 .c-filtro {
-  display: inline-block;
+  // inline-flex y font/cursor propios: la misma pastilla vale para un <a> de
+  // filtro y para el <button> de la lupa, que si no hereda el gris del agente
+  // de usuario.
+  display: inline-flex;
+  align-items: center;
   padding: s.$espaciado-diminuto s.$espaciado-medio;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
   border: 1px solid s.$color-borde;
   border-radius: s.$radio-pildora;
   color: s.$color-texto-apagado;

@@ -132,6 +132,10 @@ $ancho-formulario: 26rem;
 $ancho-pagina: 64rem;
 $ancho-tarjeta-min: 16rem;
 $ancho-contador-min: 8rem; // contadores del panel
+$ancho-busqueda: 16rem; // campo de búsqueda desplegado
+
+// Movimiento: una sola duración para toda la interfaz.
+$transicion: 180ms ease;
 
 // Apilamiento (ver --z-* arriba).
 $z-fondo: var(--z-fondo); // decoración detrás del contenido

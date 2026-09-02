@@ -34,6 +34,13 @@ const EMPRESA_NO_PUBLICADA: Empresa = {
   fechaCreacion: '2026-01-01T00:00:00Z',
 };
 
+const EMPRESA_CON_ETIQUETA: Empresa = {
+  ...EMPRESA_PUBLICADA,
+  id: 3,
+  nombre: 'Gamma',
+  etiquetas: [{ id: 5, nombre: 'Diseño gráfico' }],
+};
+
 describe('listado de empresas', () => {
   let http: HttpTestingController;
   let router: Router;
@@ -115,7 +122,59 @@ describe('listado de empresas', () => {
     await esperarMicrotareas();
     harness.detectChanges();
 
-    expect(harness.routeNativeElement?.querySelector('.c-filtro')).toBeNull();
+    // La lupa comparte pastilla con los filtros, así que se mira su lista.
+    expect(harness.routeNativeElement?.querySelector('.o-etiquetas')).toBeNull();
+  });
+
+  it('la lupa despliega el campo y busca por etiqueta sin acentos', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas');
+    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA, EMPRESA_CON_ETIQUETA]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const lupa: HTMLButtonElement = harness.routeNativeElement!.querySelector('.c-buscador button')!;
+    expect(lupa.getAttribute('aria-expanded')).toBe('false');
+    lupa.click();
+    harness.detectChanges();
+    expect(lupa.getAttribute('aria-expanded')).toBe('true');
+
+    const entrada: HTMLInputElement = harness.routeNativeElement!.querySelector('.c-buscador__entrada')!;
+    expect(document.activeElement).toBe(entrada);
+    // Sin acentos y por la etiqueta, no por el nombre.
+    entrada.value = 'diseno grafico';
+    entrada.dispatchEvent(new Event('input'));
+    harness.detectChanges();
+
+    const texto = harness.routeNativeElement?.textContent ?? '';
+    expect(texto).toContain('Gamma');
+    expect(texto).not.toContain('Acme');
+  });
+
+  it('cerrar la lupa limpia la búsqueda y devuelve el listado entero', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas');
+    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA, EMPRESA_CON_ETIQUETA]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const lupa: HTMLButtonElement = harness.routeNativeElement!.querySelector('.c-buscador button')!;
+    lupa.click();
+    harness.detectChanges();
+    const entrada: HTMLInputElement = harness.routeNativeElement!.querySelector('.c-buscador__entrada')!;
+    entrada.value = 'zzz';
+    entrada.dispatchEvent(new Event('input'));
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('Ninguna empresa coincide');
+
+    lupa.click();
+    harness.detectChanges();
+
+    const texto = harness.routeNativeElement?.textContent ?? '';
+    expect(texto).toContain('Acme');
+    expect(texto).toContain('Gamma');
   });
 
   it('un fallo de red al listar muestra un mensaje de error legible', async () => {

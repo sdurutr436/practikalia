@@ -1,35 +1,60 @@
 <main class="o-pagina">
   <app-cabecera titulo="Empresas" />
 
-  @if (esProfesor()) {
-    <ul class="o-etiquetas">
-      <li>
-        <a class="c-filtro" [class.c-filtro--activo]="filtro() === null" routerLink="/empresas">
-          Todas
-        </a>
-      </li>
-      <li>
-        <a
-          class="c-filtro"
-          [class.c-filtro--activo]="filtro() === 'true'"
-          routerLink="/empresas"
-          [queryParams]="{ publicada: true }"
-        >
-          Publicadas
-        </a>
-      </li>
-      <li>
-        <a
-          class="c-filtro"
-          [class.c-filtro--activo]="filtro() === 'false'"
-          routerLink="/empresas"
-          [queryParams]="{ publicada: false }"
-        >
-          Sin publicar
-        </a>
-      </li>
-    </ul>
-  }
+  <div class="c-acciones">
+    @if (esProfesor()) {
+      <ul class="o-etiquetas">
+        <li>
+          <a class="c-filtro" [class.c-filtro--activo]="filtro() === null" routerLink="/empresas">
+            Todas
+          </a>
+        </li>
+        <li>
+          <a
+            class="c-filtro"
+            [class.c-filtro--activo]="filtro() === 'true'"
+            routerLink="/empresas"
+            [queryParams]="{ publicada: true }"
+          >
+            Publicadas
+          </a>
+        </li>
+        <li>
+          <a
+            class="c-filtro"
+            [class.c-filtro--activo]="filtro() === 'false'"
+            routerLink="/empresas"
+            [queryParams]="{ publicada: false }"
+          >
+            Sin publicar
+          </a>
+        </li>
+      </ul>
+    }
+
+    <div class="c-buscador" [class.c-buscador--abierto]="buscando()">
+      <input
+        class="c-buscador__entrada"
+        #entrada
+        type="search"
+        aria-label="Buscar empresas"
+        placeholder="Nombre, sector, etiqueta…"
+        [attr.tabindex]="buscando() ? null : -1"
+        [value]="busqueda()"
+        (input)="busqueda.set(entrada.value)"
+        (keydown.escape)="cerrarBusqueda()"
+      />
+      <button
+        class="c-filtro"
+        type="button"
+        [attr.aria-expanded]="buscando()"
+        [attr.aria-label]="buscando() ? 'Cerrar la búsqueda' : 'Buscar empresas'"
+        (click)="alternarBusqueda()"
+      >
+        <app-icono nombre="buscar" />
+      </button>
+    </div>
+  </div>
 
   <app-estado
     [cargando]="cargando()"

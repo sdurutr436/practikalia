@@ -1,0 +1,44 @@
+// Buscador de un listado: una lupa que se estira hasta campo. La animación es
+// una transición de ancho — el campo está siempre en el DOM, así que abrir es
+// enfocarlo y nada más.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-buscador {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-diminuto;
+  margin-inline-start: auto;
+}
+
+.c-buscador__entrada {
+  width: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: s.$radio-pildora;
+  background: s.$color-superficie;
+  color: inherit;
+  font: inherit;
+  font-size: s.$texto-pequeno;
+  opacity: 0;
+  transition:
+    width s.$transicion,
+    padding s.$transicion,
+    opacity s.$transicion;
+
+  &:focus-visible {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
+
+  .c-buscador--abierto & {
+    width: min(s.$ancho-busqueda, 50vw);
+    padding: s.$espaciado-diminuto s.$espaciado-medio;
+    border-color: s.$color-borde;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
