@@ -1,0 +1,71 @@
+<app-modal titulo="Rechazar reseña" (salir)="pedirSalida()">
+  <article class="c-resena c-resena--modal">
+    <div class="c-resena__cabecera">
+      <span class="c-resena__empresa">{{ review().empresaNombre }}</span>
+      <app-estrellas [valor]="review().calificacion" [maximo]="maximoEstrellas()" />
+    </div>
+    <p class="c-resena__autor">
+      @if (review().alumnoNombre; as nombre) {
+        <strong>{{ nombre }}</strong>
+      }
+      <span class="c-resena__correo">{{ review().alumnoCorreo }}</span>
+    </p>
+    <blockquote class="c-resena__texto">«{{ review().contenido }}»</blockquote>
+  </article>
+
+  <div class="c-campo">
+    <label class="c-campo__etiqueta" for="motivo-rechazo">
+      Motivo del rechazo
+      <span class="c-requerido" aria-hidden="true">*</span>
+    </label>
+    <textarea
+      #entrada
+      id="motivo-rechazo"
+      class="c-campo__entrada c-campo__entrada--area"
+      rows="4"
+      autofocus
+      aria-describedby="motivo-rechazo-ayuda"
+      placeholder="Qué hay que corregir para que la reseña se pueda publicar"
+      [value]="motivo()"
+      (input)="motivo.set(entrada.value)"
+    ></textarea>
+    <p class="c-campo__ayuda" id="motivo-rechazo-ayuda" aria-live="polite">
+      @if (faltan() > 0) {
+        Faltan {{ faltan() }} caracteres de los {{ minimo }} mínimos.
+      } @else {
+        Lo lee el alumno para saber qué corregir.
+      }
+    </p>
+  </div>
+
+  @if (error(); as mensaje) {
+    <app-alerta>{{ mensaje }}</app-alerta>
+  }
+
+  <div acciones class="c-acciones">
+    <app-boton
+      icono="rechazar"
+      [deshabilitado]="faltan() > 0"
+      [cargando]="enviando()"
+      textoCargando="Rechazando…"
+      (click)="enviar()"
+    >
+      Confirmar rechazo
+    </app-boton>
+    <app-boton [secundario]="true" [deshabilitado]="enviando()" (click)="pedirSalida()">
+      Dejar de escribir
+    </app-boton>
+  </div>
+</app-modal>
+
+<!-- Segundo modal por encima del primero: lo apila el propio <dialog>. -->
+@if (confirmandoSalida()) {
+  <app-modal titulo="¿Seguro que quieres salir?" (salir)="seguirEscribiendo()">
+    <p>Se perderá el motivo que llevas escrito y la reseña seguirá pendiente de moderar.</p>
+
+    <div acciones class="c-acciones">
+      <app-boton icono="salir" (click)="cerrar.emit()">Salir sin guardar</app-boton>
+      <app-boton [secundario]="true" (click)="seguirEscribiendo()">Seguir escribiendo</app-boton>
+    </div>
+  </app-modal>
+}

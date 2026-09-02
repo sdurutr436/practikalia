@@ -1,0 +1,79 @@
+// Tarjeta de reseña: la usan el resumen del panel, la cola de moderación y el
+// modal de rechazo. Vivía dentro de _panel.scss cuando solo la pintaba el
+// panel; al aparecer en tres sitios se saca a su propio bloque.
+@use '../settings' as s;
+@use '../tools' as t;
+
+// Fila de reseña pendiente: la empresa manda, la nota a la derecha y la cita
+// destacada del resto del texto.
+.c-resena__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+}
+
+// El nombre de la empresa lleva a su ficha: se pinta como enlace del tema, no
+// con el azul subrayado del navegador.
+.c-resena__empresa {
+  color: s.$color-primario;
+  font-weight: s.$peso-fuerte;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
+}
+
+.c-resena__autor {
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
+.c-resena__texto {
+  margin: 0;
+  padding-inline-start: s.$espaciado-medio;
+  border-inline-start: 2px solid color-mix(in srgb, s.$color-borde 20%, transparent);
+  text-wrap: pretty;
+}
+
+// Correo junto al nombre: el nombre manda y el correo queda como apoyo, porque
+// hay cuentas que todavía no tienen nombre y solo se identifican por él.
+.c-resena__correo {
+  color: s.$color-texto-apagado;
+}
+
+.c-resena__nombre + .c-resena__correo::before {
+  content: ' · ';
+}
+
+// Motivo de un rechazo ya hecho: se lee en la pastilla de rechazadas.
+.c-resena__motivo {
+  margin: 0;
+  padding: s.$espaciado-pequeno s.$espaciado-medio;
+  border-radius: s.$radio-m;
+  background: color-mix(in srgb, s.$color-error 8%, transparent);
+  font-size: s.$texto-pequeno;
+  text-wrap: pretty;
+}
+
+.c-resena__motivo-rotulo {
+  font-weight: s.$peso-fuerte;
+}
+
+// Dentro del modal la reseña es contexto, no el contenido principal: se apoya
+// sobre el fondo apagado para separarla del campo del motivo.
+.c-resena--modal {
+  display: flex;
+  flex-direction: column;
+  gap: s.$espaciado-pequeno;
+  padding: s.$espaciado-medio;
+  border-radius: s.$radio;
+  background: s.$color-apagado;
+}

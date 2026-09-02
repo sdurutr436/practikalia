@@ -1,0 +1,15 @@
+<dialog #dialogo class="c-modal" (cancel)="alCancelar($event)" (click)="alPulsar($event)">
+  <!-- La caja para en el clic: sin ella, pulsar dentro contaría como fondo. -->
+  <div class="c-modal__caja">
+    <header class="c-modal__cabecera">
+      <h2 class="c-modal__titulo">{{ titulo() }}</h2>
+      <button class="c-modal__cerrar" type="button" aria-label="Cerrar" (click)="salir.emit()">
+        <app-icono nombre="rechazar" />
+      </button>
+    </header>
+
+    <div class="c-modal__cuerpo"><ng-content /></div>
+
+    <footer class="c-modal__acciones"><ng-content select="[acciones]" /></footer>
+  </div>
+</dialog>

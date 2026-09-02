@@ -1,0 +1,74 @@
+// Modal sobre <dialog> nativo. El navegador ya pone el fondo, el foco atrapado
+// y la top layer: aquí solo queda vestir la caja. Sin z-index a propósito —
+// dos <dialog> abiertos con showModal() se apilan por orden de apertura, que
+// es lo que hace que la confirmación de salida caiga por encima del rechazo.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-modal {
+  max-width: min(34rem, calc(100vw - #{s.$espaciado-grande} * 2));
+  max-height: calc(100vh - #{s.$espaciado-grande} * 2);
+  padding: 0;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio;
+  background: s.$color-superficie;
+  color: s.$color-superficie-texto;
+  box-shadow: s.$sombra-grande;
+
+  &::backdrop {
+    background: color-mix(in srgb, #000 45%, transparent);
+  }
+}
+
+.c-modal__caja {
+  display: flex;
+  flex-direction: column;
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-grande;
+}
+
+.c-modal__cabecera {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: s.$espaciado-medio;
+}
+
+.c-modal__titulo {
+  margin: 0;
+  font-size: s.$texto-grande;
+  font-weight: s.$peso-fuerte;
+  letter-spacing: s.$tracking-ajustado;
+}
+
+.c-modal__cerrar {
+  display: grid;
+  place-items: center;
+  padding: s.$espaciado-diminuto;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: none;
+  color: s.$color-texto-apagado;
+  cursor: pointer;
+  transition: background s.$transicion, color s.$transicion;
+
+  &:hover {
+    background: s.$color-apagado;
+    color: s.$color-superficie-texto;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+.c-modal__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: s.$espaciado-base;
+  overflow-y: auto;
+}
+
+.c-modal__acciones:empty {
+  display: none;
+}
