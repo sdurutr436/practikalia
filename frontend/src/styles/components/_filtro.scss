@@ -4,6 +4,15 @@
 @use '../settings' as s;
 @use '../tools' as t;
 
+// Fila de filtros de un listado: las pastillas a la izquierda, el buscador
+// empujado a la derecha. Centrada, porque sus dos piezas no miden igual.
+.c-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+}
+
 .c-filtro {
   // inline-flex y font/cursor propios: la misma pastilla vale para un <a> de
   // filtro y para el <button> de la lupa, que si no hereda el gris del agente

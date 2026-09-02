@@ -1,7 +1,7 @@
 <main class="o-pagina">
   <app-cabecera titulo="Empresas" />
 
-  <div class="c-acciones">
+  <div class="c-filtros">
     @if (esProfesor()) {
       <ul class="o-etiquetas">
         <li>
@@ -45,7 +45,7 @@
         (keydown.escape)="cerrarBusqueda()"
       />
       <button
-        class="c-filtro"
+        class="c-buscador__lupa"
         type="button"
         [attr.aria-expanded]="buscando()"
         [attr.aria-label]="buscando() ? 'Cerrar la búsqueda' : 'Buscar empresas'"
@@ -66,8 +66,17 @@
       @for (empresa of empresasFiltradas(); track empresa.id) {
         <li>
           <app-tarjeta-empresa [empresa]="empresa" [meta]="empresa.sector.nombre">
-            @if (esVistaProfesor(empresa) && !empresa.publicada) {
-              <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
+            <!-- El estado de publicación es cosa del profesorado: al alumnado
+                 el backend solo le manda publicadas y su DTO ni trae el campo. -->
+            @if (esVistaProfesor(empresa)) {
+              <span
+                class="c-tarjeta-empresa__estado"
+                [class.c-tarjeta-empresa__estado--publicada]="empresa.publicada"
+                role="img"
+                [attr.aria-label]="empresa.publicada ? 'Publicada' : 'Sin publicar'"
+              >
+                <app-icono [nombre]="empresa.publicada ? 'aprobar' : 'rechazar'" />
+              </span>
             }
           </app-tarjeta-empresa>
         </li>

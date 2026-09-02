@@ -1,22 +1,40 @@
-// Buscador de un listado: una lupa que se estira hasta campo. La animación es
-// una transición de ancho — el campo está siempre en el DOM, así que abrir es
-// enfocarlo y nada más.
+// Buscador de un listado: la lupa ES el campo. Cerrado mide lo que su botón;
+// al pulsarlo se estira hacia la izquierda hasta las pastillas de filtro. El
+// alto no cambia nunca (el borde y el relleno vertical están siempre), que es
+// lo que evitaba el salto de la fila al abrir.
 @use '../settings' as s;
 @use '../tools' as t;
 
 .c-buscador {
   display: flex;
   align-items: center;
-  gap: s.$espaciado-diminuto;
+  flex: 0 1 auto;
   margin-inline-start: auto;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio-pildora;
+  background: s.$color-superficie;
+  transition: flex-grow s.$transicion;
+
+  &:focus-within {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
+
+  &--abierto {
+    flex-grow: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
 .c-buscador__entrada {
   width: 0;
+  min-width: 0;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: s.$radio-pildora;
-  background: s.$color-superficie;
+  border: 0;
+  background: none;
   color: inherit;
   font: inherit;
   font-size: s.$texto-pequeno;
@@ -26,19 +44,31 @@
     padding s.$transicion,
     opacity s.$transicion;
 
-  &:focus-visible {
-    @include t.anillo-foco;
-    outline-offset: 2px;
+  // El anillo de foco lo pinta el contenedor entero, no el campo suelto.
+  &:focus {
+    outline: none;
   }
 
   .c-buscador--abierto & {
-    width: min(s.$ancho-busqueda, 50vw);
-    padding: s.$espaciado-diminuto s.$espaciado-medio;
-    border-color: s.$color-borde;
+    width: 100%;
+    padding-inline: s.$espaciado-medio;
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;
   }
+}
+
+.c-buscador__lupa {
+  display: grid;
+  place-items: center;
+  flex: none;
+  padding: s.$espaciado-diminuto s.$espaciado-medio;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }

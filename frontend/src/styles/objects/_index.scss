@@ -43,7 +43,9 @@
 .o-rejilla {
   display: grid;
   gap: s.$espaciado-base;
-  grid-template-columns: repeat(auto-fill, minmax(s.$ancho-tarjeta-min, 1fr));
+  // El 30% corta la rejilla en tres columnas como mucho; por debajo de
+  // 3 × $ancho-tarjeta-min manda el ancho mínimo y caben menos.
+  grid-template-columns: repeat(auto-fill, minmax(max(s.$ancho-tarjeta-min, 30%), 1fr));
   padding: 0;
   margin: 0;
   list-style: none;

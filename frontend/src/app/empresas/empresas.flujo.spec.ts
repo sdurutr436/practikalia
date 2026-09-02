@@ -85,20 +85,22 @@ describe('listado de empresas', () => {
 
     const texto = harness.routeNativeElement?.textContent ?? '';
     expect(texto).toContain('Acme');
-    // La vista alumno no trae `publicada`, así que nunca puede pintar el badge.
-    expect(texto).not.toContain('No publicada');
+    // La vista alumno no trae `publicada`, así que nunca puede pintar la marca.
+    expect(harness.routeNativeElement?.querySelector('.c-tarjeta-empresa__estado')).toBeNull();
   });
 
-  it('profesor ve el badge de no publicada', async () => {
+  it('profesor ve la marca de publicación de cada empresa', async () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas');
-    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA, EMPRESA_NO_PUBLICADA]);
+    // Al profesor el backend le manda la vista completa de las dos, publicada o no.
+    const publicada = { ...EMPRESA_NO_PUBLICADA, id: 4, nombre: 'Delta', publicada: true };
+    http.expectOne('/api/empresas').flush([publicada, EMPRESA_NO_PUBLICADA]);
     await esperarMicrotareas();
     harness.detectChanges();
 
-    const texto = harness.routeNativeElement?.textContent ?? '';
-    expect(texto).toContain('No publicada');
+    const marcas = [...harness.routeNativeElement!.querySelectorAll('.c-tarjeta-empresa__estado')];
+    expect(marcas.map((m) => m.getAttribute('aria-label'))).toEqual(['Publicada', 'Sin publicar']);
   });
 
   it('el filtro de la URL deja solo las empresas sin publicar', async () => {
