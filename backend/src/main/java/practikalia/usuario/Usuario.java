@@ -38,6 +38,17 @@ public class Usuario {
     @Column(nullable = false)
     private String contrasenaHash;
 
+    // Solo los rellena el auto-registro; las cuentas dadas de alta por un
+    // profesor desde POST /api/usuarios se quedan sin ellos.
+    private String nombre;
+
+    private String apellido1;
+
+    private String apellido2;
+
+    @Column(unique = true)
+    private String dni;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Rol rol;
