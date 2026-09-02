@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -73,9 +74,10 @@ class EmpresaControllerIntegrationTest {
         mockMvc.perform(get("/api/empresas")
                         .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].nombre").value("Pública"))
-                .andExpect(jsonPath("$[0].observaciones").doesNotExist());
+                .andExpect(jsonPath("$.contenido.length()").value(1))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.contenido[0].nombre").value("Pública"))
+                .andExpect(jsonPath("$.contenido[0].observaciones").doesNotExist());
     }
 
     @Test
@@ -85,8 +87,58 @@ class EmpresaControllerIntegrationTest {
         mockMvc.perform(get("/api/empresas")
                         .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].observaciones").value("obs"));
+                .andExpect(jsonPath("$.contenido.length()").value(1))
+                .andExpect(jsonPath("$.contenido[0].observaciones").value("obs"));
+    }
+
+    @Test
+    void elListadoPaginaYBuscaPorNombreSectorYEtiqueta() throws Exception {
+        Etiqueta java = etiquetaRepository.save(new Etiqueta("Java"));
+        for (String nombre : List.of("Alfa", "Beta", "Gamma")) {
+            Empresa empresa = new Empresa(nombre, "d", "dir", sector, "obs", "c", "t", "e", profesor);
+            empresa.setPublicada(true);
+            if (nombre.equals("Gamma")) {
+                empresa.setEtiquetas(new ArrayList<>(List.of(java)));
+            }
+            empresaRepository.save(empresa);
+        }
+
+        // Página de 2 sobre 3, ordenadas por nombre.
+        mockMvc.perform(get("/api/empresas").param("tamano", "2").param("pagina", "1")
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(3))
+                .andExpect(jsonPath("$.paginas").value(2))
+                .andExpect(jsonPath("$.contenido.length()").value(1))
+                .andExpect(jsonPath("$.contenido[0].nombre").value("Gamma"));
+
+        // El texto entra por la etiqueta, no por el nombre de la empresa.
+        mockMvc.perform(get("/api/empresas").param("texto", "jav")
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.length()").value(1))
+                .andExpect(jsonPath("$.contenido[0].nombre").value("Gamma"));
+
+        // Y por el sector, que comparten las tres.
+        mockMvc.perform(get("/api/empresas").param("texto", "tecno")
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.length()").value(3));
+
+        mockMvc.perform(get("/api/empresas").param("etiquetaIds", java.getId().toString())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.length()").value(1));
+    }
+
+    @Test
+    void elAlumnoNoVeLasNoPublicadasNiPidiendolasPorFiltro() throws Exception {
+        empresaRepository.save(new Empresa("Privada", "d", "dir", sector, "obs", "c", "t", "e", profesor));
+
+        mockMvc.perform(get("/api/empresas").param("publicada", "false")
+                        .with(user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.length()").value(0));
     }
 
     @Test
