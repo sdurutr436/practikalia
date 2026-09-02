@@ -15,7 +15,6 @@ import { CalificacionConfig, Review } from '../reviews/review.model';
 import { MENSAJES_REVIEW, mensajeDeError } from '../auth/mensajes-error';
 import { CabeceraComponent } from '../compartido/cabecera/cabecera';
 import { AlertaComponent } from '../compartido/alerta/alerta';
-import { CampoComponent } from '../compartido/campo/campo';
 import { BotonComponent } from '../compartido/boton/boton';
 import { PanelService, ResumenCentro } from './panel.service';
 
@@ -33,7 +32,6 @@ const RESUMEN = 4;
     EstrellasComponent,
     CabeceraComponent,
     AlertaComponent,
-    CampoComponent,
     BotonComponent,
   ],
   templateUrl: './panel-page.html',
@@ -62,7 +60,6 @@ export class PanelPage {
   /** El rango lo fija cada instituto; sin él no se pueden pintar las estrellas. */
   protected readonly calificacion = signal<CalificacionConfig | null>(null);
   protected readonly moderandoId = signal<number | null>(null);
-  protected readonly rechazandoId = signal<number | null>(null);
   protected readonly errorModeracion = signal<{ id: number; mensaje: string } | null>(null);
 
   /**
@@ -88,32 +85,19 @@ export class PanelPage {
     return this.empresas().find((empresa) => empresa.id === review.empresaId)?.nombre ?? 'Empresa';
   }
 
+  /**
+   * Aprobar es la única moderación que cabe aquí: rechazar exige un motivo, y
+   * ese formulario vive en la cola de moderación.
+   */
   protected async aprobar(review: Review): Promise<void> {
-    await this.moderar(review, 'APROBADA', null);
-  }
-
-  protected async rechazar(review: Review, motivoRechazo: string): Promise<void> {
-    if (!motivoRechazo.trim()) {
-      this.errorModeracion.set({ id: review.id, mensaje: 'Indica un motivo de rechazo.' });
-      return;
-    }
-    await this.moderar(review, 'RECHAZADA', motivoRechazo);
-  }
-
-  private async moderar(
-    review: Review,
-    estado: 'APROBADA' | 'RECHAZADA',
-    motivoRechazo: string | null,
-  ): Promise<void> {
     if (this.moderandoId() !== null) {
       return;
     }
     this.moderandoId.set(review.id);
     this.errorModeracion.set(null);
     try {
-      await this.reviewService.moderar(review.id, { estado, motivoRechazo });
+      await this.reviewService.moderar(review.id, { estado: 'APROBADA', motivoRechazo: null });
       this.pendientes.update((lista) => lista.filter((r) => r.id !== review.id));
-      this.rechazandoId.set(null);
     } catch (e) {
       this.errorModeracion.set({ id: review.id, mensaje: mensajeDeError(e, MENSAJES_REVIEW) });
     } finally {

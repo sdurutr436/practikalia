@@ -124,36 +124,21 @@ describe('panel del profesorado', () => {
     expect(fixture.nativeElement.textContent).toContain('No hay reseñas pendientes.');
   });
 
-  it('rechazar sin motivo avisa sin llamar al backend', async () => {
+  it('el nombre de la empresa lleva a su ficha', async () => {
     const fixture = await pintar();
+    const enlace: HTMLAnchorElement = fixture.nativeElement.querySelector('.c-resena__empresa');
 
-    boton(fixture, 'Rechazar')?.click();
-    fixture.detectChanges();
-    boton(fixture, 'Confirmar rechazo')?.click();
-    fixture.detectChanges();
-
-    // http.verify() del afterEach falla si se hubiera llamado a moderar.
-    expect(fixture.nativeElement.textContent).toContain('Indica un motivo de rechazo.');
+    expect(enlace.textContent?.trim()).toBe('Grupo Ondara Software');
+    expect(enlace.getAttribute('href')).toBe('/empresas/7');
   });
 
-  it('rechazar con motivo manda el motivo y saca la reseña', async () => {
+  it('rechazar lleva a la cola de moderación señalando la reseña', async () => {
     const fixture = await pintar();
+    const enlace = [...fixture.nativeElement.querySelectorAll('a')].find((a: HTMLAnchorElement) =>
+      a.textContent?.includes('Rechazar'),
+    );
 
-    boton(fixture, 'Rechazar')?.click();
-    fixture.detectChanges();
-    const motivo: HTMLInputElement = fixture.nativeElement.querySelector('#motivo-3');
-    motivo.value = 'Falta detalle sobre las tareas.';
-    boton(fixture, 'Confirmar rechazo')?.click();
-
-    const peticion = http.expectOne('/api/reviews/3/moderar');
-    expect(peticion.request.body).toEqual({
-      estado: 'RECHAZADA',
-      motivoRechazo: 'Falta detalle sobre las tareas.',
-    });
-    peticion.flush({ ...PENDIENTE, estado: 'RECHAZADA' });
-    await esperarMicrotareas();
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('No hay reseñas pendientes.');
+    // El motivo se escribe allí: aquí no se llama a moderar (lo verifica http.verify()).
+    expect(enlace?.getAttribute('href')).toBe('/reviews/pendientes?rechazar=3');
   });
 });

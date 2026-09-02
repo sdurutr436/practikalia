@@ -116,8 +116,21 @@
   gap: s.$espaciado-pequeno;
 }
 
+// El nombre de la empresa lleva a su ficha: se pinta como enlace del tema, no
+// con el azul subrayado del navegador.
 .c-resena__empresa {
+  color: s.$color-primario;
   font-weight: s.$peso-fuerte;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
 }
 
 .c-resena__autor {

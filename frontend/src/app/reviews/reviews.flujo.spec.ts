@@ -320,6 +320,23 @@ describe('cola de moderación', () => {
     expect(harness.routeNativeElement?.textContent).toContain('No hay reviews pendientes');
   });
 
+  it('llegar con ?rechazar= deja el cursor en el motivo de esa review', async () => {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/reviews/pendientes?rechazar=1');
+    http.expectOne('/api/reviews/pendientes').flush([REVIEW]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+    await esperarMicrotareas();
+
+    expect(document.activeElement?.id).toBe('motivo-1');
+  });
+
   it('rechazar sin motivo muestra un error sin llamar al backend', async () => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
     http

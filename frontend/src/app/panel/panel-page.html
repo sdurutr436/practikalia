@@ -112,7 +112,9 @@
               @for (review of pendientesResumen(); track review.id) {
                 <li class="c-fila c-resena">
                   <div class="c-resena__cabecera">
-                    <span class="c-resena__empresa">{{ nombreEmpresa(review) }}</span>
+                    <a class="c-resena__empresa" [routerLink]="['/empresas', review.empresaId]">
+                      {{ nombreEmpresa(review) }}
+                    </a>
                     @if (calificacion(); as rango) {
                       <app-estrellas [valor]="review.calificacion" [maximo]="rango.max" />
                     }
@@ -124,50 +126,25 @@
                     <app-alerta>{{ errorModeracion()?.mensaje }}</app-alerta>
                   }
 
-                  @if (rechazandoId() === review.id) {
-                    <div class="c-acciones">
-                      <app-campo
-                        etiqueta="Motivo del rechazo"
-                        [para]="'motivo-' + review.id"
-                        [crecer]="true"
-                      >
-                        <input
-                          class="c-campo__entrada"
-                          type="text"
-                          [id]="'motivo-' + review.id"
-                          #motivo
-                        />
-                      </app-campo>
-                      <app-boton
-                        icono="rechazar"
-                        [deshabilitado]="moderandoId() !== null"
-                        (click)="rechazar(review, motivo.value)"
-                      >
-                        Confirmar rechazo
-                      </app-boton>
-                      <app-boton [secundario]="true" (click)="rechazandoId.set(null)">
-                        Cancelar
-                      </app-boton>
-                    </div>
-                  } @else {
-                    <div class="c-acciones">
-                      <app-boton
-                        icono="aprobar"
-                        [deshabilitado]="moderandoId() !== null"
-                        (click)="aprobar(review)"
-                      >
-                        Aprobar
-                      </app-boton>
-                      <app-boton
-                        icono="rechazar"
-                        [secundario]="true"
-                        [deshabilitado]="moderandoId() !== null"
-                        (click)="rechazandoId.set(review.id)"
-                      >
-                        Rechazar
-                      </app-boton>
-                    </div>
-                  }
+                  <div class="c-acciones">
+                    <app-boton
+                      icono="aprobar"
+                      [deshabilitado]="moderandoId() !== null"
+                      (click)="aprobar(review)"
+                    >
+                      Aprobar
+                    </app-boton>
+                    <!-- Rechazar exige motivo, y el motivo se escribe en la cola
+                         de moderación: aquí solo se lleva allí, señalando cuál. -->
+                    <app-boton
+                      icono="rechazar"
+                      [secundario]="true"
+                      enlace="/reviews/pendientes"
+                      [params]="{ rechazar: review.id }"
+                    >
+                      Rechazar
+                    </app-boton>
+                  </div>
                 </li>
               }
             </ul>
