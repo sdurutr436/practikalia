@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideRouter } from '@angular/router';
 import { PanelPage } from './panel-page';
 import { AuthService } from '../auth/auth.service';
+import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -61,7 +62,7 @@ describe('panel del profesorado', () => {
 
   async function pintar() {
     const fixture = TestBed.createComponent(PanelPage);
-    http.expectOne('/api/empresas').flush([EMPRESA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA]));
     await esperarMicrotareas();
     http.expectOne('/api/panel/resumen').flush(RESUMEN);
     await esperarMicrotareas();
@@ -98,7 +99,7 @@ describe('panel del profesorado', () => {
 
   it('un resumen que falla no impide pintar el resto del panel', async () => {
     const fixture = TestBed.createComponent(PanelPage);
-    http.expectOne('/api/empresas').flush([EMPRESA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA]));
     await esperarMicrotareas();
     http.expectOne('/api/panel/resumen').flush('', { status: 500, statusText: 'Error' });
     await esperarMicrotareas();

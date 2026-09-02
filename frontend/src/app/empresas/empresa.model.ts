@@ -31,6 +31,25 @@ export function esVistaProfesor(empresa: Empresa): empresa is Required<Empresa> 
   return empresa.publicada !== undefined;
 }
 
+/** Página de empresas que devuelve `GET /api/empresas`. */
+export interface PaginaEmpresas {
+  contenido: Empresa[];
+  pagina: number;
+  tamano: number;
+  total: number;
+  paginas: number;
+}
+
+/** Criterios del listado; todos opcionales. Sin `tamano`, el catálogo entero. */
+export interface ConsultaEmpresas {
+  texto?: string | null;
+  publicada?: boolean | null;
+  sectorId?: number | null;
+  etiquetaIds?: number[];
+  pagina?: number;
+  tamano?: number;
+}
+
 /** Mismo shape para crear (POST) y actualizar (PUT) — igual que el backend. */
 export interface EmpresaRequest {
   nombre: string;

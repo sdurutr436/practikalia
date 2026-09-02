@@ -7,6 +7,7 @@ import { routes } from '../app.routes';
 import { AuthService } from '../auth/auth.service';
 import { authInterceptor } from '../auth/auth.interceptor';
 import { AfinidadListado } from './afinidad.model';
+import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -86,7 +87,7 @@ describe('página de afinidad', () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/mi-afinidad');
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });
@@ -95,7 +96,7 @@ describe('página de afinidad', () => {
     await loginComo('ALUMNO');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/alumnos/3/afinidad');
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });

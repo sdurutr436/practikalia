@@ -67,7 +67,7 @@ export class EmpresaFormularioPage {
 
   private async cargar(): Promise<void> {
     try {
-      const empresas = await this.empresaService.listar();
+      const empresas = (await this.empresaService.listar()).contenido;
       this.construirCatalogos(empresas);
       const id = this.empresaId();
       if (id !== null) {

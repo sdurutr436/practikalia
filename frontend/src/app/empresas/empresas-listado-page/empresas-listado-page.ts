@@ -1,108 +1,171 @@
-import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { EmpresaService } from '../empresa.service';
-import { Empresa, esVistaProfesor } from '../empresa.model';
+import { Etiqueta, PaginaEmpresas, esVistaProfesor } from '../empresa.model';
+import { PerfilService } from '../../perfil/perfil.service';
 import { TarjetaEmpresaComponent } from '../tarjeta-empresa/tarjeta-empresa';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { IconoComponent } from '../../compartido/icono/icono';
+import { BotonComponent } from '../../compartido/boton/boton';
 
-/** Sin acentos y en minúsculas: buscar "diseno" tiene que encontrar "Diseño". */
-function normalizar(texto: string): string {
-  return texto
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '');
-}
+/** Tres columnas por tres filas: lo que cabe sin desplazarse. */
+const POR_PAGINA = 9;
 
-/** Todo lo que se puede escribir para dar con una empresa, en un solo texto. */
-function textoBuscable(empresa: Empresa): string {
-  return normalizar(
-    [empresa.nombre, empresa.descripcion, empresa.sector.nombre, ...empresa.etiquetas.map((e) => e.nombre)]
-      .filter(Boolean)
-      .join(' '),
-  );
-}
+/** Lo que se espera a que pare de teclear; cada búsqueda es una consulta. */
+const ESPERA_TECLEO = 250;
 
 @Component({
   selector: 'app-empresas-listado-page',
-  imports: [RouterLink, EstadoComponent, TarjetaEmpresaComponent, CabeceraComponent, IconoComponent],
+  imports: [
+    RouterLink,
+    EstadoComponent,
+    TarjetaEmpresaComponent,
+    CabeceraComponent,
+    IconoComponent,
+    BotonComponent,
+  ],
   templateUrl: './empresas-listado-page.html',
 })
 export class EmpresasListadoPage {
   private readonly empresaService = inject(EmpresaService);
+  private readonly perfilService = inject(PerfilService);
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected readonly esVistaProfesor = esVistaProfesor;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
-  protected readonly empresas = signal<Empresa[]>([]);
+  protected readonly resultado = signal<PaginaEmpresas | null>(null);
+  protected readonly catalogo = signal<Etiqueta[]>([]);
+  protected readonly buscando = signal(false);
+  protected readonly filtrosAbiertos = signal(false);
+
+  private readonly entrada = viewChild.required<ElementRef<HTMLInputElement>>('entrada');
+  private temporizador?: ReturnType<typeof setTimeout>;
 
   /**
-   * El filtro de publicación vive en la URL (`?publicada=true|false`) para que
-   * el panel pueda enlazar al listado ya filtrado. Pulsar una pastilla navega
-   * a la misma ruta, así que hay que leerlo reactivo: el snapshot no cambia.
+   * Todo el estado del listado (pastilla, búsqueda, filtros y página) vive en
+   * la URL: se comparte por enlace, sobrevive a recargar y el botón de atrás
+   * hace lo que se espera. Leerlo reactivo es obligatorio — cambiarlo no
+   * recrea el componente.
    */
   private readonly parametros = toSignal(this.route.queryParamMap, { requireSync: true });
   protected readonly filtro = computed(() => this.parametros().get('publicada'));
-  /** El alumnado solo recibe empresas publicadas, así que el filtro no le aplica. */
+  protected readonly texto = computed(() => this.parametros().get('texto') ?? '');
+  protected readonly sectorId = computed(() => this.parametros().get('sectorId') ?? '');
+  protected readonly etiquetaIds = computed(() =>
+    (this.parametros().get('etiquetaIds') ?? '')
+      .split(',')
+      .filter(Boolean)
+      .map(Number),
+  );
+  protected readonly paginaActual = computed(() => Number(this.parametros().get('pagina') ?? 0));
+
   protected readonly esProfesor = computed(() => this.auth.sesion()?.rol !== 'ALUMNO');
-
-  private readonly entrada = viewChild.required<ElementRef<HTMLInputElement>>('entrada');
-  protected readonly buscando = signal(false);
-  protected readonly busqueda = signal('');
-
-  protected readonly empresasFiltradas = computed(() => {
-    const filtro = this.filtro();
-    const porPublicacion =
-      filtro === null || !this.esProfesor()
-        ? this.empresas()
-        : this.empresas().filter(
-            (empresa) => esVistaProfesor(empresa) && empresa.publicada === (filtro === 'true'),
-          );
-
-    // Cada palabra suelta tiene que aparecer en algún sitio de la empresa, en
-    // cualquier orden: "web ondara" encuentra "Grupo Ondara" del sector "web".
-    // ponytail: sin tolerancia a erratas; si hace falta, aquí entra una
-    // distancia de edición sobre cada palabra.
-    const palabras = normalizar(this.busqueda().trim()).split(/\s+/).filter(Boolean);
-    if (palabras.length === 0) return porPublicacion;
-    return porPublicacion.filter((empresa) => {
-      const texto = textoBuscable(empresa);
-      return palabras.every((palabra) => texto.includes(palabra));
-    });
-  });
+  protected readonly empresas = computed(() => this.resultado()?.contenido ?? []);
+  protected readonly paginas = computed(() => this.resultado()?.paginas ?? 0);
+  protected readonly filtrosActivos = computed(
+    () => (this.sectorId() ? 1 : 0) + this.etiquetaIds().length,
+  );
 
   protected readonly mensajeVacio = computed(() => {
-    if (this.busqueda().trim()) return 'Ninguna empresa coincide con la búsqueda.';
+    if (this.texto() || this.filtrosActivos() > 0) {
+      return 'Ninguna empresa coincide con la búsqueda.';
+    }
     return this.filtro() === null ? 'Todavía no hay empresas.' : 'Ninguna empresa con ese filtro.';
   });
 
   constructor() {
-    void this.cargar();
+    effect(() => {
+      this.parametros();
+      untracked(() => void this.cargar());
+    });
   }
 
   /** La lupa despliega el campo y le da el foco; cerrarla limpia la búsqueda. */
   protected alternarBusqueda(): void {
     if (this.buscando()) {
-      this.cerrarBusqueda();
+      this.buscando.set(false);
+      this.navegar({ texto: null });
       return;
     }
     this.buscando.set(true);
     this.entrada().nativeElement.focus();
   }
 
-  protected cerrarBusqueda(): void {
-    this.buscando.set(false);
-    this.busqueda.set('');
+  protected escribir(valor: string): void {
+    clearTimeout(this.temporizador);
+    this.temporizador = setTimeout(() => this.navegar({ texto: valor || null }), ESPERA_TECLEO);
+  }
+
+  /** El catálogo de etiquetas solo hace falta si alguien abre los filtros. */
+  protected async alternarFiltros(): Promise<void> {
+    this.filtrosAbiertos.update((abierto) => !abierto);
+    if (this.filtrosAbiertos() && this.catalogo().length === 0) {
+      this.catalogo.set(await this.perfilService.listarEtiquetas());
+    }
+  }
+
+  protected cambiarSector(valor: string): void {
+    this.navegar({ sectorId: valor || null });
+  }
+
+  protected alternarEtiqueta(id: number): void {
+    const ids = this.etiquetaIds().includes(id)
+      ? this.etiquetaIds().filter((etiquetaId) => etiquetaId !== id)
+      : [...this.etiquetaIds(), id];
+    this.navegar({ etiquetaIds: ids.join(',') || null });
+  }
+
+  protected limpiarFiltros(): void {
+    this.navegar({ sectorId: null, etiquetaIds: null });
+  }
+
+  protected irAPagina(pagina: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { pagina: pagina || null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  /** Tocar un filtro devuelve siempre a la primera página. */
+  private navegar(cambios: Record<string, string | null>): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { pagina: null, ...cambios },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   private async cargar(): Promise<void> {
+    this.cargando.set(true);
     try {
-      this.empresas.set(await this.empresaService.listar());
+      this.resultado.set(
+        await this.empresaService.listar({
+          texto: this.texto() || null,
+          publicada: this.filtro() === null ? null : this.filtro() === 'true',
+          sectorId: this.sectorId() ? Number(this.sectorId()) : null,
+          etiquetaIds: this.etiquetaIds(),
+          pagina: this.paginaActual(),
+          tamano: POR_PAGINA,
+        }),
+      );
+      this.error.set(null);
     } catch {
       this.error.set('No se pudieron cargar las empresas.');
     } finally {

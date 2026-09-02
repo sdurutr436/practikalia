@@ -108,7 +108,7 @@ export class PanelPage {
   private async cargar(): Promise<void> {
     const sesion = this.sesion();
     try {
-      this.empresas.set(await this.empresaService.listar());
+      this.empresas.set((await this.empresaService.listar()).contenido);
       if (sesion?.rol === 'ALUMNO') {
         // Tras un login el id llega null y no se rehidrata hasta el primer /me;
         // sin id no hay a quién pedirle las asignaciones.

@@ -6,6 +6,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from './app.routes';
 import { AuthService } from './auth/auth.service';
 import { authInterceptor } from './auth/auth.interceptor';
+import { pagina } from './pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -42,7 +43,7 @@ describe('flujo de sesión', () => {
     await loginComo(false);
 
     await harness.navigateByUrl('/');
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });
@@ -69,7 +70,7 @@ describe('flujo de sesión', () => {
     await promesa;
 
     await harness.navigateByUrl('/');
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });
@@ -89,7 +90,7 @@ describe('flujo de sesión', () => {
       .get('/api/empresas')
       .subscribe({ error: () => undefined });
     http
-      .expectOne('/api/empresas')
+      .expectOne((r) => r.url === '/api/empresas')
       .flush(
         { codigo: 'NO_AUTENTICADO', mensaje: 'No autenticado' },
         { status: 401, statusText: 'Unauthorized' },

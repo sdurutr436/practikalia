@@ -43,7 +43,7 @@ describe('EmpresaService', () => {
 
   it('listar consulta GET /api/empresas', async () => {
     const promesa = service.listar();
-    const peticion = httpMock.expectOne('/api/empresas');
+    const peticion = httpMock.expectOne((r) => r.url === '/api/empresas');
     expect(peticion.request.method).toBe('GET');
     peticion.flush([EMPRESA_ALUMNO]);
     expect(await promesa).toEqual([EMPRESA_ALUMNO]);
@@ -59,7 +59,7 @@ describe('EmpresaService', () => {
 
   it('crear manda POST con el request completo', async () => {
     const promesa = service.crear(REQUEST);
-    const peticion = httpMock.expectOne('/api/empresas');
+    const peticion = httpMock.expectOne((r) => r.url === '/api/empresas');
     expect(peticion.request.method).toBe('POST');
     expect(peticion.request.body).toEqual(REQUEST);
     peticion.flush({ ...EMPRESA_ALUMNO, publicada: false });

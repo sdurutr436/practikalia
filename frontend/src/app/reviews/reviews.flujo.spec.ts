@@ -9,6 +9,7 @@ import { authInterceptor } from '../auth/auth.interceptor';
 import { Empresa } from '../empresas/empresa.model';
 import { Review } from './review.model';
 import { ReviewFormularioPage } from './review-formulario-page/review-formulario-page';
+import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -287,7 +288,7 @@ describe('cola de moderación', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/reviews/pendientes');
     // profesorGuard deniega y "/" redirige al listado.
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });

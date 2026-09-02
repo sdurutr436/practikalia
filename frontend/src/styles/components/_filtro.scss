@@ -44,3 +44,39 @@
     color: s.$color-primario-texto;
   }
 }
+
+// El botón de filtros avanzados no se separa de las pastillas: es una más.
+.c-filtros__avanzados {
+  gap: s.$espaciado-diminuto;
+}
+
+// Bloque plegable con los filtros que no caben en una pastilla. Va en el flujo
+// de la página, debajo de la fila: sin capa superpuesta que atrape el foco.
+.c-panel-filtros {
+  @include t.panel;
+  display: grid;
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-base;
+
+  &__etiquetas {
+    display: grid;
+    gap: s.$espaciado-pequeno;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+}
+
+// Pie de listado: página actual entre los dos saltos.
+.c-paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: s.$espaciado-base;
+}
+
+.c-paginacion__posicion {
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}

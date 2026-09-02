@@ -8,8 +8,10 @@ import { AuthService } from '../auth/auth.service';
 import { authInterceptor } from '../auth/auth.interceptor';
 import { Empresa } from './empresa.model';
 import { EmpresaFormularioPage } from './empresa-formulario-page/empresa-formulario-page';
+import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
+const esperarTecleo = () => new Promise((resolve) => setTimeout(resolve, 300));
 
 const EMPRESA_PUBLICADA: Empresa = {
   id: 1,
@@ -79,7 +81,7 @@ describe('listado de empresas', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas');
     // El backend real solo manda publicadas a un alumno — sin campo `publicada`.
-    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_PUBLICADA]));
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -95,7 +97,7 @@ describe('listado de empresas', () => {
     await harness.navigateByUrl('/empresas');
     // Al profesor el backend le manda la vista completa de las dos, publicada o no.
     const publicada = { ...EMPRESA_NO_PUBLICADA, id: 4, nombre: 'Delta', publicada: true };
-    http.expectOne('/api/empresas').flush([publicada, EMPRESA_NO_PUBLICADA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([publicada, EMPRESA_NO_PUBLICADA]));
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -103,24 +105,25 @@ describe('listado de empresas', () => {
     expect(marcas.map((m) => m.getAttribute('aria-label'))).toEqual(['Publicada', 'Sin publicar']);
   });
 
-  it('el filtro de la URL deja solo las empresas sin publicar', async () => {
+  it('el filtro de la URL viaja al backend como parámetro', async () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas?publicada=false');
-    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA, EMPRESA_NO_PUBLICADA]);
+    const peticion = http.expectOne((r) => r.url === '/api/empresas');
+    expect(peticion.request.params.get('publicada')).toBe('false');
+    expect(peticion.request.params.get('tamano')).toBe('9');
+    peticion.flush(pagina([EMPRESA_NO_PUBLICADA]));
     await esperarMicrotareas();
     harness.detectChanges();
 
-    const texto = harness.routeNativeElement?.textContent ?? '';
-    expect(texto).toContain('Beta');
-    expect(texto).not.toContain('Acme');
+    expect(harness.routeNativeElement?.textContent).toContain('Beta');
   });
 
   it('el alumnado no ve las pastillas de filtro', async () => {
     await loginComo('ALUMNO');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas');
-    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_PUBLICADA]));
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -128,15 +131,15 @@ describe('listado de empresas', () => {
     expect(harness.routeNativeElement?.querySelector('.o-etiquetas')).toBeNull();
   });
 
-  it('la lupa despliega el campo y busca por etiqueta sin acentos', async () => {
+  it('la lupa se despliega y lo tecleado se consulta al backend', async () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas');
-    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA, EMPRESA_CON_ETIQUETA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_PUBLICADA]));
     await esperarMicrotareas();
     harness.detectChanges();
 
-    const lupa: HTMLButtonElement = harness.routeNativeElement!.querySelector('.c-buscador button')!;
+    const lupa: HTMLButtonElement = harness.routeNativeElement!.querySelector('.c-buscador__lupa')!;
     expect(lupa.getAttribute('aria-expanded')).toBe('false');
     lupa.click();
     harness.detectChanges();
@@ -144,39 +147,45 @@ describe('listado de empresas', () => {
 
     const entrada: HTMLInputElement = harness.routeNativeElement!.querySelector('.c-buscador__entrada')!;
     expect(document.activeElement).toBe(entrada);
-    // Sin acentos y por la etiqueta, no por el nombre.
-    entrada.value = 'diseno grafico';
+    entrada.value = 'diseno';
     entrada.dispatchEvent(new Event('input'));
-    harness.detectChanges();
+    // La consulta espera a que pare de teclear.
+    await esperarTecleo();
 
-    const texto = harness.routeNativeElement?.textContent ?? '';
-    expect(texto).toContain('Gamma');
-    expect(texto).not.toContain('Acme');
-  });
-
-  it('cerrar la lupa limpia la búsqueda y devuelve el listado entero', async () => {
-    await loginComo('PROFESOR');
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/empresas');
-    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA, EMPRESA_CON_ETIQUETA]);
+    const busqueda = http.expectOne((r) => r.url === '/api/empresas');
+    expect(busqueda.request.params.get('texto')).toBe('diseno');
+    busqueda.flush(pagina([EMPRESA_CON_ETIQUETA]));
     await esperarMicrotareas();
     harness.detectChanges();
 
-    const lupa: HTMLButtonElement = harness.routeNativeElement!.querySelector('.c-buscador button')!;
-    lupa.click();
-    harness.detectChanges();
-    const entrada: HTMLInputElement = harness.routeNativeElement!.querySelector('.c-buscador__entrada')!;
-    entrada.value = 'zzz';
-    entrada.dispatchEvent(new Event('input'));
-    harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).toContain('Ninguna empresa coincide');
+    expect(harness.routeNativeElement?.textContent).toContain('Gamma');
+    expect(router.url).toBe('/empresas?texto=diseno');
+  });
 
-    lupa.click();
+  it('la paginación pide la página siguiente sin perder el filtro', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas?publicada=true');
+    http
+      .expectOne((r) => r.url === '/api/empresas')
+      .flush(pagina([EMPRESA_PUBLICADA], { total: 12, paginas: 2 }));
+    await esperarMicrotareas();
     harness.detectChanges();
 
-    const texto = harness.routeNativeElement?.textContent ?? '';
-    expect(texto).toContain('Acme');
-    expect(texto).toContain('Gamma');
+    const siguiente = [...harness.routeNativeElement!.querySelectorAll('button')].find((b) =>
+      b.textContent?.includes('Siguiente'),
+    );
+    siguiente?.click();
+    await esperarMicrotareas();
+
+    const segunda = http.expectOne((r) => r.url === '/api/empresas');
+    expect(segunda.request.params.get('pagina')).toBe('1');
+    expect(segunda.request.params.get('publicada')).toBe('true');
+    segunda.flush(pagina([EMPRESA_CON_ETIQUETA], { pagina: 1, total: 12, paginas: 2 }));
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    expect(harness.routeNativeElement?.textContent).toContain('Página 2 de 2');
   });
 
   it('un fallo de red al listar muestra un mensaje de error legible', async () => {
@@ -184,7 +193,7 @@ describe('listado de empresas', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas');
     http
-      .expectOne('/api/empresas')
+      .expectOne((r) => r.url === '/api/empresas')
       .flush({ codigo: 'ERROR_INTERNO' }, { status: 500, statusText: 'Internal Server Error' });
     await esperarMicrotareas();
     harness.detectChanges();
@@ -335,7 +344,7 @@ describe('formulario de empresa', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas/nueva');
     // profesorGuard deniega y "/" redirige al listado.
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });
@@ -344,7 +353,7 @@ describe('formulario de empresa', () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     const componente = await harness.navigateByUrl('/empresas/nueva', EmpresaFormularioPage);
-    http.expectOne('/api/empresas').flush([EMPRESA_PUBLICADA]); // catálogo derivado del listado
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_PUBLICADA])); // catálogo derivado del listado
     await esperarMicrotareas();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -353,7 +362,7 @@ describe('formulario de empresa', () => {
     c.toggleEtiqueta(20, true);
     const envio = c.enviar() as Promise<void>;
 
-    const creacion = http.expectOne('/api/empresas');
+    const creacion = http.expectOne((r) => r.url === '/api/empresas');
     expect(creacion.request.method).toBe('POST');
     expect(creacion.request.body).toMatchObject({
       nombre: 'Nueva SL',
@@ -366,7 +375,7 @@ describe('formulario de empresa', () => {
 
     // La navegación a /empresas/5/editar monta una nueva instancia de la
     // página, que vuelve a pedir su propio catálogo y la empresa recién creada.
-    http.expectOne('/api/empresas').flush([EMPRESA_NO_PUBLICADA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
     await esperarMicrotareas();
     http.expectOne('/api/empresas/5').flush({ ...EMPRESA_NO_PUBLICADA, id: 5, nombre: 'Nueva SL' });
     await esperarMicrotareas();
@@ -378,7 +387,7 @@ describe('formulario de empresa', () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
-    http.expectOne('/api/empresas').flush([EMPRESA_NO_PUBLICADA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
     await esperarMicrotareas();
@@ -424,7 +433,7 @@ describe('formulario de empresa', () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
-    http.expectOne('/api/empresas').flush([EMPRESA_NO_PUBLICADA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
     await esperarMicrotareas();
@@ -448,7 +457,7 @@ describe('formulario de empresa', () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
-    http.expectOne('/api/empresas').flush([EMPRESA_NO_PUBLICADA]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
     await esperarMicrotareas();
     http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
     await esperarMicrotareas();
