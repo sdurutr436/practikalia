@@ -28,4 +28,12 @@ public class GradoController {
     public List<GradoDto> listar() {
         return gradoRepository.findAll().stream().map(GradoDto::de).toList();
     }
+
+    @Operation(summary = "Listar grados sin sesión", description = "Mismo catálogo que `GET /api/grados`, pero público: "
+            + "lo necesita el formulario de auto-registro, que todavía no tiene sesión. Ningún dato sensible, "
+            + "el mismo `{id, nombre}` que ya ve cualquier usuario autenticado.")
+    @GetMapping("/publico")
+    public List<GradoDto> listarPublico() {
+        return listar();
+    }
 }

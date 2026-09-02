@@ -36,6 +36,7 @@ public class SecurityConfig {
                                 JwtService.AUTORIDAD_CAMBIO_PENDIENTE, "ROLE_ALUMNO", "ROLE_PROFESOR")
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
                                 .hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/grados/publico").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/grados").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/etiquetas").hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/usuarios/*/etiquetas").hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN")

@@ -53,4 +53,13 @@ class GradoControllerIntegrationTest {
         mockMvc.perform(get("/api/grados"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void sinAutenticarListaElCatalogoPublico() throws Exception {
+        gradoRepository.save(new Grado("SMR"));
+
+        mockMvc.perform(get("/api/grados/publico"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombre").value("SMR"));
+    }
 }
