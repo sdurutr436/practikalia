@@ -48,6 +48,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/empresas/*/interesados").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/empresas/afinidad").hasAuthority("ROLE_ALUMNO")
                         .requestMatchers(HttpMethod.GET, "/api/alumnos/*/afinidad").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        // Sin estos, el listado de alumnado caería en anyRequest(), que admite ROLE_ALUMNO.
+                        .requestMatchers(HttpMethod.GET, "/api/alumnos").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/alumnos/plantilla.csv").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/alumnos/importar").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/alumnos/*").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/empresas/*/asignaciones").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")

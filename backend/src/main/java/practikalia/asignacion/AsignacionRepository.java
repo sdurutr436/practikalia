@@ -8,6 +8,9 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, Long> {
 
     List<Asignacion> findByAlumnoId(Long alumnoId);
 
+    /** Las asignaciones en curso de varios alumnos a la vez, para no consultar tarjeta a tarjeta. */
+    List<Asignacion> findByAlumnoIdInAndFechaFinIsNull(List<Long> alumnoIds);
+
     List<Asignacion> findByEmpresaId(Long empresaId);
 
     boolean existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(Long alumnoId, Long empresaId, Long gradoId, int anio);
