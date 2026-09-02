@@ -21,7 +21,7 @@ interface Seccion {
 const SECCIONES_PROFESOR: Seccion[] = [
   { etiqueta: 'Panel', icono: 'panel', ruta: '/panel' },
   { etiqueta: 'Empresas', icono: 'empresa', ruta: '/empresas' },
-  { etiqueta: 'Reseñas', icono: 'moderacion', ruta: '/reviews/pendientes' },
+  { etiqueta: 'Reseñas', icono: 'moderacion', ruta: '/reviews' },
   { etiqueta: 'Alumnado', icono: 'persona', ruta: '/alumnado' },
   { etiqueta: 'Asignaciones', icono: 'asignaciones', ruta: '/asignaciones' },
   { etiqueta: 'Sectores y etiquetas', icono: 'etiqueta', ruta: '/sectores' },

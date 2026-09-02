@@ -102,7 +102,7 @@
                 <span class="c-etiqueta">{{ pendientes().length }} por moderar</span>
               }
             </h2>
-            <app-boton [secundario]="true" enlace="/reviews/pendientes">Ver todas</app-boton>
+            <app-boton [secundario]="true" enlace="/reviews">Ver todas</app-boton>
           </div>
 
           @if (pendientes().length === 0) {
@@ -134,12 +134,12 @@
                     >
                       Aprobar
                     </app-boton>
-                    <!-- Rechazar exige motivo, y el motivo se escribe en la cola
-                         de moderación: aquí solo se lleva allí, señalando cuál. -->
+                    <!-- Rechazar exige motivo, y el motivo se escribe en el modal
+                         de la cola: aquí solo se lleva allí, señalando cuál. -->
                     <app-boton
                       icono="rechazar"
                       [secundario]="true"
-                      enlace="/reviews/pendientes"
+                      enlace="/reviews"
                       [params]="{ rechazar: review.id }"
                     >
                       Rechazar

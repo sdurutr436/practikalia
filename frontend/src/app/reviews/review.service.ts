@@ -5,7 +5,9 @@ import {
   CalificacionConfig,
   CrearReviewRequest,
   EditarReviewRequest,
+  EstadoReview,
   ModerarReviewRequest,
+  PaginaReviews,
   Review,
 } from './review.model';
 
@@ -31,6 +33,19 @@ export class ReviewService {
 
   listarPendientes(): Promise<Review[]> {
     return firstValueFrom(this.http.get<Review[]>('/api/reviews/pendientes'));
+  }
+
+  listarPorEstado(estado: EstadoReview, pagina: number, tamano: number): Promise<PaginaReviews> {
+    return firstValueFrom(
+      this.http.get<PaginaReviews>('/api/reviews', {
+        params: { estado, pagina, tamano },
+      }),
+    );
+  }
+
+  /** Devuelve una reseña ya moderada a la cola de pendientes. */
+  revertir(id: number): Promise<Review> {
+    return firstValueFrom(this.http.put<Review>(`/api/reviews/${id}/revertir`, {}));
   }
 
   moderar(id: number, request: ModerarReviewRequest): Promise<Review> {

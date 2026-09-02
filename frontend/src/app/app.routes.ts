@@ -15,7 +15,7 @@ import { EmpresaFormularioPage } from './empresas/empresa-formulario-page/empres
 import { AsignacionFormularioPage } from './asignaciones/asignacion-formulario-page/asignacion-formulario-page';
 import { AlumnoAsignacionesPage } from './asignaciones/alumno-asignaciones-page/alumno-asignaciones-page';
 import { ReviewFormularioPage } from './reviews/review-formulario-page/review-formulario-page';
-import { ReviewsPendientesPage } from './reviews/reviews-pendientes-page/reviews-pendientes-page';
+import { ReviewsPage } from './reviews/reviews-page/reviews-page';
 import { MisInteresesPage } from './intereses/mis-intereses-page/mis-intereses-page';
 import { MisEtiquetasPage } from './perfil/mis-etiquetas-page/mis-etiquetas-page';
 import { AfinidadPage } from './afinidad/afinidad-page/afinidad-page';
@@ -104,10 +104,12 @@ export const routes: Routes = [
     title: 'Afinidad del alumnado',
     canActivate: [profesorGuard],
   },
+  // Una sola pantalla; la pastilla (pendientes/aprobadas/rechazadas) viaja en
+  // `?estado=`, igual que `?publicada=` en el listado de empresas.
   {
-    path: 'reviews/pendientes',
-    title: 'Reseñas por moderar',
-    component: ReviewsPendientesPage,
+    path: 'reviews',
+    title: 'Reseñas',
+    component: ReviewsPage,
     canActivate: [profesorGuard],
   },
   {

@@ -140,6 +140,6 @@ describe('panel del profesorado', () => {
     );
 
     // El motivo se escribe allí: aquí no se llama a moderar (lo verifica http.verify()).
-    expect(enlace?.getAttribute('href')).toBe('/reviews/pendientes?rechazar=3');
+    expect(enlace?.getAttribute('href')).toBe('/reviews?rechazar=3');
   });
 });

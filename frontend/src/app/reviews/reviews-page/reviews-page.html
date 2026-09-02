@@ -1,0 +1,123 @@
+<main class="o-pagina">
+  <app-cabecera titulo="Reseñas" />
+
+  <ul class="o-etiquetas">
+    @for (pastilla of pastillas; track pastilla.clave) {
+      <li>
+        <a
+          class="c-filtro"
+          [class.c-filtro--activo]="clave() === pastilla.clave"
+          routerLink="/reviews"
+          [queryParams]="{ estado: pastilla.clave, pagina: null, rechazar: null }"
+        >
+          {{ pastilla.etiqueta }}
+        </a>
+      </li>
+    }
+  </ul>
+
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="reviews().length === 0"
+    [mensajeVacio]="mensajeVacio()"
+  >
+    <ul class="o-rejilla">
+      @for (review of reviews(); track review.id) {
+        <li class="c-fila c-resena">
+          <div class="c-resena__cabecera">
+            <a class="c-resena__empresa" [routerLink]="['/empresas', review.empresaId]">
+              {{ review.empresaNombre }}
+            </a>
+            @if (calificacion(); as rango) {
+              <app-estrellas [valor]="review.calificacion" [maximo]="rango.max" />
+            }
+          </div>
+
+          <p class="c-resena__autor">
+            @if (review.alumnoNombre; as nombre) {
+              <strong>{{ nombre }}</strong>
+            }
+            <span class="c-resena__correo">{{ review.alumnoCorreo }}</span>
+          </p>
+
+          <blockquote class="c-resena__texto">«{{ review.contenido }}»</blockquote>
+
+          @if (review.motivoRechazo; as motivo) {
+            <p class="c-resena__motivo">
+              <span class="c-resena__motivo-rotulo">Motivo del rechazo:</span> {{ motivo }}
+            </p>
+          }
+
+          @if (errorModeracion()?.id === review.id) {
+            <app-alerta>{{ errorModeracion()?.mensaje }}</app-alerta>
+          }
+
+          <div class="c-acciones">
+            @if (esPendiente()) {
+              <app-boton
+                icono="aprobar"
+                [deshabilitado]="moderandoId() !== null"
+                (click)="aprobar(review)"
+              >
+                Aprobar
+              </app-boton>
+              <app-boton
+                icono="rechazar"
+                [secundario]="true"
+                [deshabilitado]="moderandoId() !== null"
+                (click)="abrirRechazo(review)"
+              >
+                Rechazar
+              </app-boton>
+            } @else {
+              <!-- Ya moderada: lo único que queda es devolverla a la cola. -->
+              <app-boton
+                icono="volver"
+                [secundario]="true"
+                [deshabilitado]="moderandoId() !== null"
+                (click)="revertir(review)"
+              >
+                Devolver a pendientes
+              </app-boton>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  </app-estado>
+
+  @if (paginas() > 1) {
+    <nav class="c-paginacion" aria-label="Páginas de reseñas">
+      <app-boton
+        [secundario]="true"
+        icono="volver"
+        [deshabilitado]="paginaActual() === 0"
+        (click)="irAPagina(paginaActual() - 1)"
+      >
+        Anterior
+      </app-boton>
+      <span class="c-paginacion__posicion" aria-live="polite">
+        Página {{ paginaActual() + 1 }} de {{ paginas() }} · {{ total() }} reseñas
+      </span>
+      <app-boton
+        [secundario]="true"
+        [deshabilitado]="paginaActual() + 1 >= paginas()"
+        (click)="irAPagina(paginaActual() + 1)"
+      >
+        Siguiente
+      </app-boton>
+    </nav>
+  }
+</main>
+
+@if (rechazando(); as review) {
+  <app-rechazo-modal
+    [review]="review"
+    [maximoEstrellas]="calificacion()?.max ?? 5"
+    [enviando]="moderandoId() === review.id"
+    [error]="errorRechazo()"
+    (confirmar)="confirmarRechazo($event)"
+    (cerrar)="cerrarRechazo()"
+  />
+}
