@@ -193,4 +193,89 @@ describe('listado de alumnado', () => {
 
     expect(harness.routeNativeElement?.textContent).toContain('Línea 3');
   });
+
+  /**
+   * `?nuevo=1` no carga en el primer paso: abre el alta y se quita de la URL,
+   * y es esa navegación la que dispara la única carga.
+   */
+  const abrirAlta = async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/alumnado?nuevo=1');
+    http.expectOne('/api/grados/publico').flush([{ id: 1, nombre: 'DAW' }]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+    await esperarMicrotareas();
+    http.expectOne((r) => r.url === '/api/alumnos').flush(pagina([]));
+    await esperarMicrotareas();
+    harness.detectChanges();
+    return harness;
+  };
+
+  const escribirFicha = (raiz: Element) => {
+    const escribir = (id: string, valor: string) => {
+      const campo = raiz.querySelector(id) as HTMLInputElement;
+      campo.value = valor;
+      campo.dispatchEvent(new Event('input'));
+    };
+    escribir('#alumno-nombre', 'Rocío');
+    escribir('#alumno-apellido1', 'Delgado');
+    escribir('#alumno-dni', '12345678Z');
+    escribir('#alumno-correo', 'rocio@centro.es');
+  };
+
+  it('la cabecera abre el alta con la ficha vacía y crea el alumno', async () => {
+    await entrar(false);
+    const harness = await abrirAlta();
+    const raiz = harness.routeNativeElement as Element;
+
+    // Modal en modo alta: título propio y campos en blanco.
+    expect(raiz.textContent).toContain('Nuevo alumno');
+    expect((raiz.querySelector('#alumno-correo') as HTMLInputElement).value).toBe('');
+    expect(boton(raiz, 'Crear alumno')).toBeDefined();
+
+    escribirFicha(raiz);
+    harness.detectChanges();
+    boton(raiz, 'Crear alumno')?.click();
+
+    const peticion = http.expectOne('/api/alumnos');
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual({
+      nombre: 'Rocío',
+      apellido1: 'Delgado',
+      apellido2: null,
+      dni: '12345678Z',
+      correo: 'rocio@centro.es',
+      gradoId: null,
+      anio: null,
+    });
+    peticion.flush({ ...PENDIENTE, id: 9, correo: 'rocio@centro.es', activo: true });
+    await esperarMicrotareas();
+
+    http.expectOne((r) => r.url === '/api/alumnos').flush(pagina([]));
+    await esperarMicrotareas();
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('DNI sin la letra');
+  });
+
+  it('el alta con un DNI ya usado deja el modal abierto con el error', async () => {
+    await entrar(false);
+    const harness = await abrirAlta();
+    const raiz = harness.routeNativeElement as Element;
+
+    escribirFicha(raiz);
+    harness.detectChanges();
+    boton(raiz, 'Crear alumno')?.click();
+
+    http
+      .expectOne('/api/alumnos')
+      .flush(
+        { codigo: 'DNI_YA_REGISTRADO', mensaje: 'Ya existe una cuenta con ese DNI' },
+        { status: 409, statusText: 'Conflict' },
+      );
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    expect(raiz.querySelector('dialog')).not.toBeNull();
+    expect(raiz.textContent).toContain('Ya hay una cuenta con ese DNI');
+  });
 });

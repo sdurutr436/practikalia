@@ -19,7 +19,7 @@ import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { IconoComponent } from '../../compartido/icono/icono';
 import { AlumnoModalComponent } from '../alumno-modal/alumno-modal';
-import { Alumno, AlumnadoService, EditarAlumnoRequest, PaginaAlumnos } from '../alumnado.service';
+import { Alumno, AlumnadoService, FichaAlumnoRequest, PaginaAlumnos } from '../alumnado.service';
 
 /** Tres columnas por tres filas, igual que empresas y reseñas. */
 const POR_PAGINA = 9;
@@ -49,6 +49,8 @@ const VACIOS: Record<string, string> = {
 const MENSAJES_ALUMNADO: Record<string, string> = {
   CORREO_YA_EXISTE: 'Ya hay otra cuenta con ese correo.',
   DNI_INVALIDO: 'El DNI no es válido: revisa el número y la letra.',
+  DNI_YA_REGISTRADO: 'Ya hay una cuenta con ese DNI.',
+  CORREO_DOMINIO_NO_PERMITIDO: 'Ese correo no es de un dominio que admita el centro.',
   USUARIO_NO_ENCONTRADO: 'Ese alumno ya no existe.',
   GRADO_NO_ENCONTRADO: 'La clase seleccionada ya no existe.',
   ACCESO_DENEGADO: 'Solo un administrador puede confirmar cuentas.',
@@ -85,6 +87,8 @@ export class AlumnadoPage {
   protected readonly resultado = signal<PaginaAlumnos | null>(null);
   protected readonly grados = signal<GradoOpcion[]>([]);
   protected readonly editando = signal<Alumno | null>(null);
+  /** El modal está abierto: con `editando()` a null es un alta. */
+  protected readonly fichaAbierta = signal(false);
   protected readonly guardando = signal(false);
   protected readonly errorFicha = signal<string | null>(null);
   protected readonly confirmandoId = signal<number | null>(null);
@@ -115,8 +119,24 @@ export class AlumnadoPage {
   constructor() {
     void this.cargarGrados();
     effect(() => {
-      this.parametros();
-      untracked(() => void this.cargar());
+      const parametros = this.parametros();
+      untracked(() => {
+        // `?nuevo=` de la cabecera es una orden de un solo uso: abre el alta y
+        // se quita de la URL en el acto. Se sale sin cargar porque esa misma
+        // navegación vuelve a disparar el effect, y así se carga una sola vez
+        // (y recargar la página no reabre el alta).
+        if (parametros.get('nuevo')) {
+          this.abrirFicha(null);
+          void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { nuevo: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+          });
+          return;
+        }
+        void this.cargar();
+      });
     });
   }
 
@@ -133,26 +153,35 @@ export class AlumnadoPage {
     });
   }
 
-  protected abrirFicha(alumno: Alumno): void {
+  protected abrirFicha(alumno: Alumno | null): void {
     this.errorFicha.set(null);
     this.editando.set(alumno);
+    this.fichaAbierta.set(true);
   }
 
   protected cerrarFicha(): void {
+    this.fichaAbierta.set(false);
     this.editando.set(null);
     this.errorFicha.set(null);
   }
 
-  protected async guardarFicha(cambios: EditarAlumnoRequest): Promise<void> {
-    const alumno = this.editando();
-    if (!alumno || this.guardando()) {
+  protected async guardarFicha(ficha: FichaAlumnoRequest): Promise<void> {
+    if (this.guardando()) {
       return;
     }
+    const alumno = this.editando();
     this.guardando.set(true);
     this.errorFicha.set(null);
     try {
-      await this.alumnadoService.editar(alumno.id, cambios);
-      this.editando.set(null);
+      if (alumno) {
+        await this.alumnadoService.editar(alumno.id, ficha);
+      } else {
+        await this.alumnadoService.crear(ficha);
+        this.aviso.set(
+          `${ficha.nombre} ${ficha.apellido1} ya puede entrar con su DNI sin la letra como contraseña.`,
+        );
+      }
+      this.cerrarFicha();
       await this.cargar();
     } catch (e) {
       this.errorFicha.set(mensajeDeError(e, MENSAJES_ALUMNADO));

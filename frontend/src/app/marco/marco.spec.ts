@@ -83,8 +83,7 @@ describe('marco de la aplicación', () => {
   it('el acordeón de la barra abre el mismo menú que la hamburguesa', () => {
     const fixture = pintar('ALUMNO');
     const menu: HTMLElement = fixture.nativeElement.querySelector('#menu-principal');
-    const acordeon: HTMLButtonElement =
-      fixture.nativeElement.querySelector('.c-acordeon__boton');
+    const acordeon: HTMLButtonElement = fixture.nativeElement.querySelector('.c-acordeon__boton');
 
     // En pantalla estrecha la hamburguesa se esconde y este botón la sustituye,
     // así que los dos tienen que mover el mismo estado.
@@ -92,9 +91,9 @@ describe('marco de la aplicación', () => {
     fixture.detectChanges();
 
     expect(menu.hidden).toBe(false);
-    expect(fixture.nativeElement.querySelector('.c-barra__alternar').getAttribute('aria-expanded')).toBe(
-      'true',
-    );
+    expect(
+      fixture.nativeElement.querySelector('.c-barra__alternar').getAttribute('aria-expanded'),
+    ).toBe('true');
   });
 
   it('cerrar sesión desde el marco limpia la sesión y vuelve a login', async () => {

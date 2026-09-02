@@ -2,18 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-/**
- * Alta suelta de alumno. `contrasenaTemporal` llega en claro y **solo en esta
- * respuesta**: si no se anota aquí, no hay forma de recuperarla. (Las cuentas
- * importadas por CSV no pasan por aquí: nacen con el DNI de contraseña.)
- */
-export interface AlumnoCreado {
-  id: number;
-  correo: string;
-  rol: 'ALUMNO';
-  contrasenaTemporal: string;
-}
-
 /** Fila del listado de alumnado. */
 export interface Alumno {
   id: number;
@@ -38,7 +26,8 @@ export interface PaginaAlumnos {
   paginas: number;
 }
 
-export interface EditarAlumnoRequest {
+/** Ficha del modal. La misma para dar de alta y para editar. */
+export interface FichaAlumnoRequest {
   nombre: string;
   apellido1: string;
   apellido2: string | null;
@@ -52,8 +41,9 @@ export interface EditarAlumnoRequest {
 export class AlumnadoService {
   private readonly http = inject(HttpClient);
 
-  crear(correo: string): Promise<AlumnoCreado> {
-    return firstValueFrom(this.http.post<AlumnoCreado>('/api/usuarios', { correo, rol: 'ALUMNO' }));
+  /** Alta a mano: nace confirmada y su contraseña es el DNI sin la letra. */
+  crear(ficha: FichaAlumnoRequest): Promise<Alumno> {
+    return firstValueFrom(this.http.post<Alumno>('/api/alumnos', ficha));
   }
 
   /** `activo` a `null` para la pastilla «Todos». */
@@ -65,7 +55,7 @@ export class AlumnadoService {
     return firstValueFrom(this.http.get<PaginaAlumnos>('/api/alumnos', { params }));
   }
 
-  editar(id: number, request: EditarAlumnoRequest): Promise<Alumno> {
+  editar(id: number, request: FichaAlumnoRequest): Promise<Alumno> {
     return firstValueFrom(this.http.put<Alumno>(`/api/alumnos/${id}`, request));
   }
 

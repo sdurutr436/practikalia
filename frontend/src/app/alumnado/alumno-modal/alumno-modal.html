@@ -1,4 +1,4 @@
-<app-modal titulo="Editar alumno" (salir)="pedirSalida()">
+<app-modal [titulo]="titulo()" (salir)="pedirSalida()">
   <form class="c-ficha" [formGroup]="form" (ngSubmit)="enviar()">
     <app-campo
       etiqueta="Nombre"
@@ -41,7 +41,11 @@
       para="alumno-dni"
       [requerido]="true"
       [control]="form.controls.dni"
-      ayuda="Cambiarlo no cambia su contraseña."
+      [ayuda]="
+        esAlta()
+          ? 'Será su contraseña de entrada, sin la letra.'
+          : 'Cambiarlo no cambia su contraseña.'
+      "
       error="Revisa el número y la letra."
     >
       <input class="c-campo__entrada" id="alumno-dni" type="text" formControlName="dni" />
@@ -90,7 +94,7 @@
       [deshabilitado]="form.invalid"
       (click)="enviar()"
     >
-      Guardar cambios
+      {{ esAlta() ? 'Crear alumno' : 'Guardar cambios' }}
     </app-boton>
     <app-boton [secundario]="true" [deshabilitado]="guardando()" (click)="pedirSalida()">
       Cancelar
@@ -100,7 +104,7 @@
 
 @if (confirmandoSalida()) {
   <app-modal titulo="¿Seguro que quieres salir?" (salir)="seguirEditando()">
-    <p>Se perderán los cambios que has hecho en la ficha.</p>
+    <p>Se perderá lo que has escrito en la ficha.</p>
 
     <div acciones class="c-acciones">
       <app-boton icono="salir" (click)="cerrar.emit()">Salir sin guardar</app-boton>

@@ -12,7 +12,7 @@ import { BotonComponent } from '../../compartido/boton/boton';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { ModalComponent } from '../../compartido/modal/modal';
 import { GradoOpcion } from '../../auth/registro.service';
-import { Alumno, EditarAlumnoRequest } from '../alumnado.service';
+import { Alumno, FichaAlumnoRequest } from '../alumnado.service';
 
 /** Un año lectivo se escribe con cuatro cifras; el rango evita erratas de tecleo. */
 function anioValido(control: AbstractControl<string>): ValidationErrors | null {
@@ -24,9 +24,12 @@ function anioValido(control: AbstractControl<string>): ValidationErrors | null {
 }
 
 /**
- * Ficha editable de un alumno. Cambiar el correo cambia con cuál inicia sesión
- * esa persona, y cambiar el DNI **no** recalcula su contraseña: puede haber
- * entrado ya y haber puesto la suya.
+ * Ficha de alumno, la misma para dar de alta y para editar: con `alumno` en
+ * `null` el modal se abre vacío y titula «Nuevo alumno».
+ *
+ * Al editar, cambiar el correo cambia con cuál inicia sesión esa persona, y
+ * cambiar el DNI **no** recalcula su contraseña: puede haber entrado ya y
+ * haber puesto la suya.
  */
 @Component({
   selector: 'app-alumno-modal',
@@ -34,15 +37,18 @@ function anioValido(control: AbstractControl<string>): ValidationErrors | null {
   templateUrl: './alumno-modal.html',
 })
 export class AlumnoModalComponent {
-  readonly alumno = input.required<Alumno>();
+  /** `null` = alta. */
+  readonly alumno = input<Alumno | null>(null);
   readonly grados = input.required<GradoOpcion[]>();
   readonly guardando = input(false);
   readonly error = input<string | null>(null);
 
-  readonly guardar = output<EditarAlumnoRequest>();
+  readonly guardar = output<FichaAlumnoRequest>();
   readonly cerrar = output<void>();
 
   protected readonly confirmandoSalida = signal(false);
+  protected readonly esAlta = computed(() => this.alumno() === null);
+  protected readonly titulo = computed(() => (this.esAlta() ? 'Nuevo alumno' : 'Editar alumno'));
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     nombre: ['', Validators.required],
@@ -62,13 +68,13 @@ export class AlumnoModalComponent {
     effect(() => {
       const alumno = this.alumno();
       this.form.setValue({
-        nombre: alumno.nombre ?? '',
-        apellido1: alumno.apellido1 ?? '',
-        apellido2: alumno.apellido2 ?? '',
-        dni: alumno.dni ?? '',
-        correo: alumno.correo,
-        gradoId: alumno.grado ? String(alumno.grado.id) : '',
-        anio: alumno.anio ? String(alumno.anio) : '',
+        nombre: alumno?.nombre ?? '',
+        apellido1: alumno?.apellido1 ?? '',
+        apellido2: alumno?.apellido2 ?? '',
+        dni: alumno?.dni ?? '',
+        correo: alumno?.correo ?? '',
+        gradoId: alumno?.grado ? String(alumno.grado.id) : '',
+        anio: alumno?.anio ? String(alumno.anio) : '',
       });
       this.form.markAsPristine();
       this.inicial.set(JSON.stringify(this.form.getRawValue()));

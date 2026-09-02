@@ -141,9 +141,9 @@
   }
 </main>
 
-@if (editando(); as alumno) {
+@if (fichaAbierta()) {
   <app-alumno-modal
-    [alumno]="alumno"
+    [alumno]="editando()"
     [grados]="grados()"
     [guardando]="guardando()"
     [error]="errorFicha()"

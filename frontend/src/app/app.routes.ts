@@ -19,7 +19,6 @@ import { ReviewsPage } from './reviews/reviews-page/reviews-page';
 import { MisInteresesPage } from './intereses/mis-intereses-page/mis-intereses-page';
 import { MisEtiquetasPage } from './perfil/mis-etiquetas-page/mis-etiquetas-page';
 import { AfinidadPage } from './afinidad/afinidad-page/afinidad-page';
-import { AlumnoFormularioPage } from './alumnado/alumno-formulario-page/alumno-formulario-page';
 import { AlumnadoPage } from './alumnado/alumnado-page/alumnado-page';
 
 export const routes: Routes = [
@@ -86,12 +85,6 @@ export const routes: Routes = [
     component: EmpresaDetallePage,
     title: 'Ficha de empresa',
     canActivate: [autenticadoGuard],
-  },
-  {
-    path: 'alumnos/nuevo',
-    component: AlumnoFormularioPage,
-    title: 'Nuevo alumno',
-    canActivate: [profesorGuard],
   },
   {
     path: 'alumnos/:alumnoId/asignaciones',
