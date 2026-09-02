@@ -259,4 +259,96 @@ class ReviewControllerIntegrationTest {
                 .andExpect(jsonPath("$.min").value(1))
                 .andExpect(jsonPath("$.max").value(5));
     }
+
+    private final org.springframework.test.web.servlet.request.RequestPostProcessor comoProfesor =
+            user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"));
+    private final org.springframework.test.web.servlet.request.RequestPostProcessor comoAlumno =
+            user("alumno@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"));
+
+    /** Cada review necesita su propia asignación: solo se admite una por asignación. */
+    private Review guardarReview(EstadoReview estado) {
+        Usuario suyo = usuarioRepository.save(new Usuario(
+                "alu-" + estado + "@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.ALUMNO));
+        suyo.setNombre("Lucía");
+        suyo.setApellido1("Pérez");
+        usuarioRepository.save(suyo);
+        Review review = new Review(crearAsignacion(suyo), suyo, "contenido de prueba", 4, estado);
+        if (estado != EstadoReview.PENDIENTE) {
+            review.setModeradaPor(profesor);
+            review.setFechaModeracion(java.time.Instant.now());
+            review.setMotivoRechazo(estado == EstadoReview.RECHAZADA ? "Motivo de rechazo suficientemente largo" : null);
+        }
+        return reviewRepository.save(review);
+    }
+
+    @Test
+    void profesorListaPorEstadoPaginadoConNombreDeEmpresaYAlumno() throws Exception {
+        Review aprobada = guardarReview(EstadoReview.APROBADA);
+
+        mockMvc.perform(get("/api/reviews").param("estado", "APROBADA").param("tamano", "9").with(comoProfesor))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.length()").value(1))
+                .andExpect(jsonPath("$.contenido[0].id").value(aprobada.getId()))
+                .andExpect(jsonPath("$.contenido[0].empresaNombre").value("Acme"))
+                .andExpect(jsonPath("$.contenido[0].alumnoNombre").value("Lucía Pérez"))
+                .andExpect(jsonPath("$.paginas").value(1));
+    }
+
+    @Test
+    void elAlumnoSinNombreLlegaConAlumnoNombreNulo() throws Exception {
+        Asignacion asignacion = crearAsignacion(alumno);
+        reviewRepository.save(new Review(asignacion, alumno, "sin nombre", 3, EstadoReview.PENDIENTE));
+
+        mockMvc.perform(get("/api/reviews").param("estado", "PENDIENTE").with(comoProfesor))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido[0].alumnoNombre").doesNotExist())
+                .andExpect(jsonPath("$.contenido[0].alumnoCorreo").value("alumno@iesejemplo.es"));
+    }
+
+    @Test
+    void alumnoNoListaReviewsPorEstado() throws Exception {
+        mockMvc.perform(get("/api/reviews").param("estado", "PENDIENTE").with(comoAlumno))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void rechazarConMotivoDemasiadoCortoDevuelve400() throws Exception {
+        Review pendiente = guardarReview(EstadoReview.PENDIENTE);
+
+        mockMvc.perform(put("/api/reviews/" + pendiente.getId() + "/moderar")
+                        .with(csrf())
+                        .with(comoProfesor)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ModerarReviewRequest(EstadoReview.RECHAZADA, "Corto"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("CAMPO_INVALIDO"));
+    }
+
+    @Test
+    void revertirDevuelveLaReviewAPendienteYLimpiaElMotivo() throws Exception {
+        Review rechazada = guardarReview(EstadoReview.RECHAZADA);
+
+        mockMvc.perform(put("/api/reviews/" + rechazada.getId() + "/revertir").with(csrf()).with(comoProfesor))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("PENDIENTE"))
+                .andExpect(jsonPath("$.motivoRechazo").doesNotExist())
+                .andExpect(jsonPath("$.moderadaPorCorreo").doesNotExist());
+    }
+
+    @Test
+    void revertirUnaReviewYaPendienteDevuelve400() throws Exception {
+        Review pendiente = guardarReview(EstadoReview.PENDIENTE);
+
+        mockMvc.perform(put("/api/reviews/" + pendiente.getId() + "/revertir").with(csrf()).with(comoProfesor))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void alumnoNoPuedeRevertirUnaModeracion() throws Exception {
+        Review aprobada = guardarReview(EstadoReview.APROBADA);
+
+        mockMvc.perform(put("/api/reviews/" + aprobada.getId() + "/revertir").with(csrf()).with(comoAlumno))
+                .andExpect(status().isForbidden());
+    }
 }

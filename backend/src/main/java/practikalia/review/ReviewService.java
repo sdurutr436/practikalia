@@ -3,6 +3,7 @@ package practikalia.review;
 import practikalia.asignacion.Asignacion;
 import practikalia.asignacion.AsignacionException;
 import practikalia.asignacion.AsignacionRepository;
+import practikalia.common.PaginaDto;
 import practikalia.empresa.EmpresaException;
 import practikalia.empresa.EmpresaRepository;
 import practikalia.usuario.Rol;
@@ -14,11 +15,17 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReviewService {
+
+    /** Rechazar exige una explicación, no un "no vale": el alumno la lee para saber qué corregir. */
+    private static final int MINIMO_MOTIVO_RECHAZO = 20;
 
     private final ReviewRepository reviewRepository;
     private final AsignacionRepository asignacionRepository;
@@ -120,6 +127,37 @@ public class ReviewService {
         return reviewRepository.findByEstado(EstadoReview.PENDIENTE).stream().map(ReviewDto::de).toList();
     }
 
+    /**
+     * Cola de moderación paginada, un estado por pastilla. Orden fijo por fecha
+     * descendente (y por id para desempatar) para que paginar sea estable.
+     */
+    @Transactional(readOnly = true)
+    public PaginaDto<ReviewDto> listarPorEstado(EstadoReview estado, int pagina, int tamano) {
+        Pageable pageable = PageRequest.of(pagina, tamano, Sort.by(Sort.Direction.DESC, "fechaCreacion", "id"));
+        return PaginaDto.de(reviewRepository.findByEstado(estado, pageable), ReviewDto::de);
+    }
+
+    /**
+     * Devuelve una review ya moderada a la cola, para deshacer un clic
+     * equivocado sin depender de que el alumno la edite. Limpia el rastro de la
+     * moderación anterior: quien vuelva a moderarla parte de cero.
+     */
+    @Transactional
+    public ReviewDto revertirModeracion(Long id) {
+        Review review = reviewRepository.findById(id).orElseThrow(ReviewException::noEncontrada);
+
+        if (review.getEstado() == EstadoReview.PENDIENTE) {
+            throw ReviewException.campoInvalido("La review ya está pendiente de moderar");
+        }
+
+        review.setEstado(EstadoReview.PENDIENTE);
+        review.setModeradaPor(null);
+        review.setFechaModeracion(null);
+        review.setMotivoRechazo(null);
+        reviewRepository.save(review);
+        return ReviewDto.de(review);
+    }
+
     @Transactional
     public ReviewDto moderar(Long id, ModerarReviewRequest request, String correoAutenticado) {
         Review review = reviewRepository.findById(id).orElseThrow(ReviewException::noEncontrada);
@@ -131,8 +169,10 @@ public class ReviewService {
             throw ReviewException.campoInvalido("El estado debe ser APROBADA o RECHAZADA");
         }
         if (request.estado() == EstadoReview.RECHAZADA
-                && (request.motivoRechazo() == null || request.motivoRechazo().isBlank())) {
-            throw ReviewException.campoInvalido("El motivo de rechazo es obligatorio al rechazar una review");
+                && (request.motivoRechazo() == null
+                        || request.motivoRechazo().trim().length() < MINIMO_MOTIVO_RECHAZO)) {
+            throw ReviewException.campoInvalido(
+                    "El motivo de rechazo debe tener al menos " + MINIMO_MOTIVO_RECHAZO + " caracteres");
         }
 
         Usuario moderador = usuarioRepository.findByCorreo(correoAutenticado).orElseThrow();
