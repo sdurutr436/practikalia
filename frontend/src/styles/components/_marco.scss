@@ -58,6 +58,49 @@
   letter-spacing: s.$tracking-ajustado;
 }
 
+// Cabecera estrecha: la marca manda, centrada, y todo lo demás baja al
+// acordeón. La hamburguesa sobra, porque el acordeón abre lo mismo que ella.
+// El corte es 48rem y no las 64rem del resto: la barra aguanta bien hasta que
+// la marca y los tres botones dejan de caber en una línea.
+@media (width < 48rem) {
+  .c-barra__fila {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .c-barra__alternar {
+    display: none;
+  }
+
+  .c-barra__acciones {
+    margin-inline-start: 0;
+    justify-content: center;
+  }
+
+  // En el flujo, debajo del acordeón: flotando taparía las acciones que el
+  // propio acordeón acaba de destapar.
+  .c-menu {
+    position: static;
+    width: 100%;
+  }
+}
+
+// De ahí para arriba manda la barra de siempre: el acordeón se vuelve
+// transparente y las acciones son un hijo más de la fila, empujadas al fondo
+// por su propio margen automático.
+@media (width >= 48rem) {
+  .c-barra .c-acordeon,
+  .c-barra .c-acordeon__contenido,
+  .c-barra .c-acordeon__contenido[hidden] {
+    display: contents;
+  }
+
+  .c-barra .c-acordeon__boton {
+    display: none;
+  }
+}
+
 // Empuja las acciones al extremo opuesto de la hamburguesa. align-items:center
 // en vez del end heredado de .c-acciones (pensado para alinear un botón con
 // el borde inferior de una entrada de formulario, no para una barra de

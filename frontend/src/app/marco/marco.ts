@@ -4,6 +4,7 @@ import { AuthService } from '../auth/auth.service';
 import { FondoComponent } from '../compartido/fondo/fondo';
 import { IconoComponent, NombreIcono } from '../compartido/icono/icono';
 import { BotonComponent } from '../compartido/boton/boton';
+import { AcordeonComponent } from '../compartido/acordeon/acordeon';
 
 interface Seccion {
   etiqueta: string;
@@ -57,7 +58,14 @@ const SECCIONES_ALUMNO: Seccion[] = [
  */
 @Component({
   selector: 'app-marco',
-  imports: [RouterLink, RouterLinkActive, IconoComponent, FondoComponent, BotonComponent],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    IconoComponent,
+    FondoComponent,
+    BotonComponent,
+    AcordeonComponent,
+  ],
   templateUrl: './marco.html',
 })
 export class MarcoComponent {

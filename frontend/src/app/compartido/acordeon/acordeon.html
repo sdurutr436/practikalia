@@ -1,0 +1,14 @@
+<button
+  class="c-acordeon__boton"
+  type="button"
+  [attr.aria-expanded]="abierto()"
+  [attr.aria-controls]="id"
+  (click)="abierto.set(!abierto())"
+>
+  {{ etiqueta() }}
+  <app-icono class="c-acordeon__flecha" nombre="volver" />
+</button>
+
+<div class="c-acordeon__contenido" [id]="id" [hidden]="!abierto()">
+  <ng-content />
+</div>

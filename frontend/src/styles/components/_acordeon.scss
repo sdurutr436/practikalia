@@ -1,0 +1,64 @@
+// Sección plegable genérica (ver app/compartido/acordeon). Solo el botón y el
+// despliegue: lo que se proyecta dentro trae su propio aspecto.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-acordeon {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-acordeon__boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: s.$espaciado-diminuto;
+  padding: s.$espaciado-diminuto s.$espaciado-medio;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: s.$peso-medio;
+  cursor: pointer;
+
+  &:hover {
+    background: s.$color-apagado;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+// La flecha de volver girada, en vez de meter un icono más: mira abajo cuando
+// está cerrado y arriba cuando está abierto.
+.c-acordeon__flecha {
+  rotate: -90deg;
+  transition: rotate s.$transicion;
+
+  .c-acordeon__boton[aria-expanded='true'] & {
+    rotate: 90deg;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.c-acordeon__contenido {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+  transform-origin: top;
+  animation: desplegar s.$transicion ease;
+
+  // `display: grid` gana a la regla del agente de usuario: sin esto, cerrado
+  // se seguiría viendo.
+  &[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

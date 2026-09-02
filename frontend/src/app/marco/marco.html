@@ -16,15 +16,20 @@
 
       <span class="c-barra__marca">Practikalia</span>
 
-      <nav class="c-acciones c-barra__acciones" aria-label="Acciones de la sesión">
-        @if (sesion()?.rol === 'PROFESOR') {
-          <app-boton icono="anadir" enlace="/empresas/nueva">Nueva empresa</app-boton>
-          <app-boton icono="persona" enlace="/alumnos/nuevo">Nuevo alumno</app-boton>
-        }
-        <app-boton icono="salir" [secundario]="true" (click)="cerrarSesion()">
-          Cerrar sesión
-        </app-boton>
-      </nav>
+      <!-- En pantalla estrecha este acordeón es el menú: la hamburguesa se
+           esconde y sus botones bajan aquí. En pantalla ancha el acordeón se
+           vuelve transparente y las acciones vuelven a la fila de la barra. -->
+      <app-acordeon etiqueta="Menú" [(abierto)]="abierto">
+        <nav class="c-acciones c-barra__acciones" aria-label="Acciones de la sesión">
+          @if (sesion()?.rol === 'PROFESOR') {
+            <app-boton icono="anadir" enlace="/empresas/nueva">Nueva empresa</app-boton>
+            <app-boton icono="persona" enlace="/alumnos/nuevo">Nuevo alumno</app-boton>
+          }
+          <app-boton icono="salir" [secundario]="true" (click)="cerrarSesion()">
+            Cerrar sesión
+          </app-boton>
+        </nav>
+      </app-acordeon>
     </div>
 
     <nav class="c-menu" id="menu-principal" aria-label="Menú principal" [hidden]="!abierto()">
