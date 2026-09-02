@@ -56,6 +56,11 @@ public class UsuarioException extends ApiException {
                 "El dominio del correo no está permitido en este centro");
     }
 
+    /** Ya hay una cuenta con ese DNI: es único, y además es la contraseña inicial. */
+    public static UsuarioException dniYaRegistrado() {
+        return new UsuarioException(HttpStatus.CONFLICT, "DNI_YA_REGISTRADO", "Ya existe una cuenta con ese DNI");
+    }
+
     /** Ya hay una cuenta con ese correo al auto-registrarse, activa o pendiente de aprobación. */
     public static UsuarioException correoYaExiste() {
         return new UsuarioException(HttpStatus.CONFLICT, "CORREO_YA_EXISTE", "Ya existe una cuenta con ese correo");

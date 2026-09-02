@@ -77,8 +77,39 @@ public class AlumnoService {
         return PaginaDto.de(alumnos, alumno -> de(alumno, abiertas.get(alumno.getId())));
     }
 
+    /**
+     * Alta a mano desde el modal del listado. Nace confirmada, a diferencia de
+     * las importadas: aquí los datos los acaba de teclear una persona en este
+     * mismo formulario, así que no hay nada que revisar después.
+     */
     @Transactional
-    public AlumnoDto editar(Long id, EditarAlumnoRequest request) {
+    public AlumnoDto crear(FichaAlumnoRequest request) {
+        String correo = request.correo().trim().toLowerCase();
+        String dni = request.dni().trim().toUpperCase();
+
+        if (!UsuarioService.dniValido(dni)) {
+            throw UsuarioException.dniInvalido();
+        }
+        if (!usuarioService.dominioPermitido(correo)) {
+            throw UsuarioException.correoDominioNoPermitido();
+        }
+        if (usuarioRepository.findByCorreo(correo).isPresent()) {
+            throw UsuarioException.correoYaExiste();
+        }
+        if (usuarioRepository.existsByDni(dni)) {
+            throw UsuarioException.dniYaRegistrado();
+        }
+
+        Usuario alumno = new Usuario(correo, passwordEncoder.encode(UsuarioService.contrasenaInicial(dni)), Rol.ALUMNO);
+        aplicar(alumno, request, dni, correo);
+        usuarioRepository.save(alumno);
+        usuarioService.permitirCorreo(correo);
+
+        return de(alumno, null);
+    }
+
+    @Transactional
+    public AlumnoDto editar(Long id, FichaAlumnoRequest request) {
         Usuario alumno = buscarAlumno(id);
         String correo = request.correo().trim().toLowerCase();
         String dni = request.dni().trim().toUpperCase();
@@ -92,6 +123,13 @@ public class AlumnoService {
             }
         });
 
+        aplicar(alumno, request, dni, correo);
+        usuarioRepository.save(alumno);
+
+        return de(alumno, asignacionesAbiertas(List.of(alumno)).get(alumno.getId()));
+    }
+
+    private void aplicar(Usuario alumno, FichaAlumnoRequest request, String dni, String correo) {
         alumno.setNombre(request.nombre().trim());
         alumno.setApellido1(request.apellido1().trim());
         alumno.setApellido2(vacioANulo(request.apellido2()));
@@ -101,9 +139,6 @@ public class AlumnoService {
                 ? null
                 : gradoRepository.findById(request.gradoId()).orElseThrow(GradoException::noEncontrado));
         alumno.setAnio(request.anio());
-        usuarioRepository.save(alumno);
-
-        return de(alumno, asignacionesAbiertas(List.of(alumno)).get(alumno.getId()));
     }
 
     /** La plantilla es solo la cabecera: con filas de ejemplo se acaban importando alumnos inventados. */

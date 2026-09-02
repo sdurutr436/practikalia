@@ -12,6 +12,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -187,7 +188,7 @@ class AlumnoControllerIntegrationTest {
                         .with(csrf())
                         .with(comoProfesor)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new EditarAlumnoRequest(
+                        .content(objectMapper.writeValueAsString(new FichaAlumnoRequest(
                                 "Ana", "Ruiz", null, "12345678Z", "nuevo@iesejemplo.es", grado.getId(), 2026))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.correo").value("nuevo@iesejemplo.es"))
@@ -206,9 +207,73 @@ class AlumnoControllerIntegrationTest {
                         .with(csrf())
                         .with(comoProfesor)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new EditarAlumnoRequest(
+                        .content(objectMapper.writeValueAsString(new FichaAlumnoRequest(
                                 "Ana", "Ruiz", null, "12345678Z", "ocupado@iesejemplo.es", null, null))))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.codigo").value("CORREO_YA_EXISTE"));
+    }
+
+    private FichaAlumnoRequest ficha(String correo, String dni, Long gradoId) {
+        return new FichaAlumnoRequest("Rocío", "Delgado", "Cano", dni, correo, gradoId, 2026);
+    }
+
+    @Test
+    void elAltaAManoNaceConfirmadaConElDniDeContrasenaYEnLaWhitelist() throws Exception {
+        Grado grado = gradoRepository.save(new Grado("DAW"));
+
+        mockMvc.perform(post("/api/alumnos")
+                        .with(csrf())
+                        .with(comoProfesor)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                ficha("rocio@iesejemplo.es", "12345678Z", grado.getId()))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.correo").value("rocio@iesejemplo.es"))
+                .andExpect(jsonPath("$.activo").value(true));
+
+        Usuario creado = usuarioRepository.findByCorreo("rocio@iesejemplo.es").orElseThrow();
+        assertThat(creado.isActivo()).isTrue();
+        assertThat(creado.isDebeCambiarContrasena()).isTrue();
+        assertThat(passwordEncoder.matches("12345678", creado.getContrasenaHash())).isTrue();
+        assertThat(correoPermitidoRepository.existsByCorreo("rocio@iesejemplo.es")).isTrue();
+    }
+
+    @Test
+    void elAltaConUnDniYaUsadoDevuelve409() throws Exception {
+        Usuario existente = guardarAlumno("otro@iesejemplo.es", "Otro", true);
+        existente.setDni("12345678Z");
+        usuarioRepository.save(existente);
+
+        mockMvc.perform(post("/api/alumnos")
+                        .with(csrf())
+                        .with(comoProfesor)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                ficha("rocio@iesejemplo.es", "12345678Z", null))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("DNI_YA_REGISTRADO"));
+    }
+
+    @Test
+    void elAltaConUnDominioDeFueraDelCentroDevuelve400() throws Exception {
+        mockMvc.perform(post("/api/alumnos")
+                        .with(csrf())
+                        .with(comoProfesor)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                ficha("rocio@gmail.com", "12345678Z", null))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("CORREO_DOMINIO_NO_PERMITIDO"));
+    }
+
+    @Test
+    void unAlumnoNoPuedeDarDeAltaAOtro() throws Exception {
+        mockMvc.perform(post("/api/alumnos")
+                        .with(csrf())
+                        .with(comoAlumno)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                ficha("rocio@iesejemplo.es", "12345678Z", null))))
+                .andExpect(status().isForbidden());
     }
 }

@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-/** Edición de la ficha de un alumno desde el listado de alumnado. */
-public record EditarAlumnoRequest(
+/** Ficha de un alumno, tal y como la pide el modal del listado. Sirve al alta y a la edición. */
+public record FichaAlumnoRequest(
         @NotBlank String nombre,
         @NotBlank String apellido1,
         String apellido2,

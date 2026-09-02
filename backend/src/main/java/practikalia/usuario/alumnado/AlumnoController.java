@@ -3,6 +3,7 @@ package practikalia.usuario.alumnado;
 import practikalia.common.PaginaDto;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,13 +47,24 @@ public class AlumnoController {
         return ResponseEntity.ok(alumnoService.listar(activo, pagina, tamano));
     }
 
+    @Operation(summary = "Dar de alta un alumno", description = "Solo profesor/admin. Misma ficha que la edición. "
+            + "Nace **confirmada** (a diferencia de las importadas) y su contraseña inicial es el DNI sin la letra. "
+            + "El correo queda añadido a la whitelist del centro.")
+    @ApiResponse(responseCode = "400", description = "El DNI no es válido, o el dominio del correo no está permitido")
+    @ApiResponse(responseCode = "404", description = "El grado indicado no existe")
+    @ApiResponse(responseCode = "409", description = "Ya hay una cuenta con ese correo o con ese DNI")
+    @PostMapping
+    public ResponseEntity<AlumnoDto> crear(@Valid @RequestBody FichaAlumnoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(alumnoService.crear(request));
+    }
+
     @Operation(summary = "Editar la ficha de un alumno", description = "Solo profesor/admin. Cambiar el correo cambia "
             + "con cuál inicia sesión esa persona. Cambiar el DNI **no** recalcula la contraseña.")
     @ApiResponse(responseCode = "400", description = "El DNI no es válido")
     @ApiResponse(responseCode = "404", description = "El alumno o el grado indicado no existen")
     @ApiResponse(responseCode = "409", description = "Ya hay otra cuenta con ese correo")
     @PutMapping("/{id}")
-    public ResponseEntity<AlumnoDto> editar(@PathVariable Long id, @Valid @RequestBody EditarAlumnoRequest request) {
+    public ResponseEntity<AlumnoDto> editar(@PathVariable Long id, @Valid @RequestBody FichaAlumnoRequest request) {
         return ResponseEntity.ok(alumnoService.editar(id, request));
     }
 
