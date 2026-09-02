@@ -1,14 +1,17 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../asignacion.service';
 import { Grado, UsuarioResumen } from '../asignacion.model';
+import { VolverComponent } from '../../compartido/volver/volver';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 @Component({
   selector: 'app-asignacion-formulario-page',
-  imports: [ReactiveFormsModule, RouterLink, IconoComponent],
+  imports: [ReactiveFormsModule, VolverComponent, AlertaComponent, CampoComponent, BotonComponent],
   templateUrl: './asignacion-formulario-page.html',
 })
 export class AsignacionFormularioPage {

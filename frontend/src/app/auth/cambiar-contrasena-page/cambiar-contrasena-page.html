@@ -4,11 +4,16 @@
     <p>Debes cambiar tu contraseña antes de continuar.</p>
 
     @if (error(); as mensaje) {
-      <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+      <app-alerta>{{ mensaje }}</app-alerta>
     }
 
-    <div class="c-campo">
-      <label class="c-campo__etiqueta" for="contrasena-actual"><app-icono nombre="contrasena" />Contraseña actual</label>
+    <app-campo
+      etiqueta="Contraseña actual"
+      icono="contrasena"
+      para="contrasena-actual"
+      [control]="form.controls.contrasenaActual"
+      error="Introduce la contraseña actual."
+    >
       <input
         class="c-campo__entrada"
         id="contrasena-actual"
@@ -16,13 +21,15 @@
         formControlName="contrasenaActual"
         autocomplete="current-password"
       />
-      @if (form.controls.contrasenaActual.touched && form.controls.contrasenaActual.invalid) {
-        <p class="c-campo__error">Introduce la contraseña actual.</p>
-      }
-    </div>
+    </app-campo>
 
-    <div class="c-campo">
-      <label class="c-campo__etiqueta" for="contrasena-nueva"><app-icono nombre="contrasena" />Contraseña nueva</label>
+    <app-campo
+      etiqueta="Contraseña nueva"
+      icono="contrasena"
+      para="contrasena-nueva"
+      [control]="form.controls.contrasenaNueva"
+      error="Mínimo 8 caracteres, con mayúscula, minúscula, número y carácter especial."
+    >
       <input
         class="c-campo__entrada"
         id="contrasena-nueva"
@@ -30,16 +37,8 @@
         formControlName="contrasenaNueva"
         autocomplete="new-password"
       />
-      @if (form.controls.contrasenaNueva.touched && form.controls.contrasenaNueva.invalid) {
-        <p class="c-campo__error">
-          Mínimo 8 caracteres, con mayúscula, minúscula, número y carácter especial.
-        </p>
-      }
-    </div>
+    </app-campo>
 
-    <button class="c-boton" type="submit" [disabled]="enviando()">
-      <app-icono nombre="guardar" />
-      {{ enviando() ? 'Guardando…' : 'Cambiar contraseña' }}
-    </button>
+    <app-boton tipo="submit" icono="guardar" [cargando]="enviando()">Cambiar contraseña</app-boton>
   </form>
 </main>

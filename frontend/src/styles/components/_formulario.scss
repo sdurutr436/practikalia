@@ -101,14 +101,15 @@
     cursor: default;
   }
 
-  // Acción secundaria (mockup: botón "outline" junto al primario sólido).
+  // Acción secundaria: el "outline" del mockup, teñido del añil de marca para
+  // que se despegue de la superficie blanca sin competir con el primario sólido.
   &--secundario {
-    background: s.$color-superficie;
-    color: s.$color-superficie-texto;
-    border: 1px solid s.$color-borde;
+    background: color-mix(in srgb, s.$color-primario 10%, s.$color-superficie);
+    color: s.$color-primario;
+    border: 1px solid color-mix(in srgb, s.$color-primario 40%, transparent);
 
     &:hover:not(:disabled) {
-      background: s.$color-apagado;
+      background: color-mix(in srgb, s.$color-primario 18%, s.$color-superficie);
     }
   }
 }

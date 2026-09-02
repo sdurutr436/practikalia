@@ -1,18 +1,31 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
+import { Component, Injector, afterNextRender, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { MENSAJES_REVIEW, mensajeDeError } from '../../auth/mensajes-error';
 import { ReviewService } from '../review.service';
 import { Review } from '../review.model';
+import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 @Component({
   selector: 'app-reviews-pendientes-page',
-  imports: [RouterLink, IconoComponent, EstadoComponent],
+  imports: [
+    RouterLink,
+    EstadoComponent,
+    CabeceraComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+  ],
   templateUrl: './reviews-pendientes-page.html',
 })
 export class ReviewsPendientesPage {
   private readonly reviewService = inject(ReviewService);
+  private readonly injector = inject(Injector);
+  /** Reseña señalada al llegar desde el panel (`?rechazar=`), para rechazarla. */
+  private readonly senalada = Number(inject(ActivatedRoute).snapshot.queryParamMap.get('rechazar'));
 
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
@@ -27,11 +40,26 @@ export class ReviewsPendientesPage {
   private async cargar(): Promise<void> {
     try {
       this.reviews.set(await this.reviewService.listarPendientes());
+      this.enfocarSenalada();
     } catch {
       this.error.set('No se pudieron cargar las reviews pendientes.');
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  /**
+   * Quien llega desde el panel ya ha decidido rechazar: se le deja el cursor en
+   * el motivo de esa reseña. El campo no existe hasta que la lista pinta, de
+   * ahí el `afterNextRender`.
+   */
+  private enfocarSenalada(): void {
+    if (!this.senalada) {
+      return;
+    }
+    afterNextRender(() => document.getElementById(`motivo-${this.senalada}`)?.focus(), {
+      injector: this.injector,
+    });
   }
 
   protected async aprobar(review: Review): Promise<void> {

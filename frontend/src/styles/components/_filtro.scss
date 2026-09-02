@@ -1,0 +1,88 @@
+// Pastillas de filtro de un listado: enlaces que cambian el parámetro de la
+// URL, no botones. Más grandes que .c-etiqueta a propósito — son un destino
+// pulsable, no una marca decorativa.
+@use '../settings' as s;
+@use '../tools' as t;
+
+// Fila de filtros de un listado: las pastillas a la izquierda, el buscador
+// empujado a la derecha. Centrada, porque sus dos piezas no miden igual.
+.c-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-filtro {
+  // inline-flex y font/cursor propios: la misma pastilla vale para un <a> de
+  // filtro y para el <button> de la lupa, que si no hereda el gris del agente
+  // de usuario.
+  display: inline-flex;
+  align-items: center;
+  padding: s.$espaciado-diminuto s.$espaciado-medio;
+  background: s.$color-superficie;
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio-pildora;
+  color: s.$color-texto-apagado;
+  font-size: s.$texto-pequeno;
+  text-decoration: none;
+
+  &:hover {
+    color: s.$color-texto;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
+
+  &--activo {
+    background: s.$color-primario;
+    border-color: s.$color-primario;
+    color: s.$color-primario-texto;
+  }
+}
+
+// El botón de filtros avanzados no se separa de las pastillas: es una más.
+.c-filtros__avanzados {
+  gap: s.$espaciado-diminuto;
+}
+
+// Bloque plegable con los filtros que no caben en una pastilla. Va en el flujo
+// de la página, debajo de la fila: sin capa superpuesta que atrape el foco.
+.c-panel-filtros {
+  @include t.panel;
+  display: grid;
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-base;
+  transform-origin: top;
+  animation: desplegar s.$transicion ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+
+  &__etiquetas {
+    display: grid;
+    gap: s.$espaciado-pequeno;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+}
+
+// Pie de listado: página actual entre los dos saltos.
+.c-paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: s.$espaciado-base;
+}
+
+.c-paginacion__posicion {
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}

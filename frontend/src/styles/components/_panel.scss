@@ -32,6 +32,80 @@
   font-size: s.$texto-grande;
 }
 
+// La sección con carrusel sube los mandos a la fila de la cabecera: "Ver
+// todas" y las flechas comparten línea en vez de gastar dos. Para colocar las
+// dos partes del carrusel como celdas de esta rejilla hay que sacar su
+// anfitrión del flujo, de ahí el display: contents (y que esta sección
+// conozca sus clases internas).
+.c-panel__seccion:has(.c-carrusel) {
+  grid-template-columns: minmax(0, 1fr) auto;
+
+  > .c-carrusel {
+    display: contents;
+  }
+
+  > .c-panel__cabecera {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .c-carrusel__mandos {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .c-carrusel__pista {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+// Contadores del centro: tantos por fila como quepan, cada uno con la cifra
+// mandando sobre su rótulo.
+.c-panel__contadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(s.$ancho-contador-min, 1fr));
+  gap: s.$espaciado-base;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.c-panel__contador {
+  display: grid;
+  gap: s.$espaciado-diminuto;
+  padding: s.$espaciado-medio;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio-m;
+}
+
+// Los dos contadores de empresa llevan al listado ya filtrado; los de
+// alumnado todavía no tienen pantalla a la que llevar, así que no son enlace.
+.c-panel__contador--enlace {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    border-color: s.$color-primario;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
+}
+
+.c-panel__cifra {
+  font-size: s.$texto-titulo;
+  font-weight: s.$peso-fuerte;
+}
+
+.c-panel__rotulo {
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
 // Fila de reseña pendiente: la empresa manda, la nota a la derecha y la cita
 // destacada del resto del texto.
 .c-resena__cabecera {
@@ -42,8 +116,21 @@
   gap: s.$espaciado-pequeno;
 }
 
+// El nombre de la empresa lleva a su ficha: se pinta como enlace del tema, no
+// con el azul subrayado del navegador.
 .c-resena__empresa {
+  color: s.$color-primario;
   font-weight: s.$peso-fuerte;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
 }
 
 .c-resena__autor {

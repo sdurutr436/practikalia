@@ -1,7 +1,5 @@
 <main class="o-pagina">
-  <a class="c-volver" [routerLink]="['/empresas', empresaId]">
-    <app-icono nombre="volver" />Volver a la empresa
-  </a>
+  <app-volver [a]="['/empresas', empresaId]" texto="Volver a la empresa" />
 
   @if (cargando()) {
     <p>Cargando…</p>
@@ -10,68 +8,80 @@
       <h1 class="c-formulario__titulo">Nueva asignación</h1>
 
       @if (error(); as mensaje) {
-        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+        <app-alerta>{{ mensaje }}</app-alerta>
       }
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="alumno"><app-icono nombre="persona" />Alumno</label>
+      <app-campo
+        etiqueta="Alumno"
+        icono="persona"
+        para="alumno"
+        [control]="form.controls.alumnoId"
+        error="Selecciona un alumno."
+      >
         <select class="c-campo__entrada" id="alumno" formControlName="alumnoId">
           <option [value]="0" disabled>Selecciona un alumno</option>
           @for (alumno of alumnos(); track alumno.id) {
             <option [value]="alumno.id">{{ alumno.correo }}</option>
           }
         </select>
-        @if (form.controls.alumnoId.touched && form.controls.alumnoId.invalid) {
-          <p class="c-campo__error">Selecciona un alumno.</p>
-        }
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="tutor"><app-icono nombre="persona" />Tutor de centro</label>
+      <app-campo
+        etiqueta="Tutor de centro"
+        icono="persona"
+        para="tutor"
+        [control]="form.controls.tutorCentroId"
+        error="Selecciona un tutor."
+      >
         <select class="c-campo__entrada" id="tutor" formControlName="tutorCentroId">
           <option [value]="0" disabled>Selecciona un tutor</option>
           @for (tutor of tutores(); track tutor.id) {
             <option [value]="tutor.id">{{ tutor.correo }}</option>
           }
         </select>
-        @if (form.controls.tutorCentroId.touched && form.controls.tutorCentroId.invalid) {
-          <p class="c-campo__error">Selecciona un tutor.</p>
-        }
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="grado"><app-icono nombre="grado" />Grado</label>
+      <app-campo
+        etiqueta="Grado"
+        icono="grado"
+        para="grado"
+        [control]="form.controls.gradoId"
+        error="Selecciona un grado."
+      >
         <select class="c-campo__entrada" id="grado" formControlName="gradoId">
           <option [value]="0" disabled>Selecciona un grado</option>
           @for (grado of grados(); track grado.id) {
             <option [value]="grado.id">{{ grado.nombre }}</option>
           }
         </select>
-        @if (form.controls.gradoId.touched && form.controls.gradoId.invalid) {
-          <p class="c-campo__error">Selecciona un grado.</p>
-        }
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="anio"><app-icono nombre="numero" />Año</label>
+      <app-campo
+        etiqueta="Año"
+        icono="numero"
+        para="anio"
+        [control]="form.controls.anio"
+        error="Indica un año válido."
+      >
         <input class="c-campo__entrada" id="anio" type="number" formControlName="anio" />
-        @if (form.controls.anio.touched && form.controls.anio.invalid) {
-          <p class="c-campo__error">Indica un año válido.</p>
-        }
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="fecha-inicio"><app-icono nombre="fecha" />Fecha de inicio</label>
-        <input class="c-campo__entrada" id="fecha-inicio" type="date" formControlName="fechaInicio" />
-        @if (form.controls.fechaInicio.touched && form.controls.fechaInicio.invalid) {
-          <p class="c-campo__error">Indica la fecha de inicio.</p>
-        }
-      </div>
+      <app-campo
+        etiqueta="Fecha de inicio"
+        icono="fecha"
+        para="fecha-inicio"
+        [control]="form.controls.fechaInicio"
+        error="Indica la fecha de inicio."
+      >
+        <input
+          class="c-campo__entrada"
+          id="fecha-inicio"
+          type="date"
+          formControlName="fechaInicio"
+        />
+      </app-campo>
 
-      <button class="c-boton" type="submit" [disabled]="guardando()">
-        <app-icono nombre="anadir" />
-        {{ guardando() ? 'Guardando…' : 'Crear asignación' }}
-      </button>
+      <app-boton tipo="submit" icono="anadir" [cargando]="guardando()">Crear asignación</app-boton>
     </form>
   }
 </main>

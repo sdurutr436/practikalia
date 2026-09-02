@@ -7,6 +7,7 @@ import { routes } from '../app.routes';
 import { AuthService } from '../auth/auth.service';
 import { authInterceptor } from '../auth/auth.interceptor';
 import { MisEtiquetasPage } from './mis-etiquetas-page/mis-etiquetas-page';
+import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -41,7 +42,7 @@ describe('página "Mis etiquetas"', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/mis-etiquetas');
     // alumnoGuard deniega y "/" redirige al listado.
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });

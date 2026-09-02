@@ -1,6 +1,12 @@
 // Átomo de icono Fluent (ver app/compartido/icono): tamaño fijo, hereda el
 // color del texto que lo rodea.
 .c-icono {
+  // Sin esto el <svg> es inline: se apoya en la línea base de <app-icono> y
+  // esa caja reserva el hueco del descendente por debajo, así que mide más de
+  // 1.1em y el align-items:center del botón centra la caja, no el icono — que
+  // acaba pintado por encima del texto. Mismo motivo por el que generic/ ya
+  // hace `img { display: block }`.
+  display: block;
   width: 1.1em;
   height: 1.1em;
   flex-shrink: 0;

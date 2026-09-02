@@ -10,6 +10,7 @@ import { Empresa } from '../empresas/empresa.model';
 import { Asignacion } from './asignacion.model';
 import { AsignacionFormularioPage } from './asignacion-formulario-page/asignacion-formulario-page';
 import { AlumnoAsignacionesPage } from './alumno-asignaciones-page/alumno-asignaciones-page';
+import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
 
@@ -165,7 +166,7 @@ describe('guard de profesor sobre el formulario de crear asignación', () => {
 
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/empresas/2/asignaciones/nueva');
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });
@@ -288,7 +289,7 @@ describe('guard de profesor sobre el histórico por alumno', () => {
 
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/alumnos/10/asignaciones');
-    http.expectOne('/api/empresas').flush([]);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });

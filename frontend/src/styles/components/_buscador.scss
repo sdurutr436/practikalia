@@ -1,0 +1,109 @@
+// Buscador de un listado: la lupa ES el campo. Cerrado mide lo que su botón;
+// al pulsarlo se estira hacia la izquierda hasta las pastillas de filtro. El
+// alto no cambia nunca (el borde y el relleno vertical están siempre), que es
+// lo que evitaba el salto de la fila al abrir.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-buscador {
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  margin-inline-start: auto;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio-pildora;
+  background: s.$color-superficie;
+  transition: flex-grow s.$transicion;
+
+  &:focus-within {
+    @include t.anillo-foco;
+    outline-offset: 2px;
+  }
+
+  &--abierto {
+    flex-grow: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.c-buscador__entrada {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: s.$texto-pequeno;
+  opacity: 0;
+  transition:
+    width s.$transicion,
+    padding s.$transicion,
+    opacity s.$transicion;
+
+  // El anillo de foco lo pinta el contenedor entero, no el campo suelto.
+  &:focus {
+    outline: none;
+  }
+
+  .c-buscador--abierto &,
+  .c-buscador--fijo & {
+    width: 100%;
+    padding-inline: s.$espaciado-medio;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.c-buscador__lupa,
+.c-buscador__ajustes {
+  display: grid;
+  place-items: center;
+  flex: none;
+  padding: s.$espaciado-diminuto s.$espaciado-medio;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+// Icono decorativo de la barra fija: aquí la lupa no abre nada, solo dice qué
+// es esto. El botón de la derecha es el de los filtros.
+.c-buscador__icono {
+  margin-inline-start: s.$espaciado-medio;
+  color: s.$color-texto-apagado;
+}
+
+// La barra fija solo existe en pantalla estrecha: ocupa el ancho entero, va
+// siempre abierta y se lleva dentro el engranaje de los filtros. A cambio,
+// ahí se esconden la lupa desplegable y la pastilla de "Filtros".
+// Estas reglas van al final del fichero a propósito: una media query no suma
+// especificidad, así que lo único que las hace ganar es el orden.
+.c-buscador--fijo {
+  display: none;
+  margin-inline-start: 0;
+}
+
+@media (width < 48rem) {
+  .c-filtros {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .c-buscador:not(.c-buscador--fijo),
+  .c-filtros__avanzados {
+    display: none;
+  }
+
+  .c-buscador--fijo {
+    display: flex;
+  }
+}

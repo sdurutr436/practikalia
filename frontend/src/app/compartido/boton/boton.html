@@ -1,0 +1,32 @@
+<!-- Un solo <ng-content>: Angular proyecta únicamente en la primera ranura que
+     encuentra, así que las dos formas comparten cuerpo por plantilla. -->
+<ng-template #cuerpo>
+  @if (icono(); as nombre) {
+    <app-icono [nombre]="nombre" />
+  }
+  @if (cargando()) {
+    {{ textoCargando() }}
+  } @else {
+    <ng-content />
+  }
+</ng-template>
+
+@if (enlace(); as destino) {
+  <a
+    class="c-boton"
+    [class.c-boton--secundario]="secundario()"
+    [routerLink]="destino"
+    [queryParams]="params()"
+  >
+    <ng-container [ngTemplateOutlet]="cuerpo" />
+  </a>
+} @else {
+  <button
+    class="c-boton"
+    [class.c-boton--secundario]="secundario()"
+    [type]="tipo()"
+    [disabled]="deshabilitado() || cargando()"
+  >
+    <ng-container [ngTemplateOutlet]="cuerpo" />
+  </button>
+}

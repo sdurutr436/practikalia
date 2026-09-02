@@ -52,14 +52,18 @@
         </p>
 
         @if (error(); as mensaje) {
-          <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          <app-alerta>{{ mensaje }}</app-alerta>
         }
 
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="correo">
-            <app-icono nombre="correo" />Correo del centro
-            <span class="c-requerido" aria-hidden="true">*</span>
-          </label>
+        <app-campo
+          etiqueta="Correo del centro"
+          icono="correo"
+          para="correo"
+          [requerido]="true"
+          ayuda="Usa la cuenta del centro, no una personal."
+          [control]="form.controls.correo"
+          error="Introduce un correo válido."
+        >
           <input
             class="c-campo__entrada"
             id="correo"
@@ -70,17 +74,16 @@
             placeholder="nombre@g.educaand.es"
             aria-describedby="correo-ayuda"
           />
-          <p class="c-campo__ayuda" id="correo-ayuda">Usa la cuenta del centro, no una personal.</p>
-          @if (form.controls.correo.touched && form.controls.correo.invalid) {
-            <p class="c-campo__error">Introduce un correo válido.</p>
-          }
-        </div>
+        </app-campo>
 
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="contrasena">
-            <app-icono nombre="contrasena" />Contraseña
-            <span class="c-requerido" aria-hidden="true">*</span>
-          </label>
+        <app-campo
+          etiqueta="Contraseña"
+          icono="contrasena"
+          para="contrasena"
+          [requerido]="true"
+          [control]="form.controls.contrasena"
+          error="Introduce la contraseña."
+        >
           <div class="c-campo__envoltorio">
             <input
               class="c-campo__entrada"
@@ -99,20 +102,16 @@
               <app-icono nombre="ver" />
             </button>
           </div>
-          @if (form.controls.contrasena.touched && form.controls.contrasena.invalid) {
-            <p class="c-campo__error">Introduce la contraseña.</p>
-          }
-        </div>
+        </app-campo>
 
         <div class="u-honeypot" aria-hidden="true">
           <label for="web">Web</label>
           <input id="web" type="text" formControlName="web" tabindex="-1" autocomplete="off" />
         </div>
 
-        <button class="c-boton" type="submit" [disabled]="enviando()">
-          <app-icono nombre="entrar" />
-          {{ enviando() ? 'Entrando…' : 'Entrar' }}
-        </button>
+        <app-boton tipo="submit" icono="entrar" [cargando]="enviando()" textoCargando="Entrando…">
+          Entrar
+        </app-boton>
 
         <p class="c-formulario__pie">
           ¿No tienes cuenta?
@@ -122,14 +121,11 @@
     } @else if (registroEnviado()) {
       <div class="c-formulario">
         <h1 class="c-formulario__titulo">Solicitud enviada</h1>
-        <p class="c-alerta c-alerta--aviso" role="status">
+        <app-alerta tipo="aviso">
           Un administrador revisará tu alta y activará la cuenta cuando confirme la matriculación.
           Te avisará por el correo indicado.
-        </p>
-        <button class="c-boton" type="button" (click)="abrirLogin()">
-          <app-icono nombre="entrar" />
-          Volver a iniciar sesión
-        </button>
+        </app-alerta>
+        <app-boton icono="entrar" (click)="abrirLogin()">Volver a iniciar sesión</app-boton>
       </div>
     } @else {
       <form class="c-formulario" [formGroup]="formRegistro" (ngSubmit)="enviarRegistro()">
@@ -140,40 +136,43 @@
         </p>
 
         @if (errorRegistro(); as mensaje) {
-          <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          <app-alerta>{{ mensaje }}</app-alerta>
         }
 
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="nombre">
-            <app-icono nombre="persona" />Nombre completo
-            <span class="c-requerido" aria-hidden="true">*</span>
-          </label>
+        <app-campo
+          etiqueta="Nombre completo"
+          icono="persona"
+          para="nombre"
+          [requerido]="true"
+          [control]="formRegistro.controls.nombre"
+          error="Introduce tu nombre."
+        >
           <input class="c-campo__entrada" id="nombre" formControlName="nombre" />
-          @if (formRegistro.controls.nombre.touched && formRegistro.controls.nombre.invalid) {
-            <p class="c-campo__error">Introduce tu nombre.</p>
-          }
-        </div>
+        </app-campo>
 
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="apellido1">
-            Primer apellido<span class="c-requerido" aria-hidden="true">*</span>
-          </label>
+        <app-campo
+          etiqueta="Primer apellido"
+          para="apellido1"
+          [requerido]="true"
+          [control]="formRegistro.controls.apellido1"
+          error="Introduce el primer apellido."
+        >
           <input class="c-campo__entrada" id="apellido1" formControlName="apellido1" />
-          @if (formRegistro.controls.apellido1.touched && formRegistro.controls.apellido1.invalid) {
-            <p class="c-campo__error">Introduce el primer apellido.</p>
-          }
-        </div>
+        </app-campo>
 
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="apellido2">Segundo apellido</label>
+        <app-campo etiqueta="Segundo apellido" para="apellido2">
           <input class="c-campo__entrada" id="apellido2" formControlName="apellido2" />
-        </div>
+        </app-campo>
 
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="dni">
-            <app-icono nombre="numero" />DNI
-            <span class="c-requerido" aria-hidden="true">*</span>
-          </label>
+        <app-campo
+          etiqueta="DNI"
+          icono="numero"
+          para="dni"
+          [requerido]="true"
+          ayuda="Se comprueba el formato (número y letra), no la matriculación real: eso lo confirma el centro al aprobar la cuenta."
+          [control]="formRegistro.controls.dni"
+          error="El DNI no es válido."
+        >
           <input
             class="c-campo__entrada"
             id="dni"
@@ -182,20 +181,16 @@
             maxlength="9"
             aria-describedby="dni-ayuda"
           />
-          <p class="c-campo__ayuda" id="dni-ayuda">
-            Se comprueba el formato (número y letra), no la matriculación real: eso lo confirma el
-            centro al aprobar la cuenta.
-          </p>
-          @if (formRegistro.controls.dni.touched && formRegistro.controls.dni.invalid) {
-            <p class="c-campo__error">El DNI no es válido.</p>
-          }
-        </div>
+        </app-campo>
 
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="gradoId">
-            <app-icono nombre="grado" />Clase
-            <span class="c-requerido" aria-hidden="true">*</span>
-          </label>
+        <app-campo
+          etiqueta="Clase"
+          icono="grado"
+          para="gradoId"
+          [requerido]="true"
+          [control]="formRegistro.controls.gradoId"
+          error="Selecciona tu clase."
+        >
           <select class="c-campo__entrada" id="gradoId" formControlName="gradoId">
             <option value="" disabled>Selecciona tu clase</option>
             @for (grado of grados(); track grado.id) {
@@ -205,16 +200,17 @@
           @if (errorGrados(); as mensaje) {
             <p class="c-campo__error">{{ mensaje }}</p>
           }
-          @if (formRegistro.controls.gradoId.touched && formRegistro.controls.gradoId.invalid) {
-            <p class="c-campo__error">Selecciona tu clase.</p>
-          }
-        </div>
+        </app-campo>
 
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="correoRegistro">
-            <app-icono nombre="correo" />Correo institucional
-            <span class="c-requerido" aria-hidden="true">*</span>
-          </label>
+        <app-campo
+          etiqueta="Correo institucional"
+          icono="correo"
+          para="correoRegistro"
+          [requerido]="true"
+          ayuda="El de &#64;g.educaand.es, o el propio del centro si lo tienes."
+          [control]="formRegistro.controls.correo"
+          error="Usa tu correo institucional."
+        >
           <input
             class="c-campo__entrada"
             id="correoRegistro"
@@ -225,13 +221,7 @@
             placeholder="nombre@g.educaand.es"
             aria-describedby="correoRegistro-ayuda"
           />
-          <p class="c-campo__ayuda" id="correoRegistro-ayuda">
-            El de &#64;g.educaand.es, o el propio del centro si lo tienes.
-          </p>
-          @if (formRegistro.controls.correo.touched && formRegistro.controls.correo.invalid) {
-            <p class="c-campo__error">Usa tu correo institucional.</p>
-          }
-        </div>
+        </app-campo>
 
         <div class="u-honeypot" aria-hidden="true">
           <label for="webRegistro">Web</label>
@@ -244,10 +234,14 @@
           />
         </div>
 
-        <button class="c-boton" type="submit" [disabled]="enviandoRegistro()">
-          <app-icono nombre="entrar" />
-          {{ enviandoRegistro() ? 'Enviando…' : 'Crear cuenta' }}
-        </button>
+        <app-boton
+          tipo="submit"
+          icono="entrar"
+          [cargando]="enviandoRegistro()"
+          textoCargando="Enviando…"
+        >
+          Crear cuenta
+        </app-boton>
 
         <p class="c-formulario__pie">
           ¿Ya tienes cuenta?

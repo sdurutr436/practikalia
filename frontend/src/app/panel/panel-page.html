@@ -1,27 +1,47 @@
 <main class="o-pagina">
-  <header class="c-cabecera">
-    <h1 class="c-cabecera__titulo">
-      @if (esAlumno()) {
-        Hola{{ sesion()?.correo ? ', ' + sesion()?.correo : '' }}
-      } @else {
-        Panel del centro
-      }
-    </h1>
-  </header>
+  <app-cabecera [titulo]="titulo()" />
 
   <app-estado [cargando]="cargando()" [error]="error()">
     <div class="c-panel">
       @if (!esAlumno()) {
-        <!-- Contadores del centro. Los cuatro salen de un agregado que el backend
-           todavía no expone; hasta entonces el bloque queda maquetado y vacío. -->
         <section class="c-panel__seccion" aria-labelledby="panel-contadores">
           <h2 class="c-panel__titulo" id="panel-contadores">
             <app-icono nombre="actividad" />Resumen del centro
           </h2>
-          <p class="c-alerta c-alerta--aviso" role="status">
-            Empresas publicadas, sin publicar, alumnado activo y sin asignar: pendientes del
-            endpoint de resumen.
-          </p>
+          @if (resumen(); as contadores) {
+            <ul class="c-panel__contadores">
+              <li>
+                <a
+                  class="c-panel__contador c-panel__contador--enlace"
+                  routerLink="/empresas"
+                  [queryParams]="{ publicada: true }"
+                >
+                  <span class="c-panel__cifra">{{ contadores.empresasPublicadas }}</span>
+                  <span class="c-panel__rotulo">Empresas publicadas</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  class="c-panel__contador c-panel__contador--enlace"
+                  routerLink="/empresas"
+                  [queryParams]="{ publicada: false }"
+                >
+                  <span class="c-panel__cifra">{{ contadores.empresasSinPublicar }}</span>
+                  <span class="c-panel__rotulo">Empresas sin publicar</span>
+                </a>
+              </li>
+              <li class="c-panel__contador">
+                <span class="c-panel__cifra">{{ contadores.alumnadoActivo }}</span>
+                <span class="c-panel__rotulo">Alumnado activo</span>
+              </li>
+              <li class="c-panel__contador">
+                <span class="c-panel__cifra">{{ contadores.alumnadoSinAsignar }}</span>
+                <span class="c-panel__rotulo">Alumnado sin asignar</span>
+              </li>
+            </ul>
+          } @else {
+            <app-alerta tipo="aviso">No se pudo cargar el resumen del centro.</app-alerta>
+          }
         </section>
       }
 
@@ -35,11 +55,11 @@
               Empresas
             }
           </h2>
-          <a class="c-boton c-boton--secundario" routerLink="/empresas">Ver todas</a>
+          <app-boton [secundario]="true" enlace="/empresas">Ver todas</app-boton>
         </div>
 
         @if (empresasCarrusel().length === 0) {
-          <p class="c-alerta c-alerta--aviso" role="status">Todavía no hay empresas publicadas.</p>
+          <app-alerta tipo="aviso">Todavía no hay empresas publicadas.</app-alerta>
         } @else {
           <app-carrusel etiqueta="empresas">
             @for (empresa of empresasCarrusel(); track empresa.id) {
@@ -61,17 +81,16 @@
                 Desde el {{ asignacion.fechaInicio }} · {{ asignacion.grado.nombre }}
                 {{ asignacion.anio }} · Tutor: {{ asignacion.tutorCentroCorreo }}
               </span>
-              <a
-                class="c-boton c-boton--secundario"
-                [routerLink]="['/empresas', asignacion.empresaId]"
+              <app-boton
+                icono="empresa"
+                [secundario]="true"
+                [enlace]="['/empresas', asignacion.empresaId]"
               >
-                <app-icono nombre="empresa" />Ver ficha
-              </a>
+                Ver ficha
+              </app-boton>
             </div>
           } @else {
-            <p class="c-alerta c-alerta--aviso" role="status">
-              Todavía no tienes una empresa asignada.
-            </p>
+            <app-alerta tipo="aviso">Todavía no tienes una empresa asignada.</app-alerta>
           }
         </section>
       } @else {
@@ -83,17 +102,19 @@
                 <span class="c-etiqueta">{{ pendientes().length }} por moderar</span>
               }
             </h2>
-            <a class="c-boton c-boton--secundario" routerLink="/reviews/pendientes">Ver todas</a>
+            <app-boton [secundario]="true" enlace="/reviews/pendientes">Ver todas</app-boton>
           </div>
 
           @if (pendientes().length === 0) {
-            <p class="c-alerta c-alerta--aviso" role="status">No hay reseñas pendientes.</p>
+            <app-alerta tipo="aviso">No hay reseñas pendientes.</app-alerta>
           } @else {
             <ul class="o-lista">
               @for (review of pendientesResumen(); track review.id) {
                 <li class="c-fila c-resena">
                   <div class="c-resena__cabecera">
-                    <span class="c-resena__empresa">{{ nombreEmpresa(review) }}</span>
+                    <a class="c-resena__empresa" [routerLink]="['/empresas', review.empresaId]">
+                      {{ nombreEmpresa(review) }}
+                    </a>
                     @if (calificacion(); as rango) {
                       <app-estrellas [valor]="review.calificacion" [maximo]="rango.max" />
                     }
@@ -102,60 +123,28 @@
                   <blockquote class="c-resena__texto">«{{ review.contenido }}»</blockquote>
 
                   @if (errorModeracion()?.id === review.id) {
-                    <p class="c-alerta c-alerta--error" role="alert">
-                      {{ errorModeracion()?.mensaje }}
-                    </p>
+                    <app-alerta>{{ errorModeracion()?.mensaje }}</app-alerta>
                   }
 
-                  @if (rechazandoId() === review.id) {
-                    <div class="c-acciones">
-                      <div class="c-campo u-crecer">
-                        <label class="c-campo__etiqueta" [for]="'motivo-' + review.id">
-                          Motivo del rechazo
-                        </label>
-                        <input
-                          class="c-campo__entrada"
-                          type="text"
-                          [id]="'motivo-' + review.id"
-                          #motivo
-                        />
-                      </div>
-                      <button
-                        class="c-boton"
-                        type="button"
-                        [disabled]="moderandoId() !== null"
-                        (click)="rechazar(review, motivo.value)"
-                      >
-                        <app-icono nombre="rechazar" />Confirmar rechazo
-                      </button>
-                      <button
-                        class="c-boton c-boton--secundario"
-                        type="button"
-                        (click)="rechazandoId.set(null)"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  } @else {
-                    <div class="c-acciones">
-                      <button
-                        class="c-boton"
-                        type="button"
-                        [disabled]="moderandoId() !== null"
-                        (click)="aprobar(review)"
-                      >
-                        <app-icono nombre="aprobar" />Aprobar
-                      </button>
-                      <button
-                        class="c-boton c-boton--secundario"
-                        type="button"
-                        [disabled]="moderandoId() !== null"
-                        (click)="rechazandoId.set(review.id)"
-                      >
-                        <app-icono nombre="rechazar" />Rechazar
-                      </button>
-                    </div>
-                  }
+                  <div class="c-acciones">
+                    <app-boton
+                      icono="aprobar"
+                      [deshabilitado]="moderandoId() !== null"
+                      (click)="aprobar(review)"
+                    >
+                      Aprobar
+                    </app-boton>
+                    <!-- Rechazar exige motivo, y el motivo se escribe en la cola
+                         de moderación: aquí solo se lleva allí, señalando cuál. -->
+                    <app-boton
+                      icono="rechazar"
+                      [secundario]="true"
+                      enlace="/reviews/pendientes"
+                      [params]="{ rechazar: review.id }"
+                    >
+                      Rechazar
+                    </app-boton>
+                  </div>
                 </li>
               }
             </ul>

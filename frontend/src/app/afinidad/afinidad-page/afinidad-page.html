@@ -1,18 +1,18 @@
 <main class="o-pagina">
-  <header class="c-cabecera">
-    <h1 class="c-cabecera__titulo">{{ alumnoId ? 'Afinidad del alumno' : 'Mi afinidad' }}</h1>
-  </header>
+  <app-cabecera [titulo]="alumnoId ? 'Afinidad del alumno' : 'Mi afinidad'" />
 
   <app-estado [cargando]="cargando()" [error]="error()">
     @if (!alumnoConEtiquetas()) {
-      <p class="c-alerta c-alerta--aviso" role="status">
+      <app-alerta tipo="aviso">
         @if (alumnoId) {
-          Este alumno todavía no ha marcado ninguna etiqueta de interés — el listado queda en orden alfabético.
+          Este alumno todavía no ha marcado ninguna etiqueta de interés — el listado queda en orden
+          alfabético.
         } @else {
           Todavía no has marcado ninguna etiqueta de interés — el listado queda en orden alfabético.
-          <a routerLink="/mis-etiquetas">Marca tus etiquetas</a> para ver primero las empresas más afines a ti.
+          <a routerLink="/mis-etiquetas">Marca tus etiquetas</a> para ver primero las empresas más
+          afines a ti.
         }
-      </p>
+      </app-alerta>
     }
 
     @if (empresas().length === 0) {

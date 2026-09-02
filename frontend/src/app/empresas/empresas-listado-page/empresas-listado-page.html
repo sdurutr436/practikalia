@@ -1,24 +1,202 @@
 <main class="o-pagina">
-  <header class="c-cabecera">
-    <h1 class="c-cabecera__titulo">Empresas</h1>
-  </header>
+  <app-cabecera titulo="Empresas" />
+
+  <div class="c-filtros">
+    <!-- Barra de móvil: siempre abierta y con el engranaje dentro. En pantalla
+         ancha desaparece entera y mandan la lupa y la pastilla de "Filtros" de
+         debajo; solo una de las dos existe a la vez para el lector de pantalla,
+         porque la otra está en display:none. -->
+    <div class="c-buscador c-buscador--fijo">
+      <app-icono class="c-buscador__icono" nombre="buscar" />
+      <input
+        class="c-buscador__entrada"
+        #movil
+        type="search"
+        aria-label="Buscar empresas"
+        placeholder="Nombre, sector, etiqueta…"
+        [value]="texto()"
+        (input)="escribir(movil.value)"
+      />
+      <button
+        class="c-buscador__ajustes"
+        type="button"
+        aria-label="Filtros"
+        aria-controls="filtros-avanzados"
+        [attr.aria-expanded]="filtrosAbiertos()"
+        (click)="alternarFiltros()"
+      >
+        <app-icono nombre="configuracion" />
+      </button>
+    </div>
+
+    @if (esProfesor()) {
+      <ul class="o-etiquetas">
+        <li>
+          <a
+            class="c-filtro"
+            [class.c-filtro--activo]="filtro() === null"
+            routerLink="/empresas"
+            [queryParams]="{ publicada: null, pagina: null }"
+            queryParamsHandling="merge"
+          >
+            Todas
+          </a>
+        </li>
+        <li>
+          <a
+            class="c-filtro"
+            [class.c-filtro--activo]="filtro() === 'true'"
+            routerLink="/empresas"
+            [queryParams]="{ publicada: true, pagina: null }"
+            queryParamsHandling="merge"
+          >
+            Publicadas
+          </a>
+        </li>
+        <li>
+          <a
+            class="c-filtro"
+            [class.c-filtro--activo]="filtro() === 'false'"
+            routerLink="/empresas"
+            [queryParams]="{ publicada: false, pagina: null }"
+            queryParamsHandling="merge"
+          >
+            Sin publicar
+          </a>
+        </li>
+      </ul>
+    }
+
+    <button
+      class="c-filtro c-filtros__avanzados"
+      [class.c-filtro--activo]="filtrosActivos() > 0"
+      type="button"
+      [attr.aria-expanded]="filtrosAbiertos()"
+      aria-controls="filtros-avanzados"
+      (click)="alternarFiltros()"
+    >
+      <app-icono nombre="configuracion" />
+      Filtros
+      @if (filtrosActivos() > 0) {
+        <span>({{ filtrosActivos() }})</span>
+      }
+    </button>
+
+    <div class="c-buscador" [class.c-buscador--abierto]="buscando()">
+      <input
+        class="c-buscador__entrada"
+        #entrada
+        type="search"
+        aria-label="Buscar empresas"
+        placeholder="Nombre, sector, etiqueta…"
+        [attr.tabindex]="buscando() ? null : -1"
+        [value]="texto()"
+        (input)="escribir(entrada.value)"
+        (keydown.escape)="alternarBusqueda()"
+      />
+      <button
+        class="c-buscador__lupa"
+        type="button"
+        [attr.aria-expanded]="buscando()"
+        [attr.aria-label]="buscando() ? 'Cerrar la búsqueda' : 'Buscar empresas'"
+        (click)="alternarBusqueda()"
+      >
+        <app-icono nombre="buscar" />
+      </button>
+    </div>
+  </div>
+
+  @if (filtrosAbiertos()) {
+    <div class="c-panel-filtros" id="filtros-avanzados">
+      <label class="c-campo">
+        <span class="c-campo__etiqueta"><app-icono nombre="etiqueta" />Sector</span>
+        <select
+          class="c-campo__entrada"
+          [value]="sectorId()"
+          (change)="cambiarSector($any($event.target).value)"
+        >
+          <option value="">Cualquiera</option>
+          @for (etiqueta of catalogo(); track etiqueta.id) {
+            <option [value]="etiqueta.id">{{ etiqueta.nombre }}</option>
+          }
+        </select>
+      </label>
+
+      <fieldset class="c-panel-filtros__etiquetas">
+        <legend class="c-campo__etiqueta">Etiquetas</legend>
+        <ul class="o-etiquetas">
+          @for (etiqueta of catalogo(); track etiqueta.id) {
+            <li>
+              <label
+                class="c-checkbox c-filtro"
+                [class.c-filtro--activo]="etiquetaIds().includes(etiqueta.id)"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="etiquetaIds().includes(etiqueta.id)"
+                  (change)="alternarEtiqueta(etiqueta.id)"
+                />
+                {{ etiqueta.nombre }}
+              </label>
+            </li>
+          }
+        </ul>
+      </fieldset>
+
+      @if (filtrosActivos() > 0) {
+        <app-boton [secundario]="true" (click)="limpiarFiltros()">Limpiar filtros</app-boton>
+      }
+    </div>
+  }
 
   <app-estado
     [cargando]="cargando()"
     [error]="error()"
     [vacio]="empresas().length === 0"
-    mensajeVacio="Todavía no hay empresas."
+    [mensajeVacio]="mensajeVacio()"
   >
     <ul class="o-rejilla">
       @for (empresa of empresas(); track empresa.id) {
         <li>
           <app-tarjeta-empresa [empresa]="empresa" [meta]="empresa.sector.nombre">
-            @if (esVistaProfesor(empresa) && !empresa.publicada) {
-              <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
+            <!-- El estado de publicación es cosa del profesorado: al alumnado
+                 el backend solo le manda publicadas y su DTO ni trae el campo. -->
+            @if (esVistaProfesor(empresa)) {
+              <span
+                class="c-tarjeta-empresa__estado"
+                [class.c-tarjeta-empresa__estado--publicada]="empresa.publicada"
+                role="img"
+                [attr.aria-label]="empresa.publicada ? 'Publicada' : 'Sin publicar'"
+              >
+                <app-icono [nombre]="empresa.publicada ? 'aprobar' : 'rechazar'" />
+              </span>
             }
           </app-tarjeta-empresa>
         </li>
       }
     </ul>
   </app-estado>
+
+  @if (paginas() > 1) {
+    <nav class="c-paginacion" aria-label="Páginas de empresas">
+      <app-boton
+        [secundario]="true"
+        icono="volver"
+        [deshabilitado]="paginaActual() === 0"
+        (click)="irAPagina(paginaActual() - 1)"
+      >
+        Anterior
+      </app-boton>
+      <span class="c-paginacion__posicion" aria-live="polite">
+        Página {{ paginaActual() + 1 }} de {{ paginas() }}
+      </span>
+      <app-boton
+        [secundario]="true"
+        [deshabilitado]="paginaActual() + 1 >= paginas()"
+        (click)="irAPagina(paginaActual() + 1)"
+      >
+        Siguiente
+      </app-boton>
+    </nav>
+  }
 </main>

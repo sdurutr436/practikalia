@@ -1,10 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MENSAJES_EMPRESA, mensajeDeError } from '../../auth/mensajes-error';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, EmpresaRequest, Etiqueta } from '../empresa.model';
+import { VolverComponent } from '../../compartido/volver/volver';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 /** IDs sueltos separados por coma → números válidos (>0), sin duplicados. */
 function parseIds(texto: string): number[] {
@@ -20,7 +23,7 @@ function porNombre(a: Etiqueta, b: Etiqueta): number {
 
 @Component({
   selector: 'app-empresa-formulario-page',
-  imports: [ReactiveFormsModule, RouterLink, IconoComponent],
+  imports: [ReactiveFormsModule, VolverComponent, AlertaComponent, CampoComponent, BotonComponent],
   templateUrl: './empresa-formulario-page.html',
 })
 export class EmpresaFormularioPage {
@@ -64,7 +67,7 @@ export class EmpresaFormularioPage {
 
   private async cargar(): Promise<void> {
     try {
-      const empresas = await this.empresaService.listar();
+      const empresas = (await this.empresaService.listar()).contenido;
       this.construirCatalogos(empresas);
       const id = this.empresaId();
       if (id !== null) {

@@ -1,15 +1,25 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { MENSAJES_PERFIL, mensajeDeError } from '../../auth/mensajes-error';
 import { PerfilService } from '../perfil.service';
 import { Etiqueta } from '../../empresas/empresa.model';
+import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
+import { VolverComponent } from '../../compartido/volver/volver';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 @Component({
   selector: 'app-mis-etiquetas-page',
-  imports: [RouterLink, IconoComponent, EstadoComponent],
+  imports: [
+    EstadoComponent,
+    CabeceraComponent,
+    VolverComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+  ],
   templateUrl: './mis-etiquetas-page.html',
 })
 export class MisEtiquetasPage {

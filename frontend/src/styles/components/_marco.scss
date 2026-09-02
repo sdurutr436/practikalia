@@ -34,13 +34,14 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  padding: s.$espaciado-pequeno;
+  padding: s.$espaciado-diminuto;
   border: 0;
   border-radius: s.$radio-m;
   background: transparent;
   color: inherit;
   font: inherit;
   font-size: s.$texto-grande;
+  line-height: 1;
   cursor: pointer;
 
   &:hover {
@@ -57,9 +58,17 @@
   letter-spacing: s.$tracking-ajustado;
 }
 
-// Empuja las acciones al extremo opuesto de la hamburguesa.
+// Cabecera estrecha: la marca manda, centrada, y todo lo demás baja al
+// acordeón. La hamburguesa sobra, porque el acordeón abre lo mismo que ella.
+// El corte es 48rem y no las 64rem del resto: la barra aguanta bien hasta que
+// la marca y los tres botones dejan de caber en una línea.
 .c-barra__acciones {
   margin-inline-start: auto;
+  align-items: center;
+
+  .c-boton {
+    padding-block: s.$espaciado-diminuto;
+  }
 }
 
 // El palo vertical de la Γ: cuelga del extremo izquierdo de la cabecera.
@@ -79,9 +88,15 @@
   max-width: 100%;
   margin-top: s.$espaciado-pequeno;
   padding: s.$espaciado-base;
+  transform-origin: top;
+  animation: desplegar s.$transicion ease;
 
   &[hidden] {
     display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
   }
 }
 
@@ -158,3 +173,57 @@
   font-size: s.$texto-diminuto;
   color: s.$color-texto-apagado;
 }
+
+@media (width < 48rem) {
+  .c-barra__fila {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .c-barra__alternar {
+    display: none;
+  }
+
+  .c-barra__acciones {
+    margin-inline-start: 0;
+    justify-content: center;
+  }
+
+  // Dentro del acordeón, en el flujo y sin superficie propia: aquí el menú no
+  // es un desplegable que cuelga de la hamburguesa, sino una sección más del
+  // panel que ya dibuja la barra. Con su tarjeta puesta se vería una tarjeta
+  // dentro de otra, que es lo que hacía parecer que había dos menús.
+  .c-menu {
+    position: static;
+    width: 100%;
+    padding: 0;
+    margin-top: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+}
+
+// De ahí para arriba manda la barra de siempre: el acordeón se vuelve
+// transparente y las acciones son un hijo más de la fila, empujadas al fondo
+// por su propio margen automático.
+@media (width >= 48rem) {
+  .c-barra .c-acordeon,
+  .c-barra .c-acordeon__contenido,
+  .c-barra .c-acordeon__contenido[hidden] {
+    display: contents;
+  }
+
+  .c-barra .c-acordeon__boton {
+    display: none;
+  }
+}
+
+// Empuja las acciones al extremo opuesto de la hamburguesa. align-items:center
+// en vez del end heredado de .c-acciones (pensado para alinear un botón con
+// el borde inferior de una entrada de formulario, no para una barra de
+// cabecera) y botones más compactos: el padding de .c-boton está pensado
+// para formularios y aquí, junto al texto suelto de la marca, se veían
+// mucho más altos que él.

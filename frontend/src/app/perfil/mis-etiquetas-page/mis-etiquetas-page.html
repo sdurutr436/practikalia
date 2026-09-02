@@ -1,24 +1,21 @@
 <main class="o-pagina">
-  <a class="c-volver" routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
+  <app-volver a="/empresas" />
 
-  <header class="c-cabecera">
-    <h1 class="c-cabecera__titulo">Mis etiquetas</h1>
-  </header>
+  <app-cabecera titulo="Mis etiquetas" />
 
   <app-estado [cargando]="cargando()" [error]="error()">
     <form class="c-formulario" (ngSubmit)="guardar()">
       @if (errorGuardar(); as mensaje) {
-        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+        <app-alerta>{{ mensaje }}</app-alerta>
       }
       @if (guardado()) {
-        <p class="c-alerta c-alerta--aviso" role="status">Etiquetas guardadas.</p>
+        <app-alerta tipo="aviso">Etiquetas guardadas.</app-alerta>
       }
 
       @if (catalogo().length === 0) {
         <p>Todavía no hay etiquetas en el catálogo.</p>
       } @else {
-        <fieldset class="c-campo">
-          <legend class="c-campo__etiqueta"><app-icono nombre="etiqueta" />Etiquetas de interés</legend>
+        <app-campo etiqueta="Etiquetas de interés" icono="etiqueta" [grupo]="true">
           @for (etiqueta of catalogo(); track etiqueta.id) {
             <label class="c-checkbox">
               <input
@@ -29,13 +26,10 @@
               {{ etiqueta.nombre }}
             </label>
           }
-        </fieldset>
+        </app-campo>
       }
 
-      <button class="c-boton" type="submit" [disabled]="guardando()">
-        <app-icono nombre="guardar" />
-        {{ guardando() ? 'Guardando…' : 'Guardar' }}
-      </button>
+      <app-boton tipo="submit" icono="guardar" [cargando]="guardando()">Guardar</app-boton>
     </form>
   </app-estado>
 </main>

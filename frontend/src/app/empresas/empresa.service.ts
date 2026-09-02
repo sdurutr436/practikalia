@@ -1,14 +1,21 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { Empresa, EmpresaRequest } from './empresa.model';
+import { ConsultaEmpresas, Empresa, EmpresaRequest, PaginaEmpresas } from './empresa.model';
 
 @Injectable({ providedIn: 'root' })
 export class EmpresaService {
   private readonly http = inject(HttpClient);
 
-  listar(): Promise<Empresa[]> {
-    return firstValueFrom(this.http.get<Empresa[]>('/api/empresas'));
+  listar(consulta: ConsultaEmpresas = {}): Promise<PaginaEmpresas> {
+    let params = new HttpParams();
+    if (consulta.texto) params = params.set('texto', consulta.texto);
+    if (consulta.publicada != null) params = params.set('publicada', consulta.publicada);
+    if (consulta.sectorId != null) params = params.set('sectorId', consulta.sectorId);
+    for (const id of consulta.etiquetaIds ?? []) params = params.append('etiquetaIds', id);
+    if (consulta.pagina) params = params.set('pagina', consulta.pagina);
+    if (consulta.tamano != null) params = params.set('tamano', consulta.tamano);
+    return firstValueFrom(this.http.get<PaginaEmpresas>('/api/empresas', { params }));
   }
 
   obtener(id: number): Promise<Empresa> {

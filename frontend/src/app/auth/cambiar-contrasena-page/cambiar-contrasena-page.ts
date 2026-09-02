@@ -7,9 +7,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IconoComponent } from '../../compartido/icono/icono';
 import { AuthService } from '../auth.service';
 import { MENSAJES_CAMBIO_CONTRASENA, mensajeDeError } from '../mensajes-error';
+import { AlertaComponent } from '../../compartido/alerta/alerta';
+import { CampoComponent } from '../../compartido/campo/campo';
+import { BotonComponent } from '../../compartido/boton/boton';
 
 // Misma política que el backend (UsuarioService.POLITICA_CONTRASENA).
 const POLITICA = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
@@ -20,7 +22,7 @@ export function politicaContrasena(control: AbstractControl<string>): Validation
 
 @Component({
   selector: 'app-cambiar-contrasena-page',
-  imports: [ReactiveFormsModule, IconoComponent],
+  imports: [ReactiveFormsModule, AlertaComponent, CampoComponent, BotonComponent],
   templateUrl: './cambiar-contrasena-page.html',
 })
 export class CambiarContrasenaPage {

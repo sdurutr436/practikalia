@@ -1,9 +1,7 @@
 <main class="o-pagina">
-  <a class="c-volver" routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
+  <app-volver a="/empresas" />
 
-  <header class="c-cabecera">
-    <h1 class="c-cabecera__titulo">Mis intereses</h1>
-  </header>
+  <app-cabecera titulo="Mis intereses" />
 
   <app-estado
     [cargando]="cargando()"

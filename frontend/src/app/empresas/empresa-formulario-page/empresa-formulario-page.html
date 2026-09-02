@@ -1,36 +1,47 @@
 <main class="o-pagina">
-  <a class="c-volver" routerLink="/empresas"><app-icono nombre="volver" />Volver al listado</a>
+  <app-volver a="/empresas" />
 
   @if (cargando()) {
     <p>Cargando…</p>
   } @else {
     <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
-      <h1 class="c-formulario__titulo">{{ modo() === 'editar' ? 'Editar empresa' : 'Nueva empresa' }}</h1>
+      <h1 class="c-formulario__titulo">
+        {{ modo() === 'editar' ? 'Editar empresa' : 'Nueva empresa' }}
+      </h1>
 
       @if (error(); as mensaje) {
-        <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+        <app-alerta>{{ mensaje }}</app-alerta>
       }
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="nombre"><app-icono nombre="empresa" />Nombre</label>
+      <app-campo
+        etiqueta="Nombre"
+        icono="empresa"
+        para="nombre"
+        [control]="form.controls.nombre"
+        error="Introduce el nombre."
+      >
         <input class="c-campo__entrada" id="nombre" type="text" formControlName="nombre" />
-        @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
-          <p class="c-campo__error">Introduce el nombre.</p>
-        }
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="descripcion"><app-icono nombre="nota" />Descripción</label>
-        <textarea class="c-campo__entrada" id="descripcion" formControlName="descripcion"></textarea>
-      </div>
+      <app-campo etiqueta="Descripción" icono="nota" para="descripcion">
+        <textarea
+          class="c-campo__entrada"
+          id="descripcion"
+          formControlName="descripcion"
+        ></textarea>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="direccion"><app-icono nombre="ubicacion" />Dirección</label>
+      <app-campo etiqueta="Dirección" icono="ubicacion" para="direccion">
         <input class="c-campo__entrada" id="direccion" type="text" formControlName="direccion" />
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="sector"><app-icono nombre="etiqueta" />Sector</label>
+      <app-campo
+        etiqueta="Sector"
+        icono="etiqueta"
+        para="sector"
+        [control]="form.controls.sectorId"
+        error="Indica el ID de un sector (etiqueta) existente."
+      >
         <input
           class="c-campo__entrada"
           id="sector"
@@ -43,13 +54,9 @@
             <option [value]="sector.id">{{ sector.nombre }}</option>
           }
         </datalist>
-        @if (form.controls.sectorId.touched && form.controls.sectorId.invalid) {
-          <p class="c-campo__error">Indica el ID de un sector (etiqueta) existente.</p>
-        }
-      </div>
+      </app-campo>
 
-      <fieldset class="c-campo">
-        <legend class="c-campo__etiqueta"><app-icono nombre="etiqueta" />Etiquetas</legend>
+      <app-campo etiqueta="Etiquetas" icono="etiqueta" [grupo]="true">
         @for (etiqueta of etiquetasDisponibles(); track etiqueta.id) {
           <label class="c-checkbox">
             <input
@@ -60,46 +67,55 @@
             {{ etiqueta.nombre }}
           </label>
         }
-      </fieldset>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="etiquetas-manual">
-          <app-icono nombre="etiqueta" />IDs adicionales (separados por coma)
-        </label>
+      <app-campo
+        etiqueta="IDs adicionales (separados por coma)"
+        icono="etiqueta"
+        para="etiquetas-manual"
+      >
         <input
           class="c-campo__entrada"
           id="etiquetas-manual"
           type="text"
           formControlName="etiquetasManual"
         />
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="observaciones"><app-icono nombre="nota" />Observaciones</label>
-        <textarea class="c-campo__entrada" id="observaciones" formControlName="observaciones"></textarea>
-      </div>
+      <app-campo etiqueta="Observaciones" icono="nota" para="observaciones">
+        <textarea
+          class="c-campo__entrada"
+          id="observaciones"
+          formControlName="observaciones"
+        ></textarea>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="contacto-nombre"><app-icono nombre="persona" />Contacto: nombre</label>
-        <input class="c-campo__entrada" id="contacto-nombre" type="text" formControlName="contactoNombre" />
-      </div>
+      <app-campo etiqueta="Contacto: nombre" icono="persona" para="contacto-nombre">
+        <input
+          class="c-campo__entrada"
+          id="contacto-nombre"
+          type="text"
+          formControlName="contactoNombre"
+        />
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="contacto-telefono">
-          <app-icono nombre="telefono" />Contacto: teléfono
-        </label>
+      <app-campo etiqueta="Contacto: teléfono" icono="telefono" para="contacto-telefono">
         <input
           class="c-campo__entrada"
           id="contacto-telefono"
           type="text"
           formControlName="contactoTelefono"
         />
-      </div>
+      </app-campo>
 
-      <div class="c-campo">
-        <label class="c-campo__etiqueta" for="contacto-email"><app-icono nombre="correo" />Contacto: email</label>
-        <input class="c-campo__entrada" id="contacto-email" type="email" formControlName="contactoEmail" />
-      </div>
+      <app-campo etiqueta="Contacto: email" icono="correo" para="contacto-email">
+        <input
+          class="c-campo__entrada"
+          id="contacto-email"
+          type="email"
+          formControlName="contactoEmail"
+        />
+      </app-campo>
 
       @if (modo() === 'editar') {
         <label class="c-checkbox">
@@ -108,10 +124,13 @@
         </label>
       }
 
-      <button class="c-boton" type="submit" [disabled]="guardando()">
-        <app-icono [nombre]="modo() === 'editar' ? 'guardar' : 'anadir'" />
-        {{ guardando() ? 'Guardando…' : 'Guardar' }}
-      </button>
+      <app-boton
+        tipo="submit"
+        [icono]="modo() === 'editar' ? 'guardar' : 'anadir'"
+        [cargando]="guardando()"
+      >
+        Guardar
+      </app-boton>
     </form>
 
     @if (modo() === 'editar') {
@@ -123,10 +142,9 @@
           <p>Sin imagen todavía.</p>
         }
         @if (errorImagen(); as mensaje) {
-          <p class="c-alerta c-alerta--error" role="alert">{{ mensaje }}</p>
+          <app-alerta>{{ mensaje }}</app-alerta>
         }
-        <div class="c-campo">
-          <label class="c-campo__etiqueta" for="imagen-empresa"><app-icono nombre="subir" />Subir imagen</label>
+        <app-campo etiqueta="Subir imagen" icono="subir" para="imagen-empresa">
           <input
             id="imagen-empresa"
             type="file"
@@ -134,7 +152,7 @@
             [disabled]="subiendoImagen()"
             (change)="onArchivoSeleccionado($event)"
           />
-        </div>
+        </app-campo>
       </section>
     }
   }

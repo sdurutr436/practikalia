@@ -5,6 +5,7 @@
 
 .c-tarjeta-empresa {
   @include t.panel;
+  position: relative;
   display: grid;
   gap: s.$espaciado-pequeno;
   padding: s.$espaciado-base;
@@ -17,6 +18,26 @@
   &:focus-visible {
     @include t.anillo-foco;
     outline-offset: 2px;
+  }
+}
+
+// Marca de publicación, solo para profesorado: verde publicada, roja sin
+// publicar. Va sobre la esquina, con superficie propia para leerse encima de
+// la imagen.
+.c-tarjeta-empresa__estado {
+  position: absolute;
+  inset-block-start: s.$espaciado-pequeno;
+  inset-inline-end: s.$espaciado-pequeno;
+  display: grid;
+  place-items: center;
+  padding: s.$espaciado-diminuto;
+  border-radius: s.$radio-pildora;
+  background: s.$color-superficie;
+  box-shadow: s.$sombra;
+  color: s.$color-error;
+
+  &--publicada {
+    color: s.$color-secundario;
   }
 }
 

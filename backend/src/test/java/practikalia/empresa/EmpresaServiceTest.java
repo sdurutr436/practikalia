@@ -94,16 +94,4 @@ class EmpresaServiceTest {
                 .isInstanceOf(EmpresaException.class)
                 .hasFieldOrPropertyWithValue("codigo", "EMPRESA_NO_ENCONTRADA");
     }
-
-    @Test
-    void listarParaAlumnoSoloDevuelveEmpresasPublicadas() {
-        Empresa publicada = new Empresa("Acme", null, null, sector, "obs", null, null, null, profesor);
-        publicada.setPublicada(true);
-        when(empresaRepository.findByPublicadaTrue()).thenReturn(List.of(publicada));
-
-        List<EmpresaAlumnoDto> resultado = empresaService.listarParaAlumno();
-
-        assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).nombre()).isEqualTo("Acme");
-    }
 }

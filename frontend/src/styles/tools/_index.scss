@@ -12,7 +12,7 @@
 // (grid/gap), su padding y sus estados. Los bloques de gestión de la ficha NO
 // la usan: son superficie apagada sin borde ni sombra, otra cosa.
 @mixin panel {
-  background: s.$color-superficie;
+  background: s.$degradado-superficie;
   color: s.$color-superficie-texto;
   border: 1px solid s.$color-borde;
   border-radius: s.$radio;

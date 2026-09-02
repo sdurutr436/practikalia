@@ -1,5 +1,7 @@
 package practikalia.empresa;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,12 +37,23 @@ public class EmpresaController {
         this.empresaService = empresaService;
     }
 
-    @Operation(summary = "Listar empresas", description = "El alumnado solo ve las publicadas; el profesorado ve todas, publicadas o no.")
+    @Operation(summary = "Listar empresas", description = "El alumnado solo ve las publicadas; el profesorado ve todas, "
+            + "publicadas o no. Devuelve una página ordenada por nombre: sin `tamano`, el listado entero en una sola "
+            + "página. `texto` busca en nombre, descripción, sector y etiquetas; `etiquetaIds` admite varias y basta "
+            + "con que la empresa tenga alguna.")
     @GetMapping
-    public ResponseEntity<?> listar(Authentication authentication) {
+    public ResponseEntity<?> listar(
+            Authentication authentication,
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) Boolean publicada,
+            @RequestParam(required = false) Long sectorId,
+            @RequestParam(required = false) List<Long> etiquetaIds,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(required = false) Integer tamano) {
+        EmpresaFiltroDto filtro = new EmpresaFiltroDto(texto, publicada, sectorId, etiquetaIds, pagina, tamano);
         return esProfesor(authentication)
-                ? ResponseEntity.ok(empresaService.listarParaProfesor())
-                : ResponseEntity.ok(empresaService.listarParaAlumno());
+                ? ResponseEntity.ok(empresaService.listarParaProfesor(filtro))
+                : ResponseEntity.ok(empresaService.listarParaAlumno(filtro));
     }
 
     @Operation(summary = "Consultar una empresa", description = "Un alumno pidiendo una empresa no publicada recibe 404, "

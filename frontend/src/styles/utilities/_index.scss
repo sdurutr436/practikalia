@@ -19,3 +19,11 @@
   flex: 1;
   min-width: 0;
 }
+
+// Borra del layout el anfitrión de un componente: lo que manda es el elemento
+// real de dentro (el <button> que es ítem de .c-acciones, el <div class="c-campo">
+// que es ítem de la rejilla de .c-formulario). Sin esto el anfitrión mete una
+// caja intermedia y el flex/grid del padre deja de alcanzar al elemento.
+.u-contenidos {
+  display: contents;
+}

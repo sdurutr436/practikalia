@@ -1,4 +1,4 @@
-<div class="o-marco c-marco">
+<div class="o-marco">
   <app-fondo />
 
   <header class="c-barra">
@@ -16,42 +16,48 @@
 
       <span class="c-barra__marca">Practikalia</span>
 
-      <nav class="c-acciones c-barra__acciones" aria-label="Acciones de la sesión">
-        @if (sesion()?.rol === 'PROFESOR') {
-          <a class="c-boton" routerLink="/empresas/nueva"
-            ><app-icono nombre="anadir" />Nueva empresa</a
-          >
-        }
-        <button class="c-boton c-boton--secundario" type="button" (click)="cerrarSesion()">
-          <app-icono nombre="salir" />Cerrar sesión
-        </button>
-      </nav>
+      <!-- En pantalla estrecha este acordeón es el menú entero: la hamburguesa
+           se esconde y tanto las acciones como las secciones se abren aquí, en
+           un solo panel. En pantalla ancha el acordeón se vuelve transparente,
+           las acciones vuelven a la fila y el menú a ser el desplegable que
+           cuelga de la hamburguesa. -->
+      <app-acordeon etiqueta="Menú" [(abierto)]="abierto">
+        <nav class="c-acciones c-barra__acciones" aria-label="Acciones de la sesión">
+          @if (sesion()?.rol === 'PROFESOR') {
+            <app-boton icono="anadir" enlace="/empresas/nueva">Nueva empresa</app-boton>
+            <app-boton icono="persona" enlace="/alumnos/nuevo">Nuevo alumno</app-boton>
+          }
+          <app-boton icono="salir" [secundario]="true" (click)="cerrarSesion()">
+            Cerrar sesión
+          </app-boton>
+        </nav>
+
+        <nav class="c-menu" id="menu-principal" aria-label="Menú principal" [hidden]="!abierto()">
+          <ul class="c-menu__secciones">
+            @for (seccion of secciones(); track seccion.ruta) {
+              <li>
+                <a
+                  class="c-menu__seccion"
+                  routerLinkActive="c-menu__seccion--activa"
+                  [routerLink]="seccion.ruta"
+                >
+                  <app-icono [nombre]="seccion.icono" />
+                  <span>{{ seccion.etiqueta }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+
+          <div class="c-menu__cuenta">
+            <span class="c-menu__avatar" aria-hidden="true"><app-icono nombre="persona" /></span>
+            <span class="c-menu__titulos">
+              <span class="c-menu__correo">{{ sesion()?.correo ?? 'Mi cuenta' }}</span>
+              <span class="c-menu__rol">{{ rolLegible() }}</span>
+            </span>
+          </div>
+        </nav>
+      </app-acordeon>
     </div>
-
-    <nav class="c-menu" id="menu-principal" aria-label="Menú principal" [hidden]="!abierto()">
-      <ul class="c-menu__secciones">
-        @for (seccion of secciones(); track seccion.ruta) {
-          <li>
-            <a
-              class="c-menu__seccion"
-              routerLinkActive="c-menu__seccion--activa"
-              [routerLink]="seccion.ruta"
-            >
-              <app-icono [nombre]="seccion.icono" />
-              <span class="c-menu__texto">{{ seccion.etiqueta }}</span>
-            </a>
-          </li>
-        }
-      </ul>
-
-      <div class="c-menu__cuenta">
-        <span class="c-menu__avatar" aria-hidden="true"><app-icono nombre="persona" /></span>
-        <span class="c-menu__titulos">
-          <span class="c-menu__correo">{{ sesion()?.correo ?? 'Mi cuenta' }}</span>
-          <span class="c-menu__rol">{{ rolLegible() }}</span>
-        </span>
-      </div>
-    </nav>
   </header>
 
   <div class="c-marco__contenido">

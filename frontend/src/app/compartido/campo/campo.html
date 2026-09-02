@@ -1,0 +1,35 @@
+<!-- Rótulo y cuerpo van en plantillas para que solo haya un <ng-content>:
+     Angular proyecta únicamente en la primera ranura que encuentra. -->
+<ng-template #rotulo>
+  @if (icono(); as nombre) {
+    <app-icono [nombre]="nombre" />
+  }
+  {{ etiqueta() }}
+  @if (requerido()) {
+    <span class="c-requerido" aria-hidden="true">*</span>
+  }
+</ng-template>
+
+<ng-template #cuerpo>
+  <ng-content />
+  @if (ayuda(); as texto) {
+    <p class="c-campo__ayuda" [id]="para() + '-ayuda'">{{ texto }}</p>
+  }
+  @if (hayError()) {
+    <p class="c-campo__error">{{ error() }}</p>
+  }
+</ng-template>
+
+@if (grupo()) {
+  <fieldset class="c-campo" [class.u-crecer]="crecer()">
+    <legend class="c-campo__etiqueta"><ng-container [ngTemplateOutlet]="rotulo" /></legend>
+    <ng-container [ngTemplateOutlet]="cuerpo" />
+  </fieldset>
+} @else {
+  <div class="c-campo" [class.u-crecer]="crecer()">
+    <label class="c-campo__etiqueta" [attr.for]="para()">
+      <ng-container [ngTemplateOutlet]="rotulo" />
+    </label>
+    <ng-container [ngTemplateOutlet]="cuerpo" />
+  </div>
+}
