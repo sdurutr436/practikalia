@@ -10,11 +10,11 @@ Visión funcional completa, roles y roadmap: [docs/briefing.md](docs/briefing.md
 
 Proyecto en desarrollo activo, pre-MVP. Ya funciona (con margen de mejora):
 
-- Alta y autenticación de usuarios: login con JWT en cookie, cambio de contraseña obligatorio, auto-registro de alumnado por correo institucional.
-- Directorio de empresas: listado, detalle y alta/edición.
-- Reviews de profesorado (publicación directa) y de alumnado (con moderación docente).
+- Alta y autenticación de usuarios: login con JWT en cookie, cambio de contraseña obligatorio, auto-registro de alumnado por correo institucional, alta de alumnado desde la cabecera por parte del profesorado.
+- Directorio de empresas: listado paginado, detalle y alta/edición, con buscador por nombre/sector/etiquetas, filtros avanzados y filtro por estado de publicación desde el panel.
+- Reviews de profesorado (publicación directa) y de alumnado (con moderación docente), enlazadas a su empresa y con cola de moderación para las rechazadas.
 - Intereses del alumnado por empresa y afinidad básica.
-- Panel diferenciado por rol (alumno/profesor) con navegación propia.
+- Panel diferenciado por rol (alumno/profesor), con navegación propia y contadores del centro (empresas, alumnado).
 
 Lo marcado como "a futuro" o "más adelante" en el [briefing](docs/briefing.md#roadmap) (OTP, 2FA, métricas de contratación, motor de afinidad avanzado, federación entre instancias...) sigue siendo **WIP**.
 
@@ -29,17 +29,27 @@ Lo marcado como "a futuro" o "más adelante" en el [briefing](docs/briefing.md#r
 
 ## Capturas de pantalla
 
-Pantalla de acceso, en desktop y en móvil. Son las únicas capturas disponibles por ahora — se irán añadiendo más a medida que el resto de pantallas se estabilice (**WIP**).
+Pantalla de acceso y panel general, en desktop y en móvil. Son las únicas capturas disponibles por ahora — se irán añadiendo más a medida que el resto de pantallas se estabilice (**WIP**).
 
 <table>
 <tr>
 <td align="center">
 <img src="docs/assets/img/Practikalia-login-desktop.png" alt="Pantalla de acceso en desktop" width="480"><br>
-<sub>Desktop</sub>
+<sub>Acceso — Desktop</sub>
 </td>
 <td align="center">
 <img src="docs/assets/img/Practikalia-login-mobile.png" alt="Pantalla de acceso en móvil" width="200"><br>
-<sub>Móvil</sub>
+<sub>Acceso — Móvil</sub>
+</td>
+</tr>
+<tr>
+<td align="center">
+<img src="docs/assets/img/Practikalia-panel-general-desktop.png" alt="Panel general en desktop" width="480"><br>
+<sub>Panel general — Desktop</sub>
+</td>
+<td align="center">
+<img src="docs/assets/img/Practikalia-panel-general-mobile.png" alt="Panel general en móvil" width="200"><br>
+<sub>Panel general — Móvil</sub>
 </td>
 </tr>
 </table>
