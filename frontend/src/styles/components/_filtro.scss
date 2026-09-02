@@ -11,7 +11,7 @@
   display: inline-flex;
   align-items: center;
   padding: s.$espaciado-diminuto s.$espaciado-medio;
-  background: transparent;
+  background: s.$color-superficie;
   font: inherit;
   cursor: pointer;
   border: 1px solid s.$color-borde;
