@@ -78,11 +78,19 @@
     justify-content: center;
   }
 
-  // En el flujo, debajo del acordeón: flotando taparía las acciones que el
-  // propio acordeón acaba de destapar.
+  // Dentro del acordeón, en el flujo y sin superficie propia: aquí el menú no
+  // es un desplegable que cuelga de la hamburguesa, sino una sección más del
+  // panel que ya dibuja la barra. Con su tarjeta puesta se vería una tarjeta
+  // dentro de otra, que es lo que hacía parecer que había dos menús.
   .c-menu {
     position: static;
     width: 100%;
+    padding: 0;
+    margin-top: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
 }
 
