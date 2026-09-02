@@ -139,13 +139,13 @@ describe('listado de empresas', () => {
     await esperarMicrotareas();
     harness.detectChanges();
 
-    const lupa: HTMLButtonElement = harness.routeNativeElement!.querySelector('.c-buscador__lupa')!;
+    const lupa: HTMLButtonElement = harness.routeNativeElement!.querySelector('.c-buscador:not(.c-buscador--fijo) .c-buscador__lupa')!;
     expect(lupa.getAttribute('aria-expanded')).toBe('false');
     lupa.click();
     harness.detectChanges();
     expect(lupa.getAttribute('aria-expanded')).toBe('true');
 
-    const entrada: HTMLInputElement = harness.routeNativeElement!.querySelector('.c-buscador__entrada')!;
+    const entrada: HTMLInputElement = harness.routeNativeElement!.querySelector('.c-buscador:not(.c-buscador--fijo) .c-buscador__entrada')!;
     expect(document.activeElement).toBe(entrada);
     entrada.value = 'diseno';
     entrada.dispatchEvent(new Event('input'));

@@ -2,6 +2,33 @@
   <app-cabecera titulo="Empresas" />
 
   <div class="c-filtros">
+    <!-- Barra de móvil: siempre abierta y con el engranaje dentro. En pantalla
+         ancha desaparece entera y mandan la lupa y la pastilla de "Filtros" de
+         debajo; solo una de las dos existe a la vez para el lector de pantalla,
+         porque la otra está en display:none. -->
+    <div class="c-buscador c-buscador--fijo">
+      <app-icono class="c-buscador__icono" nombre="buscar" />
+      <input
+        class="c-buscador__entrada"
+        #movil
+        type="search"
+        aria-label="Buscar empresas"
+        placeholder="Nombre, sector, etiqueta…"
+        [value]="texto()"
+        (input)="escribir(movil.value)"
+      />
+      <button
+        class="c-buscador__ajustes"
+        type="button"
+        aria-label="Filtros"
+        aria-controls="filtros-avanzados"
+        [attr.aria-expanded]="filtrosAbiertos()"
+        (click)="alternarFiltros()"
+      >
+        <app-icono nombre="configuracion" />
+      </button>
+    </div>
+
     @if (esProfesor()) {
       <ul class="o-etiquetas">
         <li>
