@@ -57,6 +57,12 @@
   display: grid;
   gap: s.$espaciado-base;
   padding: s.$espaciado-base;
+  transform-origin: top;
+  animation: desplegar s.$transicion ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   &__etiquetas {
     display: grid;

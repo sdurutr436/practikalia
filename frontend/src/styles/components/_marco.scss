@@ -90,9 +90,15 @@
   max-width: 100%;
   margin-top: s.$espaciado-pequeno;
   padding: s.$espaciado-base;
+  transform-origin: top;
+  animation: desplegar s.$transicion ease;
 
   &[hidden] {
     display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
   }
 }
 
