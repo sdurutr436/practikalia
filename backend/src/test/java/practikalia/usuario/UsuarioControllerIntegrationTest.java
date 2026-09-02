@@ -331,23 +331,22 @@ class UsuarioControllerIntegrationTest {
     }
 
     @Test
-    void adminActivaLaCuentaYLaContrasenaDevueltaSirveParaEntrar() throws Exception {
+    void adminConfirmaLaCuentaSinTocarLaContrasena() throws Exception {
         Usuario pendiente = guardarAlumno("pendiente2@iesejemplo.es");
         pendiente.setActivo(false);
         usuarioRepository.save(pendiente);
+        String hashAntes = pendiente.getContrasenaHash();
 
-        String cuerpo = mockMvc.perform(put("/api/usuarios/" + pendiente.getId() + "/activar")
+        mockMvc.perform(put("/api/usuarios/" + pendiente.getId() + "/activar")
                         .with(csrf())
                         .with(user("admin@iesejemplo.es").authorities(
                                 new SimpleGrantedAuthority("ROLE_PROFESOR"), new SimpleGrantedAuthority("ADMIN"))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.correo").value("pendiente2@iesejemplo.es"))
-                .andExpect(jsonPath("$.contrasenaTemporal").exists())
-                .andReturn().getResponse().getContentAsString();
+                .andExpect(status().isNoContent());
 
-        String contrasenaTemporal = objectMapper.readTree(cuerpo).get("contrasenaTemporal").asText();
         Usuario activado = usuarioRepository.findById(pendiente.getId()).orElseThrow();
         assertThat(activado.isActivo()).isTrue();
-        assertThat(passwordEncoder.matches(contrasenaTemporal, activado.getContrasenaHash())).isTrue();
+        // La contraseña es la que el alumno ya conoce (su DNI si vino con uno):
+        // confirmar no la puede regenerar sin dejarle fuera.
+        assertThat(activado.getContrasenaHash()).isEqualTo(hashAntes);
     }
 }

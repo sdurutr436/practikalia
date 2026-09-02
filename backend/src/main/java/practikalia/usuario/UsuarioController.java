@@ -55,14 +55,15 @@ public class UsuarioController {
         return usuarioService.listar(rol);
     }
 
-    @Operation(summary = "Aprobar/activar una cuenta", description = "Solo admin. Deja la cuenta activa y devuelve una "
-            + "contraseña temporal nueva en claro (la del auto-registro no se le mostró a nadie), que el usuario deberá "
-            + "cambiar en su primer login. Sobre una cuenta ya activa la renueva igualmente.")
-    @ApiResponse(responseCode = "403", description = "Quien la aprueba no es admin")
+    @Operation(summary = "Confirmar una cuenta", description = "Solo admin. Deja la cuenta activa y ya: no toca la "
+            + "contraseña, porque las cuentas que nacen con DNI (auto-registro e importación de alumnado) arrancan con "
+            + "él como contraseña inicial. Sobre una cuenta ya activa no hace nada.")
+    @ApiResponse(responseCode = "403", description = "Quien la confirma no es admin")
     @ApiResponse(responseCode = "404", description = "El usuario no existe")
     @PutMapping("/{id}/activar")
-    public ResponseEntity<CrearUsuarioResponse> activar(@PathVariable Long id) {
-        return ResponseEntity.ok(usuarioService.activarUsuario(id));
+    public ResponseEntity<Void> activar(@PathVariable Long id) {
+        usuarioService.activarUsuario(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Actualizar el grado/año de un usuario", description = "Solo profesor/admin. Reemplaza el perfil completo (grado y año a la vez).")

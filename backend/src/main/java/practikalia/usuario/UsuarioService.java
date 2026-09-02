@@ -124,7 +124,7 @@ public class UsuarioService {
             throw UsuarioException.correoYaExiste();
         }
 
-        Usuario usuario = new Usuario(correo, passwordEncoder.encode(generarContrasenaTemporal()), Rol.ALUMNO);
+        Usuario usuario = new Usuario(correo, passwordEncoder.encode(contrasenaInicial(dni)), Rol.ALUMNO);
         usuario.setNombre(request.nombre().trim());
         usuario.setApellido1(request.apellido1().trim());
         usuario.setApellido2(request.apellido2() == null || request.apellido2().isBlank() ? null : request.apellido2().trim());
@@ -135,22 +135,16 @@ public class UsuarioService {
     }
 
     /**
-     * Aprobación de una cuenta por un admin. Genera una contraseña temporal nueva
-     * porque la del auto-registro no se le mostró a nadie. Sobre una cuenta ya
-     * activa es un no-op que igualmente la renueva: no hay estado "pendiente"
-     * aparte de {@code activo} con el que distinguir los dos casos.
+     * Confirmación de una cuenta por un admin: solo la activa. Ya no toca la
+     * contraseña — las cuentas que nacen con DNI (auto-registro e importación)
+     * arrancan con él como contraseña, y regenerarla aquí destruiría justo la
+     * que el alumno conoce. Sobre una cuenta ya activa es un no-op.
      */
     @Transactional
-    public CrearUsuarioResponse activarUsuario(Long id) {
+    public void activarUsuario(Long id) {
         Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioException::noEncontrado);
-
-        String contrasenaTemporal = generarContrasenaTemporal();
-        usuario.setContrasenaHash(passwordEncoder.encode(contrasenaTemporal));
-        usuario.setDebeCambiarContrasena(true);
         usuario.setActivo(true);
         usuarioRepository.save(usuario);
-
-        return new CrearUsuarioResponse(usuario.getId(), usuario.getCorreo(), usuario.getRol(), contrasenaTemporal);
     }
 
     @Transactional
@@ -288,11 +282,22 @@ public class UsuarioService {
         return dominiosPermitidos.contains(correo.substring(correo.indexOf('@') + 1).toLowerCase());
     }
 
-    /** Formato del DNI, no matriculación: que la persona exista lo comprueba el centro al aprobar la cuenta. */
-    private boolean dniValido(String dni) {
+    /** Formato del DNI, no matriculación: que la persona exista lo comprueba el centro al confirmar la cuenta. */
+    public static boolean dniValido(String dni) {
         Matcher coincide = FORMATO_DNI.matcher(dni);
         return coincide.matches()
                 && LETRAS_DNI.charAt(Integer.parseInt(coincide.group(1)) % 23) == coincide.group(2).charAt(0);
+    }
+
+    /**
+     * Contraseña con la que nace una cuenta que trae DNI: el número sin la letra.
+     * Decisión de producto del centro — es débil a propósito, para que el alumno
+     * pueda entrar la primera vez sin que nadie le reparta nada. Sigue viniendo
+     * con {@code debeCambiarContrasena = true}, así que solo vale para ese primer
+     * acceso.
+     */
+    public static String contrasenaInicial(String dni) {
+        return dni.substring(0, 8);
     }
 
     private boolean cumplePolitica(String contrasena) {

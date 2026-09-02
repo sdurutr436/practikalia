@@ -287,6 +287,9 @@ class AuthControllerIntegrationTest {
         assertThat(creado.isEsAdmin()).isFalse();
         assertThat(creado.isDebeCambiarContrasena()).isTrue();
         assertThat(creado.getDni()).isEqualTo(DNI_VALIDO);
+        // La contraseña inicial es el DNI sin la letra: el alumno la sabe sin
+        // que el centro tenga que repartirle nada.
+        assertThat(passwordEncoder.matches("12345678", creado.getContrasenaHash())).isTrue();
         assertThat(creado.getGrado().getId()).isEqualTo(grado.getId());
     }
 
