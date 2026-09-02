@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/registro").permitAll()
                         .requestMatchers("/api/auth/cambiar-contrasena").hasAnyAuthority(
                                 JwtService.AUTORIDAD_CAMBIO_PENDIENTE, "ROLE_ALUMNO", "ROLE_PROFESOR")
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")

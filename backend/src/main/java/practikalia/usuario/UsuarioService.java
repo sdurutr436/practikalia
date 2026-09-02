@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,9 @@ public class UsuarioService {
 
     private static final Pattern POLITICA_CONTRASENA = Pattern.compile(
             "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$");
+    private static final Pattern FORMATO_DNI = Pattern.compile("^(\\d{8})([A-Z])$");
+    /** Letra de control del DNI: el resto de dividir el número entre 23 indexa esta cadena. */
+    private static final String LETRAS_DNI = "TRWAGMYFPDXBNJZSQVHLCKE";
     private static final String MAYUSCULAS = "ABCDEFGHJKLMNPQRSTUVWXYZ";
     private static final String MINUSCULAS = "abcdefghijkmnpqrstuvwxyz";
     private static final String NUMEROS = "23456789";
@@ -92,6 +96,42 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
 
         return new CrearUsuarioResponse(usuario.getId(), usuario.getCorreo(), usuario.getRol(), contrasenaTemporal);
+    }
+
+    /**
+     * Alta que se hace el propio alumnado desde la pantalla de acceso. La cuenta
+     * queda inactiva hasta que un admin la apruebe, así que la contraseña temporal
+     * generada aquí no se devuelve a nadie: la aprobación genera otra.
+     */
+    @Transactional
+    public void registrarAutoservicio(RegistroRequest request, String ipRemota) {
+        String correo = request.correo().toLowerCase();
+
+        if (request.web() != null && !request.web().isBlank()) {
+            log.warn("Intento de registro sospechoso (honeypot relleno): correo={} ip={}", correo, ipRemota);
+            throw UsuarioException.credencialesInvalidas();
+        }
+
+        String dni = request.dni().trim().toUpperCase();
+        if (!dniValido(dni)) {
+            throw UsuarioException.dniInvalido();
+        }
+        if (!dominioPermitido(correo)) {
+            throw UsuarioException.correoDominioNoPermitido();
+        }
+        Grado grado = gradoRepository.findById(request.gradoId()).orElseThrow(GradoException::noEncontrado);
+        if (usuarioRepository.findByCorreo(correo).isPresent()) {
+            throw UsuarioException.correoYaExiste();
+        }
+
+        Usuario usuario = new Usuario(correo, passwordEncoder.encode(generarContrasenaTemporal()), Rol.ALUMNO);
+        usuario.setNombre(request.nombre().trim());
+        usuario.setApellido1(request.apellido1().trim());
+        usuario.setApellido2(request.apellido2() == null || request.apellido2().isBlank() ? null : request.apellido2().trim());
+        usuario.setDni(dni);
+        usuario.setGrado(grado);
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
     }
 
     @Transactional
@@ -221,8 +261,19 @@ public class UsuarioService {
     }
 
     private boolean correoPermitido(String correo) {
-        String dominio = correo.substring(correo.indexOf('@') + 1).toLowerCase();
-        return dominiosPermitidos.contains(dominio) || correoPermitidoRepository.existsByCorreo(correo);
+        return dominioPermitido(correo) || correoPermitidoRepository.existsByCorreo(correo);
+    }
+
+    /** Solo `allowed.domains`: el auto-registro no mira la whitelist de correos sueltos, que es para altas ya aprobadas. */
+    private boolean dominioPermitido(String correo) {
+        return dominiosPermitidos.contains(correo.substring(correo.indexOf('@') + 1).toLowerCase());
+    }
+
+    /** Formato del DNI, no matriculación: que la persona exista lo comprueba el centro al aprobar la cuenta. */
+    private boolean dniValido(String dni) {
+        Matcher coincide = FORMATO_DNI.matcher(dni);
+        return coincide.matches()
+                && LETRAS_DNI.charAt(Integer.parseInt(coincide.group(1)) % 23) == coincide.group(2).charAt(0);
     }
 
     private boolean cumplePolitica(String contrasena) {

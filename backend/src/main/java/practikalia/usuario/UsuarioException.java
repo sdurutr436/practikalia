@@ -45,6 +45,22 @@ public class UsuarioException extends ApiException {
         return new UsuarioException(HttpStatus.CONFLICT, "CORREO_YA_REGISTRADO", "El correo ya está registrado");
     }
 
+    /** El DNI del auto-registro no cuadra por formato o por letra de control. */
+    public static UsuarioException dniInvalido() {
+        return new UsuarioException(HttpStatus.BAD_REQUEST, "DNI_INVALIDO", "El DNI no es válido");
+    }
+
+    /** El dominio del correo del auto-registro no está en `allowed.domains` (la tabla `CorreoPermitido` no cuenta aquí). */
+    public static UsuarioException correoDominioNoPermitido() {
+        return new UsuarioException(HttpStatus.BAD_REQUEST, "CORREO_DOMINIO_NO_PERMITIDO",
+                "El dominio del correo no está permitido en este centro");
+    }
+
+    /** Ya hay una cuenta con ese correo al auto-registrarse, activa o pendiente de aprobación. */
+    public static UsuarioException correoYaExiste() {
+        return new UsuarioException(HttpStatus.CONFLICT, "CORREO_YA_EXISTE", "Ya existe una cuenta con ese correo");
+    }
+
     /** La cuenta existe pero está desactivada, o su correo dejó de estar en la whitelist. */
     public static UsuarioException cuentaNoDisponible() {
         return new UsuarioException(HttpStatus.FORBIDDEN, "CUENTA_NO_DISPONIBLE", "La cuenta no está disponible");

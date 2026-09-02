@@ -5,6 +5,7 @@ import practikalia.usuario.jwt.JwtService;
 import java.time.Duration;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -50,6 +51,20 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, construirCookie(resultado.token(), DURACION_COOKIE).toString())
                 .body(new LoginResponse(usuario.rol(), usuario.esAdmin(), usuario.debeCambiarContrasena()));
+    }
+
+    @Operation(summary = "Auto-registro de alumnado", description = "Público. Da de alta una cuenta de alumno "
+            + "**inactiva**, pendiente de que un admin la apruebe con `PUT /api/usuarios/{id}/activar`. "
+            + "El DNI se comprueba solo por formato (número y letra de control); que la persona esté matriculada "
+            + "lo verifica el centro a mano al aprobar. No devuelve contraseña: la genera la aprobación.")
+    @ApiResponse(responseCode = "400", description = "DNI inválido, o el dominio del correo no está permitido en el centro")
+    @ApiResponse(responseCode = "401", description = "El campo honeypot `web` viene relleno (indicio de bot)")
+    @ApiResponse(responseCode = "404", description = "El `gradoId` indicado no existe")
+    @ApiResponse(responseCode = "409", description = "Ya hay una cuenta con ese correo, activa o pendiente")
+    @PostMapping("/registro")
+    public ResponseEntity<Void> registro(@Valid @RequestBody RegistroRequest request, HttpServletRequest httpRequest) {
+        usuarioService.registrarAutoservicio(request, httpRequest.getRemoteAddr());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(summary = "Cerrar sesión", description = "Invalida la cookie de sesión en el cliente (no hay blacklist de tokens en servidor).")
