@@ -1,35 +1,22 @@
-<app-modal titulo="Rechazar reseña" (salir)="pedirSalida()">
-  <article class="c-resena c-resena--modal">
-    <div class="c-resena__cabecera">
-      <span class="c-resena__empresa">{{ review().empresaNombre }}</span>
-      <app-estrellas [valor]="review().calificacion" [maximo]="maximoEstrellas()" />
-    </div>
-    <p class="c-resena__autor">
-      @if (review().alumnoNombre; as nombre) {
-        <strong class="c-resena__nombre">{{ nombre }}</strong>
-      }
-      <span class="c-resena__correo">{{ review().alumnoCorreo }}</span>
-    </p>
-    <blockquote class="c-resena__texto">«{{ review().contenido }}»</blockquote>
-  </article>
-
+<!-- El campo y los botones se escriben una sola vez y se colocan en el modal o
+     dentro de la tarjeta según la anchura; solo se instancia una rama. -->
+<ng-template #campo>
   <div class="c-campo">
-    <label class="c-campo__etiqueta" for="motivo-rechazo">
+    <label class="c-campo__etiqueta" [attr.for]="idCampo()">
       Motivo del rechazo
       <span class="c-requerido" aria-hidden="true">*</span>
     </label>
     <textarea
       #entrada
-      id="motivo-rechazo"
       class="c-campo__entrada c-campo__entrada--area"
       rows="4"
-      autofocus
-      aria-describedby="motivo-rechazo-ayuda"
+      [id]="idCampo()"
+      [attr.aria-describedby]="idCampo() + '-ayuda'"
       placeholder="Qué hay que corregir para que la reseña se pueda publicar"
       [value]="motivo()"
       (input)="motivo.set(entrada.value)"
     ></textarea>
-    <p class="c-campo__ayuda" id="motivo-rechazo-ayuda" aria-live="polite">
+    <p class="c-campo__ayuda" [id]="idCampo() + '-ayuda'" aria-live="polite">
       @if (faltan() > 0) {
         Faltan {{ faltan() }} caracteres de los {{ minimo }} mínimos.
       } @else {
@@ -41,31 +28,60 @@
   @if (error(); as mensaje) {
     <app-alerta>{{ mensaje }}</app-alerta>
   }
+</ng-template>
 
-  <div acciones class="c-acciones">
-    <app-boton
-      icono="rechazar"
-      [deshabilitado]="faltan() > 0"
-      [cargando]="enviando()"
-      textoCargando="Rechazando…"
-      (click)="enviar()"
-    >
-      Confirmar rechazo
-    </app-boton>
-    <app-boton [secundario]="true" [deshabilitado]="enviando()" (click)="pedirSalida()">
-      Dejar de escribir
-    </app-boton>
+<ng-template #acciones>
+  <app-boton
+    icono="rechazar"
+    [deshabilitado]="faltan() > 0"
+    [cargando]="enviando()"
+    textoCargando="Rechazando…"
+    (click)="enviar()"
+  >
+    Confirmar rechazo
+  </app-boton>
+  <app-boton [secundario]="true" [deshabilitado]="enviando()" (click)="pedirSalida()">
+    Dejar de escribir
+  </app-boton>
+</ng-template>
+
+@if (enLinea()) {
+  <!-- Móvil: la tarjeta ya enseña empresa, alumno, nota y texto justo encima,
+       así que aquí solo va el campo. -->
+  <div class="c-rechazo">
+    <ng-container [ngTemplateOutlet]="campo" />
+    <div class="c-acciones"><ng-container [ngTemplateOutlet]="acciones" /></div>
   </div>
-</app-modal>
+} @else {
+  <app-modal titulo="Rechazar reseña" (salir)="pedirSalida()">
+    <article class="c-resena c-resena--modal">
+      <div class="c-resena__cabecera">
+        <span class="c-resena__empresa">{{ review().empresaNombre }}</span>
+        <app-estrellas [valor]="review().calificacion" [maximo]="maximoEstrellas()" />
+      </div>
+      <p class="c-resena__autor">
+        @if (review().alumnoNombre; as nombre) {
+          <strong class="c-resena__nombre">{{ nombre }}</strong>
+        }
+        <span class="c-resena__correo">{{ review().alumnoCorreo }}</span>
+      </p>
+      <blockquote class="c-resena__texto">«{{ review().contenido }}»</blockquote>
+    </article>
 
-<!-- Segundo modal por encima del primero: lo apila el propio <dialog>. -->
-@if (confirmandoSalida()) {
-  <app-modal titulo="¿Seguro que quieres salir?" (salir)="seguirEscribiendo()">
-    <p>Se perderá el motivo que llevas escrito y la reseña seguirá pendiente de moderar.</p>
+    <ng-container [ngTemplateOutlet]="campo" />
 
-    <div acciones class="c-acciones">
-      <app-boton icono="salir" (click)="cerrar.emit()">Salir sin guardar</app-boton>
-      <app-boton [secundario]="true" (click)="seguirEscribiendo()">Seguir escribiendo</app-boton>
-    </div>
+    <div acciones class="c-acciones"><ng-container [ngTemplateOutlet]="acciones" /></div>
   </app-modal>
+
+  <!-- Segundo modal por encima del primero: lo apila el propio <dialog>. -->
+  @if (confirmandoSalida()) {
+    <app-modal titulo="¿Seguro que quieres salir?" (salir)="seguirEscribiendo()">
+      <p>Se perderá el motivo que llevas escrito y la reseña seguirá pendiente de moderar.</p>
+
+      <div acciones class="c-acciones">
+        <app-boton icono="salir" (click)="cerrar.emit()">Salir sin guardar</app-boton>
+        <app-boton [secundario]="true" (click)="seguirEscribiendo()">Seguir escribiendo</app-boton>
+      </div>
+    </app-modal>
+  }
 }

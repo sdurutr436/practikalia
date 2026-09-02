@@ -83,7 +83,10 @@ describe('ReviewService', () => {
     const promesa = service.moderar(1, { estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
     const peticion = httpMock.expectOne('/api/reviews/1/moderar');
     expect(peticion.request.method).toBe('PUT');
-    expect(peticion.request.body).toEqual({ estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
+    expect(peticion.request.body).toEqual({
+      estado: 'RECHAZADA',
+      motivoRechazo: 'Poco detallada.',
+    });
     peticion.flush({ ...REVIEW, estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
     await promesa;
   });

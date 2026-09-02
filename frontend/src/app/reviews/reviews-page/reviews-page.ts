@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MENSAJES_REVIEW, mensajeDeError } from '../../auth/mensajes-error';
@@ -13,6 +13,15 @@ import { ReviewService } from '../review.service';
 
 /** Tres columnas por tres filas, igual que el listado de empresas. */
 const POR_PAGINA = 9;
+
+/**
+ * Ancho por debajo del cual la rejilla va a una sola columna, y con ella el
+ * rechazo se escribe dentro de la propia tarjeta en vez de en un modal.
+ * Medido sobre la pantalla real: 585px de viewport da una columna y 605px da
+ * dos. Va atado a `$ancho-tarjeta-min` de la hoja de tokens: si cambia el
+ * ancho mínimo de tarjeta, hay que volver a medir esto.
+ */
+const UNA_COLUMNA = '(width < 37.5rem)';
 
 /**
  * Las pastillas de la pantalla. La clave es lo que viaja en `?estado=` (se lee
@@ -64,6 +73,9 @@ export class ReviewsPage {
   /** Reseña con el modal de rechazo abierto. */
   protected readonly rechazando = signal<Review | null>(null);
 
+  /** Una columna: el modal desaparece y el motivo se escribe en la tarjeta. */
+  protected readonly esMovil = signal(false);
+
   private readonly parametros = toSignal(this.route.queryParamMap, { requireSync: true });
 
   protected readonly clave = computed(() => {
@@ -82,11 +94,31 @@ export class ReviewsPage {
   protected readonly mensajeVacio = computed(() => VACIOS[this.clave()]);
 
   constructor() {
+    this.seguirLaAnchura();
     void this.cargarCalificacion();
     effect(() => {
       this.parametros();
       untracked(() => void this.cargar());
     });
+  }
+
+  /** ¿Esta reseña tiene el motivo desplegado dentro de su tarjeta? */
+  protected rechazandoAqui(review: Review): boolean {
+    return this.esMovil() && this.rechazando()?.id === review.id;
+  }
+
+  private seguirLaAnchura(): void {
+    // Opcional a propósito: hay entornos sin media queries (jsdom en los tests,
+    // y cualquier render fuera del navegador). Sin ellas se queda en la
+    // presentación de escritorio, que funciona a cualquier ancho.
+    const consulta = window.matchMedia?.(UNA_COLUMNA);
+    if (!consulta) {
+      return;
+    }
+    this.esMovil.set(consulta.matches);
+    const alCambiar = (evento: MediaQueryListEvent) => this.esMovil.set(evento.matches);
+    consulta.addEventListener('change', alCambiar);
+    inject(DestroyRef).onDestroy(() => consulta.removeEventListener('change', alCambiar));
   }
 
   protected irAPagina(pagina: number): void {

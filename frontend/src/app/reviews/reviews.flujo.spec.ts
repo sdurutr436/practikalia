@@ -463,4 +463,73 @@ describe('cola de moderación', () => {
 
     expect(raiz.querySelector('dialog')).toBeNull();
   });
+
+  it('en una columna el motivo se escribe dentro de la tarjeta, sin modal', async () => {
+    // jsdom no evalúa media queries de verdad: siempre responde matches:false.
+    const original = window.matchMedia;
+    window.matchMedia = ((consulta: string) => ({
+      matches: true,
+      media: consulta,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia;
+
+    try {
+      await entrarComoProfesor();
+      const harness = await abrir('/reviews', [REVIEW]);
+      const raiz = harness.routeNativeElement as Element;
+
+      boton(raiz, 'Rechazar')?.click();
+      harness.detectChanges();
+
+      expect(raiz.querySelector('dialog')).toBeNull();
+      const area = raiz.querySelector('textarea') as HTMLTextAreaElement;
+      expect(raiz.querySelector('.c-rechazo')?.contains(area)).toBe(true);
+
+      area.value = MOTIVO;
+      area.dispatchEvent(new Event('input'));
+      harness.detectChanges();
+      boton(raiz, 'Confirmar rechazo')?.click();
+
+      const peticion = http.expectOne('/api/reviews/1/moderar');
+      expect(peticion.request.body).toEqual({ estado: 'RECHAZADA', motivoRechazo: MOTIVO });
+      peticion.flush({ ...REVIEW, estado: 'RECHAZADA', motivoRechazo: MOTIVO });
+      await esperarMicrotareas();
+      http.expectOne((r) => r.url === '/api/reviews').flush(pagina([]));
+      await esperarMicrotareas();
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
+  it('en una columna, dejar de escribir cierra sin confirmar aunque haya texto', async () => {
+    const original = window.matchMedia;
+    window.matchMedia = ((consulta: string) => ({
+      matches: true,
+      media: consulta,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia;
+
+    try {
+      await entrarComoProfesor();
+      const harness = await abrir('/reviews', [REVIEW]);
+      const raiz = harness.routeNativeElement as Element;
+
+      boton(raiz, 'Rechazar')?.click();
+      harness.detectChanges();
+      const area = raiz.querySelector('textarea') as HTMLTextAreaElement;
+      area.value = MOTIVO;
+      area.dispatchEvent(new Event('input'));
+      harness.detectChanges();
+
+      boton(raiz, 'Dejar de escribir')?.click();
+      harness.detectChanges();
+
+      expect(raiz.querySelector('textarea')).toBeNull();
+      expect(raiz.textContent).not.toContain('Seguro que quieres salir');
+    } finally {
+      window.matchMedia = original;
+    }
+  });
 });

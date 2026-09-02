@@ -62,7 +62,9 @@
   background: none;
   color: s.$color-texto-apagado;
   cursor: pointer;
-  transition: background s.$transicion, color s.$transicion;
+  transition:
+    background s.$transicion,
+    color s.$transicion;
 
   &:hover {
     background: s.$color-apagado;
@@ -87,22 +89,4 @@
 
 .c-modal__acciones:empty {
   display: none;
-}
-
-// En móvil el modal deja de ser una caja centrada y se pega al borde inferior:
-// el pulgar llega a los botones sin estirarse, y el teclado no lo parte por la
-// mitad.
-@media (width < 30rem) {
-  .c-modal {
-    max-width: 100%;
-    width: 100%;
-    max-height: 90dvh;
-    margin: auto auto 0;
-    border-end-start-radius: 0;
-    border-end-end-radius: 0;
-  }
-
-  .c-modal__caja {
-    padding: s.$espaciado-base;
-  }
 }

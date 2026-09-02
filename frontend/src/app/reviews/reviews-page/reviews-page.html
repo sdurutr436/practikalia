@@ -53,35 +53,52 @@
             <app-alerta>{{ errorModeracion()?.mensaje }}</app-alerta>
           }
 
-          <div class="c-acciones">
-            @if (esPendiente()) {
-              <app-boton
-                icono="aprobar"
-                [deshabilitado]="moderandoId() !== null"
-                (click)="aprobar(review)"
-              >
-                Aprobar
-              </app-boton>
-              <app-boton
-                icono="rechazar"
-                [secundario]="true"
-                [deshabilitado]="moderandoId() !== null"
-                (click)="abrirRechazo(review)"
-              >
-                Rechazar
-              </app-boton>
-            } @else {
-              <!-- Ya moderada: lo único que queda es devolverla a la cola. -->
-              <app-boton
-                icono="volver"
-                [secundario]="true"
-                [deshabilitado]="moderandoId() !== null"
-                (click)="revertir(review)"
-              >
-                Devolver a pendientes
-              </app-boton>
-            }
-          </div>
+          <!-- Con el motivo desplegado dentro de la tarjeta, los dos botones
+               sobran: el propio desplegable trae los suyos. Se quitan del DOM y
+               no con [hidden], que .c-acciones anularía con su display:flex. -->
+          @if (!rechazandoAqui(review)) {
+            <div class="c-acciones">
+              @if (esPendiente()) {
+                <app-boton
+                  icono="aprobar"
+                  [deshabilitado]="moderandoId() !== null"
+                  (click)="aprobar(review)"
+                >
+                  Aprobar
+                </app-boton>
+                <app-boton
+                  icono="rechazar"
+                  [secundario]="true"
+                  [deshabilitado]="moderandoId() !== null"
+                  (click)="abrirRechazo(review)"
+                >
+                  Rechazar
+                </app-boton>
+              } @else {
+                <!-- Ya moderada: lo único que queda es devolverla a la cola. -->
+                <app-boton
+                  icono="volver"
+                  [secundario]="true"
+                  [deshabilitado]="moderandoId() !== null"
+                  (click)="revertir(review)"
+                >
+                  Devolver a pendientes
+                </app-boton>
+              }
+            </div>
+          }
+
+          @if (rechazandoAqui(review)) {
+            <app-rechazo-modal
+              [enLinea]="true"
+              [review]="review"
+              [maximoEstrellas]="calificacion()?.max ?? 5"
+              [enviando]="moderandoId() === review.id"
+              [error]="errorRechazo()"
+              (confirmar)="confirmarRechazo($event)"
+              (cerrar)="cerrarRechazo()"
+            />
+          }
         </li>
       }
     </ul>
@@ -111,7 +128,7 @@
   }
 </main>
 
-@if (rechazando(); as review) {
+@if (!esMovil() && rechazando(); as review) {
   <app-rechazo-modal
     [review]="review"
     [maximoEstrellas]="calificacion()?.max ?? 5"

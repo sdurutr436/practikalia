@@ -77,3 +77,14 @@
   border-radius: s.$radio;
   background: s.$color-apagado;
 }
+
+// Rechazo escrito dentro de la propia tarjeta: es lo que sustituye al modal
+// cuando la rejilla va a una columna. La línea de arriba lo separa de la
+// reseña sin necesidad de otra superficie.
+.c-rechazo {
+  display: flex;
+  flex-direction: column;
+  gap: s.$espaciado-pequeno;
+  padding-top: s.$espaciado-pequeno;
+  border-top: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+}
