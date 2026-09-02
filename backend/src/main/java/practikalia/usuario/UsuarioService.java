@@ -134,6 +134,25 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    /**
+     * Aprobación de una cuenta por un admin. Genera una contraseña temporal nueva
+     * porque la del auto-registro no se le mostró a nadie. Sobre una cuenta ya
+     * activa es un no-op que igualmente la renueva: no hay estado "pendiente"
+     * aparte de {@code activo} con el que distinguir los dos casos.
+     */
+    @Transactional
+    public CrearUsuarioResponse activarUsuario(Long id) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioException::noEncontrado);
+
+        String contrasenaTemporal = generarContrasenaTemporal();
+        usuario.setContrasenaHash(passwordEncoder.encode(contrasenaTemporal));
+        usuario.setDebeCambiarContrasena(true);
+        usuario.setActivo(true);
+        usuarioRepository.save(usuario);
+
+        return new CrearUsuarioResponse(usuario.getId(), usuario.getCorreo(), usuario.getRol(), contrasenaTemporal);
+    }
+
     @Transactional
     public LoginResultado login(LoginRequest request, String ipRemota) {
         String correo = request.correo().toLowerCase();
