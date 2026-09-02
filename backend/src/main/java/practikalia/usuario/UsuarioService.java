@@ -6,6 +6,7 @@ import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.grado.Grado;
 import practikalia.grado.GradoException;
 import practikalia.grado.GradoRepository;
+import practikalia.usuario.correo.CorreoPermitido;
 import practikalia.usuario.correo.CorreoPermitidoRepository;
 import practikalia.usuario.jwt.JwtService;
 
@@ -132,6 +133,18 @@ public class UsuarioService {
         usuario.setGrado(grado);
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
+        permitirCorreo(correo);
+    }
+
+    /**
+     * Apunta el correo en la whitelist. Quien se da de alta con un dominio
+     * permitido queda anotado uno a uno, de forma que si el centro estrecha
+     * después `allowed.domains` las cuentas que ya existían siguen entrando.
+     */
+    public void permitirCorreo(String correo) {
+        if (!correoPermitidoRepository.existsByCorreo(correo)) {
+            correoPermitidoRepository.save(new CorreoPermitido(correo));
+        }
     }
 
     /**
@@ -277,8 +290,12 @@ public class UsuarioService {
         return dominioPermitido(correo) || correoPermitidoRepository.existsByCorreo(correo);
     }
 
-    /** Solo `allowed.domains`: el auto-registro no mira la whitelist de correos sueltos, que es para altas ya aprobadas. */
-    private boolean dominioPermitido(String correo) {
+    /**
+     * Solo `allowed.domains`, no la tabla de correos sueltos: es la puerta por la
+     * que entra alguien que todavía no está en ninguna lista (auto-registro e
+     * importación de alumnado). Quien pasa por aquí acaba añadido a la whitelist.
+     */
+    public boolean dominioPermitido(String correo) {
         return dominiosPermitidos.contains(correo.substring(correo.indexOf('@') + 1).toLowerCase());
     }
 

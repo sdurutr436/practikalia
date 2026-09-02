@@ -5,6 +5,7 @@ import practikalia.grado.GradoRepository;
 import practikalia.usuario.Rol;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioRepository;
+import practikalia.usuario.correo.CorreoPermitidoRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -26,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@TestPropertySource(properties = "allowed.domains=iesejemplo.es")
 class AlumnoControllerIntegrationTest {
 
     private static final String CABECERA = "nombre,apellido1,apellido2,dni,correo,grado,anio\n";
@@ -48,6 +51,8 @@ class AlumnoControllerIntegrationTest {
     private GradoRepository gradoRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private CorreoPermitidoRepository correoPermitidoRepository;
 
     private final RequestPostProcessor comoProfesor =
             user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"));
@@ -112,6 +117,23 @@ class AlumnoControllerIntegrationTest {
         assertThat(creado.getNombre()).isEqualTo("Lucía");
         assertThat(creado.getGrado().getNombre()).isEqualTo("DAW");
         assertThat(passwordEncoder.matches("12345678", creado.getContrasenaHash())).isTrue();
+        // Sin la entrada en la whitelist, `login` rechazaría la cuenta para siempre.
+        assertThat(correoPermitidoRepository.existsByCorreo("lucia@iesejemplo.es")).isTrue();
+    }
+
+    @Test
+    void importarConUnDominioDeFueraDelCentroFalla() throws Exception {
+        gradoRepository.save(new Grado("DAW"));
+
+        mockMvc.perform(multipart("/api/alumnos/importar")
+                        .file(csv(CABECERA + "Lucía,Ramírez,,12345678Z,lucia@gmail.com,DAW,2026\n"))
+                        .with(csrf())
+                        .with(comoProfesor))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value(
+                        org.hamcrest.Matchers.containsString("dominio")));
+
+        assertThat(usuarioRepository.findByCorreo("lucia@gmail.com")).isEmpty();
     }
 
     @Test

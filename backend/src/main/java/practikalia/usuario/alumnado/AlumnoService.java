@@ -48,16 +48,19 @@ public class AlumnoService {
     private final UsuarioRepository usuarioRepository;
     private final AsignacionRepository asignacionRepository;
     private final GradoRepository gradoRepository;
+    private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
 
     public AlumnoService(
             UsuarioRepository usuarioRepository,
             AsignacionRepository asignacionRepository,
             GradoRepository gradoRepository,
+            UsuarioService usuarioService,
             PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.asignacionRepository = asignacionRepository;
         this.gradoRepository = gradoRepository;
+        this.usuarioService = usuarioService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -126,6 +129,9 @@ public class AlumnoService {
         }
 
         usuarioRepository.saveAll(nuevos);
+        // Sin esto las cuentas se crean pero `login` las rechaza para siempre:
+        // exige que el correo esté permitido, y el dominio solo abre la puerta.
+        nuevos.forEach(alumno -> usuarioService.permitirCorreo(alumno.getCorreo()));
         return new ImportacionDto(nuevos.size());
     }
 
@@ -142,6 +148,8 @@ public class AlumnoService {
         exigir(!fila.get("apellido1").isBlank(), linea, "falta el primer apellido");
         exigir(UsuarioService.dniValido(dni), linea, "el DNI '" + fila.get("dni") + "' no es válido");
         exigir(correo.contains("@"), linea, "el correo '" + fila.get("correo") + "' no es válido");
+        exigir(usuarioService.dominioPermitido(correo), linea,
+                "el dominio de '" + correo + "' no está permitido en este centro");
         exigir(correos.add(correo), linea, "el correo '" + correo + "' está repetido en el fichero");
         exigir(dnis.add(dni), linea, "el DNI '" + dni + "' está repetido en el fichero");
         exigir(usuarioRepository.findByCorreo(correo).isEmpty(), linea, "ya existe una cuenta con el correo '" + correo + "'");

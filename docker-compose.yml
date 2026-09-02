@@ -20,6 +20,10 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       APP_UPLOADS_DIR: /app/uploads
+      # Dominios cuyos correos pueden darse de alta (auto-registro e importación
+      # de alumnado). Por defecto el de las cuentas de demostración; cada centro
+      # pone el suyo en el .env.
+      ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-practikalia.test}
     volumes:
       - uploads_data:/app/uploads
     depends_on:
