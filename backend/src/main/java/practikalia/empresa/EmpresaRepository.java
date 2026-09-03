@@ -10,4 +10,10 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long>, JpaSpec
     List<Empresa> findByPublicadaTrue();
 
     long countByPublicada(boolean publicada);
+
+    /** Para el borrado del catálogo: ¿alguna empresa tiene este nodo como sector? */
+    boolean existsBySectorId(Long sectorId);
+
+    /** Ídem, pero entre sus etiquetas. */
+    boolean existsByEtiquetasId(Long etiquetaId);
 }

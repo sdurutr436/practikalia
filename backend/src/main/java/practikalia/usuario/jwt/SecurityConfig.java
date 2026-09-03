@@ -39,6 +39,12 @@ public class SecurityConfig {
                                 .hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/grados/publico").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/grados").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        // El catálogo plano lo lee cualquiera (formulario de empresa, intereses
+                        // del alumnado); montarlo y desmontarlo es solo de admin.
+                        .requestMatchers(HttpMethod.GET, "/api/etiquetas/arbol").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/etiquetas").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/etiquetas/*").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/etiquetas/*").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/etiquetas").hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/usuarios/*/etiquetas").hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/activar").hasAuthority("ADMIN")

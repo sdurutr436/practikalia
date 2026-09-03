@@ -21,6 +21,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     boolean existsByDni(String dni);
 
+    /** Para el borrado del catálogo: ¿algún alumno tiene esta etiqueta entre sus intereses? */
+    boolean existsByEtiquetasId(Long etiquetaId);
+
     long countByRolAndActivoTrue(Rol rol);
 
     /**
