@@ -3,10 +3,10 @@
 
   <!-- Pastillas a la izquierda y los dos botones a la derecha del todo, con
        "Descargar plantilla" como el más a la derecha. -->
-  <div class="c-barra-alumnado">
+  <div class="c-barra-listado">
     <app-pastillas [opciones]="pastillas" [activa]="clave()" ruta="/alumnado" />
 
-    <div class="c-barra-alumnado__acciones">
+    <div class="c-barra-listado__acciones">
       <app-boton icono="subir" [secundario]="true" (click)="elegirFichero()">
         Subida masiva
       </app-boton>
@@ -39,25 +39,25 @@
   >
     <ul class="o-rejilla">
       @for (alumno of alumnos(); track alumno.id) {
-        <li class="c-fila c-alumno">
-          <div class="c-alumno__cabecera">
-            <p class="c-alumno__nombre">{{ nombreCompleto(alumno) }}</p>
+        <li class="c-fila c-persona">
+          <div class="c-persona__cabecera">
+            <p class="c-persona__nombre">{{ nombreCompleto(alumno) }}</p>
 
             <!-- En estrecho el lápiz se queda solo con su icono para no saturar
                  la tarjeta; el rótulo sigue existiendo para el lector de pantalla. -->
             <button
-              class="c-alumno__editar"
+              class="c-persona__editar"
               type="button"
               [attr.aria-label]="'Editar la ficha de ' + nombreCompleto(alumno)"
               (click)="abrirFicha(alumno)"
             >
               <app-icono nombre="editar" />
-              <span class="c-alumno__editar-texto">Editar</span>
+              <span class="c-persona__editar-texto">Editar</span>
             </button>
           </div>
 
-          <p class="c-alumno__correo">{{ alumno.correo }}</p>
-          <p class="c-alumno__clase">
+          <p class="c-persona__correo">{{ alumno.correo }}</p>
+          <p class="c-persona__clase">
             @if (alumno.grado; as grado) {
               {{ grado.nombre }}
               @if (alumno.anio) {
@@ -68,7 +68,7 @@
             }
           </p>
 
-          <div class="c-alumno__pies">
+          <div class="c-persona__pies">
             @if (alumno.empresaNombre; as empresa) {
               <a
                 class="c-etiqueta c-etiqueta--empresa"

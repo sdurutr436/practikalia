@@ -1,12 +1,12 @@
-// Tarjeta de alumno y barra del listado de alumnado. Las tarjetas son bajas a
-// propósito: en Practikalia el alumnado no tiene foto de perfil, así que no hay
-// nada que reservar arriba.
+// Tarjeta de persona (alumnado y profesorado) y barra de un listado. Las
+// tarjetas son bajas a propósito: en Practikalia nadie tiene foto de perfil,
+// así que no hay nada que reservar arriba.
 @use '../settings' as s;
 @use '../tools' as t;
 
 // Pastillas a la izquierda, acciones pegadas a la derecha. Envuelve en estrecho
-// en vez de encoger los botones.
-.c-barra-alumnado {
+// en vez de encoger los botones. La usan alumnado y profesorado.
+.c-barra-listado {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -14,39 +14,39 @@
   gap: s.$espaciado-medio;
 }
 
-.c-barra-alumnado__acciones {
+.c-barra-listado__acciones {
   display: flex;
   flex-wrap: wrap;
   gap: s.$espaciado-pequeno;
   margin-inline-start: auto;
 }
 
-.c-alumno {
+.c-persona {
   gap: s.$espaciado-diminuto;
 }
 
-.c-alumno__cabecera {
+.c-persona__cabecera {
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: s.$espaciado-pequeno;
 }
 
-.c-alumno__nombre {
+.c-persona__nombre {
   margin: 0;
   font-weight: s.$peso-fuerte;
   text-wrap: balance;
 }
 
-.c-alumno__correo,
-.c-alumno__clase {
+.c-persona__correo,
+.c-persona__clase {
   margin: 0;
   font-size: s.$texto-pequeno;
   color: s.$color-texto-apagado;
   overflow-wrap: anywhere;
 }
 
-.c-alumno__pies {
+.c-persona__pies {
   display: flex;
   flex-wrap: wrap;
   gap: s.$espaciado-diminuto;
@@ -54,7 +54,7 @@
 }
 
 // Lápiz arriba a la derecha de la tarjeta.
-.c-alumno__editar {
+.c-persona__editar {
   display: inline-flex;
   align-items: center;
   gap: 0.35em;
@@ -81,7 +81,7 @@
 // En una columna la tarjeta es estrecha: el lápiz se queda solo con el icono.
 // El botón mantiene su aria-label, así que sigue anunciándose entero.
 @media (width < 37.5rem) {
-  .c-alumno__editar-texto {
+  .c-persona__editar-texto {
     display: none;
   }
 }
