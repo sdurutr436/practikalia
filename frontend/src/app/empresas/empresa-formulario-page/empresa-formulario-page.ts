@@ -3,11 +3,12 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { MENSAJES_EMPRESA, mensajeDeError } from '../../auth/mensajes-error';
 import { EmpresaService } from '../empresa.service';
-import { Empresa, EmpresaRequest, Etiqueta } from '../empresa.model';
+import { Empresa, EmpresaRequest, Etiqueta, TutorEmpresa } from '../empresa.model';
 import { VolverComponent } from '../../compartido/volver/volver';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { IconoComponent } from '../../compartido/icono/icono';
 
 /** IDs sueltos separados por coma → números válidos (>0), sin duplicados. */
 function parseIds(texto: string): number[] {
@@ -23,7 +24,14 @@ function porNombre(a: Etiqueta, b: Etiqueta): number {
 
 @Component({
   selector: 'app-empresa-formulario-page',
-  imports: [ReactiveFormsModule, VolverComponent, AlertaComponent, CampoComponent, BotonComponent],
+  imports: [
+    ReactiveFormsModule,
+    VolverComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+    IconoComponent,
+  ],
   templateUrl: './empresa-formulario-page.html',
 })
 export class EmpresaFormularioPage {
@@ -43,7 +51,12 @@ export class EmpresaFormularioPage {
   protected readonly subiendoImagen = signal(false);
   protected readonly errorImagen = signal<string | null>(null);
 
-  protected readonly form = inject(NonNullableFormBuilder).group({
+  private readonly fb = inject(NonNullableFormBuilder);
+
+  /** Los tutores de empresa: siempre al menos una fila, que el backend exige uno. */
+  protected readonly tutores = this.fb.array([this.filaTutor()]);
+
+  protected readonly form = this.fb.group({
     nombre: ['', Validators.required],
     descripcion: [''],
     direccion: [''],
@@ -54,7 +67,29 @@ export class EmpresaFormularioPage {
     contactoTelefono: [''],
     contactoEmail: [''],
     publicada: [false],
+    tutores: this.tutores,
   });
+
+  private filaTutor(tutor?: TutorEmpresa) {
+    return this.fb.group({
+      id: this.fb.control<number | null>(tutor?.id ?? null),
+      nombre: [tutor?.nombre ?? '', Validators.required],
+      cargo: [tutor?.cargo ?? ''],
+      telefono: [tutor?.telefono ?? ''],
+      correo: [tutor?.correo ?? ''],
+    });
+  }
+
+  protected anadirTutor(): void {
+    this.tutores.push(this.filaTutor());
+  }
+
+  /** La última no se puede quitar: toda empresa necesita un tutor. */
+  protected quitarTutor(indice: number): void {
+    if (this.tutores.length > 1) {
+      this.tutores.removeAt(indice);
+    }
+  }
 
   constructor() {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -107,6 +142,14 @@ export class EmpresaFormularioPage {
     });
     this.etiquetasSeleccionadas.set(new Set(empresa.etiquetas.map((e) => e.id)));
     this.imagenActual.set(empresa.imagen ?? null);
+    this.tutores.clear();
+    for (const tutor of empresa.tutores ?? []) {
+      this.tutores.push(this.filaTutor(tutor));
+    }
+    if (this.tutores.length === 0) {
+      // Empresas de antes de que hubiera tutores: se rellena al guardarla.
+      this.tutores.push(this.filaTutor());
+    }
   }
 
   protected toggleEtiqueta(id: number, marcada: boolean): void {
@@ -140,6 +183,13 @@ export class EmpresaFormularioPage {
       sectorId: valores.sectorId,
       etiquetaIds,
       observaciones: valores.observaciones,
+      tutores: valores.tutores.map((tutor) => ({
+        id: tutor.id,
+        nombre: tutor.nombre.trim(),
+        cargo: tutor.cargo.trim() || null,
+        telefono: tutor.telefono.trim() || null,
+        correo: tutor.correo.trim() || null,
+      })),
       contactoNombre: valores.contactoNombre,
       contactoTelefono: valores.contactoTelefono,
       contactoEmail: valores.contactoEmail,

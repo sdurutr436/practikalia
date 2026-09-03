@@ -3,6 +3,15 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { PaginaAlumnos } from '../alumnado/alumnado.service';
 
+/** Lo que guarda una fila de la pantalla de asignaciones. */
+export interface AsignarEmpresaRequest {
+  empresaId: number;
+  /** El profesor que le tutoriza las prácticas. */
+  tutorCentroId: number | null;
+  /** Quién le tutoriza en la empresa; `null` para dejarle sin ninguno. */
+  tutorEmpresaId: number | null;
+}
+
 /** Criterios del listado de asignaciones; todos opcionales menos la página. */
 export interface ConsultaAlumnado {
   anio?: number | null;
@@ -49,10 +58,13 @@ export class AsignacionService {
     return firstValueFrom(this.http.get<PaginaAlumnos>('/api/alumnos/curso', { params }));
   }
 
-  /** Pone empresa a un alumno: crea su asignación, o corrige la que tenga abierta. */
-  asignar(alumnoId: number, empresaId: number): Promise<Asignacion> {
+  /**
+   * Pone empresa y tutores a un alumno: crea su asignación, o corrige la que
+   * tenga abierta. Sin `tutorCentroId` manda el tutor de su clase.
+   */
+  asignar(alumnoId: number, request: AsignarEmpresaRequest): Promise<Asignacion> {
     return firstValueFrom(
-      this.http.put<Asignacion>(`/api/alumnos/${alumnoId}/asignacion`, { empresaId }),
+      this.http.put<Asignacion>(`/api/alumnos/${alumnoId}/asignacion`, request),
     );
   }
 

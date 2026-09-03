@@ -28,6 +28,8 @@ const SIN_ASIGNAR: Alumno = {
   empresaNombre: null,
   tutorId: null,
   tutorNombre: null,
+  tutorEmpresaId: null,
+  tutorEmpresaNombre: null,
 };
 
 const ASIGNADO: Alumno = {
@@ -40,11 +42,32 @@ const ASIGNADO: Alumno = {
   empresaNombre: 'Bahía Solar',
   tutorId: 4,
   tutorNombre: 'Marta Núñez',
+  tutorEmpresaId: 6,
+  tutorEmpresaNombre: 'Rosa Vidal',
 };
 
+/** El claustro del desplegable de tutor de prácticas; Marta tutoriza DAW. */
+const PROFESORES = [
+  {
+    id: 4,
+    nombre: 'Marta',
+    apellido1: 'Núñez',
+    apellido2: null,
+    dni: '12345678Z',
+    correo: 'marta@centro.es',
+    esAdmin: false,
+    clase: { id: 1, nombre: 'DAW' },
+    alumnosPractica: 1,
+  },
+];
+
 const EMPRESAS = [
-  { id: 3, nombre: 'Bahía Solar' },
-  { id: 5, nombre: 'Acme' },
+  { id: 3, nombre: 'Bahía Solar', tutores: [] },
+  {
+    id: 5,
+    nombre: 'Acme',
+    tutores: [{ id: 6, nombre: 'Rosa Vidal', cargo: null, telefono: null, correo: null }],
+  },
 ];
 
 const CURSOS = { actual: 2026, cursos: [2026, 2025] };
@@ -75,11 +98,12 @@ describe('pantalla de asignaciones', () => {
     await promesa;
   };
 
-  /** Los tres catálogos que la pantalla pide al arrancar, en paralelo. */
+  /** Los catálogos que la pantalla pide al arrancar, en paralelo. */
   const catalogos = () => {
     http.expectOne((r) => r.url === '/api/empresas').flush(pagina(EMPRESAS));
     http.expectOne('/api/grados/publico').flush([{ id: 1, nombre: 'DAW' }]);
     http.expectOne('/api/alumnos/cursos').flush(CURSOS);
+    http.expectOne((r) => r.url === '/api/profesores').flush(pagina(PROFESORES));
   };
 
   const abrir = async (url: string, alumnos: Alumno[]) => {
@@ -96,6 +120,12 @@ describe('pantalla de asignaciones', () => {
   const entradas = (raiz: Element) => [
     ...raiz.querySelectorAll<HTMLInputElement>('.c-asignacion .c-desplegable__entrada'),
   ];
+
+  /** El primer desplegable de cada fila, que es el de empresa. */
+  const empresas = (raiz: Element) =>
+    [...raiz.querySelectorAll('.c-asignacion')].map(
+      (fila) => fila.querySelector<HTMLInputElement>('.c-desplegable__entrada')!.value,
+    );
 
   const opciones = (raiz: Element) => [
     ...raiz.querySelectorAll<HTMLElement>('.c-asignacion .c-desplegable__opcion'),
@@ -119,6 +149,7 @@ describe('pantalla de asignaciones', () => {
     expect(peticion.request.params.get('publicada')).toBe('true');
     peticion.flush(pagina(EMPRESAS));
     http.expectOne('/api/grados/publico').flush([]);
+    http.expectOne((r) => r.url === '/api/profesores').flush(pagina(PROFESORES));
     http.expectOne('/api/alumnos/cursos').flush(CURSOS);
     http.expectOne((r) => r.url === '/api/alumnos/curso').flush(pagina([]));
     await esperarMicrotareas();
@@ -128,8 +159,10 @@ describe('pantalla de asignaciones', () => {
     await entrar();
     const harness = await abrir('/asignaciones', [SIN_ASIGNAR, ASIGNADO]);
 
-    const valores = entradas(harness.routeNativeElement!).map((e) => e.value);
-    expect(valores).toEqual(['', 'Bahía Solar']);
+    const raiz = harness.routeNativeElement!;
+    expect(empresas(raiz)).toEqual(['', 'Bahía Solar']);
+    // El tutor de prácticas por defecto es el tutor de su clase (Marta, de DAW).
+    expect(entradas(raiz)[1].value).toBe('Marta Núñez');
   });
 
   it('la pastilla «Sin asignar» filtra por asignado=false', async () => {
@@ -192,7 +225,12 @@ describe('pantalla de asignaciones', () => {
 
     const peticion = http.expectOne(`/api/alumnos/${SIN_ASIGNAR.id}/asignacion`);
     expect(peticion.request.method).toBe('PUT');
-    expect(peticion.request.body).toEqual({ empresaId: 5 });
+    // Los dos tutores van por defecto: el de su clase y el primero de la empresa.
+    expect(peticion.request.body).toEqual({
+      empresaId: 5,
+      tutorCentroId: 4,
+      tutorEmpresaId: 6,
+    });
     peticion.flush({ empresaNombre: 'Acme' });
     await esperarMicrotareas();
 

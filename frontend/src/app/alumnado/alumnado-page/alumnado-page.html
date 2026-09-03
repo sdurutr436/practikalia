@@ -68,6 +68,15 @@
             }
           </p>
 
+          @if (alumno.empresaId) {
+            <p class="c-persona__tutor">
+              Prácticas: {{ alumno.tutorNombre ?? 'sin tutor' }}
+            </p>
+            <p class="c-persona__tutor">
+              En la empresa: {{ alumno.tutorEmpresaNombre ?? 'sin tutor' }}
+            </p>
+          }
+
           <div class="c-persona__pies">
             @if (alumno.empresaNombre; as empresa) {
               <a

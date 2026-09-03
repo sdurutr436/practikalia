@@ -1,5 +1,6 @@
 package practikalia.empresa;
 
+import practikalia.empresa.tutor.TutorEmpresaDto;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.usuario.Rol;
@@ -61,7 +62,9 @@ class EmpresaControllerIntegrationTest {
     }
 
     private CrearEmpresaRequest requestValido(boolean publicada) {
-        return new CrearEmpresaRequest("Acme", "desc", "dir", sector.getId(), List.of(), "obs", "Ana", "600", "ana@acme.com", publicada);
+        return new CrearEmpresaRequest("Acme", "desc", "dir", sector.getId(), List.of(), "obs",
+                List.of(new TutorEmpresaDto(null, "Rosa", "Jefa de taller", "600", "rosa@acme.com")),
+                "Ana", "600", "ana@acme.com", publicada);
     }
 
     @Test
@@ -176,7 +179,8 @@ class EmpresaControllerIntegrationTest {
 
     @Test
     void crearConSectorInexistenteDevuelve400() throws Exception {
-        CrearEmpresaRequest request = new CrearEmpresaRequest("Acme", "desc", "dir", 999L, List.of(), null, null, null, null, false);
+        CrearEmpresaRequest request = new CrearEmpresaRequest("Acme", "desc", "dir", 999L, List.of(), null,
+                List.of(new TutorEmpresaDto(null, "Rosa", null, null, null)), null, null, null, false);
 
         mockMvc.perform(post("/api/empresas")
                         .with(csrf())
@@ -226,6 +230,33 @@ class EmpresaControllerIntegrationTest {
                         .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.codigo").value("IMAGEN_INVALIDA"));
+    }
+
+    @Test
+    void crearSinTutorDeEmpresaDevuelve400() throws Exception {
+        CrearEmpresaRequest sinTutores = new CrearEmpresaRequest("Acme", "desc", "dir", sector.getId(),
+                List.of(), "obs", List.of(), "Ana", "600", "ana@acme.com", false);
+
+        mockMvc.perform(post("/api/empresas")
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sinTutores)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("SIN_TUTOR_EMPRESA"));
+    }
+
+    @Test
+    void elAltaGuardaLosTutoresDeEmpresa() throws Exception {
+        mockMvc.perform(post("/api/empresas")
+                        .with(csrf())
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestValido(false))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.tutores.length()").value(1))
+                .andExpect(jsonPath("$.tutores[0].nombre").value("Rosa"))
+                .andExpect(jsonPath("$.tutores[0].cargo").value("Jefa de taller"));
     }
 
     @Test

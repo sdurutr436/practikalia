@@ -51,6 +51,8 @@ const ALUMNO_ASIGNADO: Alumno = {
   empresaNombre: 'Bahía Solar',
   tutorId: 9,
   tutorNombre: 'Otro Tutor',
+  tutorEmpresaId: null,
+  tutorEmpresaNombre: null,
 };
 
 describe('listado de profesorado', () => {

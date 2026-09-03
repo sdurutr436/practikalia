@@ -18,6 +18,9 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, Long> {
     /** Las asignaciones abiertas de varios tutores a la vez: su tutoría de prácticas en curso. */
     List<Asignacion> findByTutorCentroIdInAndFechaFinIsNull(List<Long> tutorIds);
 
+    /** Las asignaciones de unos tutores de empresa: al borrarlos de la ficha se quedan sin él. */
+    List<Asignacion> findByTutorEmpresaIdIn(List<Long> tutorEmpresaIds);
+
     List<Asignacion> findByEmpresaId(Long empresaId);
 
     boolean existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(Long alumnoId, Long empresaId, Long gradoId, int anio);

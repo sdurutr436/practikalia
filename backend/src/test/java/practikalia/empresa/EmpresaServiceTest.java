@@ -1,5 +1,7 @@
 package practikalia.empresa;
 
+import practikalia.asignacion.AsignacionRepository;
+import practikalia.empresa.tutor.TutorEmpresaDto;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.usuario.Rol;
@@ -34,11 +36,14 @@ class EmpresaServiceTest {
         etiquetaRepository = mock(EtiquetaRepository.class);
         usuarioRepository = mock(UsuarioRepository.class);
         empresaService = new EmpresaService(
-                empresaRepository, etiquetaRepository, usuarioRepository, mock(ImagenEmpresaService.class));
+                empresaRepository, etiquetaRepository, usuarioRepository, mock(ImagenEmpresaService.class),
+                mock(AsignacionRepository.class));
     }
 
     private CrearEmpresaRequest request(Long sectorId, List<Long> etiquetaIds, boolean publicada) {
-        return new CrearEmpresaRequest("Acme", "desc", "dir", sectorId, etiquetaIds, "obs", "Ana", "600", "ana@acme.com", publicada);
+        return new CrearEmpresaRequest("Acme", "desc", "dir", sectorId, etiquetaIds, "obs",
+                List.of(new TutorEmpresaDto(null, "Rosa", "Jefa de taller", "600", "rosa@acme.com")),
+                "Ana", "600", "ana@acme.com", publicada);
     }
 
     @Test

@@ -66,8 +66,10 @@ public class AsignacionController {
 
     @Operation(summary = "Asignar empresa a un alumno", description = "Solo profesor/admin — es lo que guarda cada "
             + "fila de la pantalla de asignaciones. Si el alumno ya tiene una asignación abierta se le cambia la "
-            + "empresa (corrección, ni se cierra ni se duplica); si no tiene ninguna, se crea con quien llama como "
-            + "tutor, la clase del alumno y el curso académico en marcha. La empresa tiene que estar publicada.")
+            + "empresa (corrección, ni se cierra ni se duplica); si no tiene ninguna, se crea con la clase del "
+            + "alumno y el curso académico en marcha. Los dos tutores se guardan siempre: el de prácticas por "
+            + "defecto es el tutor de su clase, y el de empresa tiene que ser uno de los de esa empresa. "
+            + "La empresa tiene que estar publicada.")
     @ApiResponse(responseCode = "400", description = "La empresa no está publicada, o el alumno no tiene clase asignada")
     @ApiResponse(responseCode = "404", description = "El alumno o la empresa no existen")
     @ApiResponse(responseCode = "409", description = "Ese alumno ya estuvo asignado a esa empresa en este mismo curso")
@@ -76,7 +78,7 @@ public class AsignacionController {
             Authentication authentication,
             @PathVariable Long alumnoId,
             @Valid @RequestBody AsignarEmpresaRequest request) {
-        return ResponseEntity.ok(asignacionService.asignar(alumnoId, request.empresaId(), authentication.getName()));
+        return ResponseEntity.ok(asignacionService.asignar(alumnoId, request, authentication.getName()));
     }
 
     @Operation(summary = "Cerrar una asignación", description = "Solo profesor/admin. Fija `fechaFin` y, opcionalmente, si "

@@ -340,7 +340,9 @@ public class AlumnoService {
                 abierta == null ? null : abierta.getEmpresa().getId(),
                 abierta == null ? null : abierta.getEmpresa().getNombre(),
                 abierta == null ? null : abierta.getTutorCentro().getId(),
-                abierta == null ? null : nombreDe(abierta.getTutorCentro()));
+                abierta == null ? null : nombreDe(abierta.getTutorCentro()),
+                abierta == null || abierta.getTutorEmpresa() == null ? null : abierta.getTutorEmpresa().getId(),
+                abierta == null || abierta.getTutorEmpresa() == null ? null : abierta.getTutorEmpresa().getNombre());
     }
 
     /**

@@ -51,6 +51,22 @@
               vacio="Ninguna empresa confirmada coincide."
               (cambia)="elegir(alumno, +$event)"
             />
+            <app-desplegable
+              [opciones]="opcionesProfesor()"
+              [valor]="tutorElegido(alumno)"
+              [etiqueta]="'Tutor de prácticas de ' + nombre(alumno)"
+              marcador="Sin tutor de prácticas"
+              vacio="Ningún profesor coincide."
+              (cambia)="elegirTutor(alumno, $event)"
+            />
+            <app-desplegable
+              [opciones]="opcionesTutorEmpresa(alumno)"
+              [valor]="tutorEmpresaElegido(alumno)"
+              [etiqueta]="'Tutor de empresa de ' + nombre(alumno)"
+              marcador="Sin tutor de empresa"
+              vacio="Esa empresa no tiene tutores todavía."
+              (cambia)="elegirTutorEmpresa(alumno, $event)"
+            />
             <app-boton
               icono="guardar"
               [cargando]="guardandoId() === alumno.id"

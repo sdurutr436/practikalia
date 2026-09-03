@@ -1,5 +1,6 @@
 package practikalia.empresa;
 
+import practikalia.empresa.tutor.TutorEmpresaDto;
 import practikalia.etiqueta.EtiquetaDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,6 +19,8 @@ public record EmpresaProfesorDto(
         EtiquetaDto sector,
         List<EtiquetaDto> etiquetas,
         String observaciones,
+        @Schema(description = "Personal de la empresa que puede tutorizar prácticas. Nunca vacía: la ficha exige al menos uno")
+        List<TutorEmpresaDto> tutores,
         String contactoNombre,
         String contactoTelefono,
         String contactoEmail,
@@ -36,6 +39,7 @@ public record EmpresaProfesorDto(
                 EtiquetaDto.de(empresa.getSector()),
                 empresa.getEtiquetas().stream().map(EtiquetaDto::de).toList(),
                 empresa.getObservaciones(),
+                empresa.getTutores().stream().map(TutorEmpresaDto::de).toList(),
                 empresa.getContactoNombre(),
                 empresa.getContactoTelefono(),
                 empresa.getContactoEmail(),

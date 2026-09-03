@@ -19,6 +19,9 @@ export interface Alumno {
   /** Tutor de prácticas de su asignación abierta. */
   tutorId: number | null;
   tutorNombre: string | null;
+  /** Quién le tutoriza en la empresa; `null` si no se ha elegido a nadie. */
+  tutorEmpresaId: number | null;
+  tutorEmpresaNombre: string | null;
 }
 
 /** Cursos que ofrece el selector — `actual` es el que está en marcha. */

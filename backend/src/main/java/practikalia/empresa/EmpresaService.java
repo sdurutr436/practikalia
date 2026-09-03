@@ -1,13 +1,18 @@
 package practikalia.empresa;
 
+import practikalia.asignacion.AsignacionRepository;
 import practikalia.common.PaginaDto;
+import practikalia.empresa.tutor.TutorEmpresa;
+import practikalia.empresa.tutor.TutorEmpresaDto;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,16 +33,19 @@ public class EmpresaService {
     private final EtiquetaRepository etiquetaRepository;
     private final UsuarioRepository usuarioRepository;
     private final ImagenEmpresaService imagenEmpresaService;
+    private final AsignacionRepository asignacionRepository;
 
     public EmpresaService(
             EmpresaRepository empresaRepository,
             EtiquetaRepository etiquetaRepository,
             UsuarioRepository usuarioRepository,
-            ImagenEmpresaService imagenEmpresaService) {
+            ImagenEmpresaService imagenEmpresaService,
+            AsignacionRepository asignacionRepository) {
         this.empresaRepository = empresaRepository;
         this.etiquetaRepository = etiquetaRepository;
         this.usuarioRepository = usuarioRepository;
         this.imagenEmpresaService = imagenEmpresaService;
+        this.asignacionRepository = asignacionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -122,6 +130,7 @@ public class EmpresaService {
                 request.observaciones(), request.contactoNombre(), request.contactoTelefono(),
                 request.contactoEmail(), creador);
         empresa.setEtiquetas(etiquetas);
+        aplicarTutores(empresa, request.tutores());
         empresaRepository.save(empresa);
         return EmpresaProfesorDto.de(empresa);
     }
@@ -142,6 +151,7 @@ public class EmpresaService {
         empresa.setContactoTelefono(request.contactoTelefono());
         empresa.setContactoEmail(request.contactoEmail());
         empresa.setPublicada(request.publicada());
+        aplicarTutores(empresa, request.tutores());
         empresaRepository.save(empresa);
         return EmpresaProfesorDto.de(empresa);
     }
@@ -152,6 +162,50 @@ public class EmpresaService {
         empresa.setImagen(imagenEmpresaService.guardar(fichero));
         empresaRepository.save(empresa);
         return EmpresaProfesorDto.de(empresa);
+    }
+
+    /**
+     * Reemplaza la lista de tutores de empresa con la que llega de la ficha: los
+     * que traen id se actualizan, los que no lo traen son nuevos, y los que
+     * faltan se borran. Al borrar uno, sus alumnos se quedan sin tutor de
+     * empresa en vez de bloquear el borrado — el dato se pierde a propósito, es
+     * lo que se decidió al diseñar la ficha.
+     */
+    private void aplicarTutores(Empresa empresa, List<TutorEmpresaDto> pedidos) {
+        if (pedidos == null || pedidos.isEmpty()) {
+            throw EmpresaException.sinTutorEmpresa();
+        }
+
+        Map<Long, TutorEmpresa> sobrantes = new HashMap<>();
+        empresa.getTutores().forEach(tutor -> sobrantes.put(tutor.getId(), tutor));
+
+        List<TutorEmpresa> nuevos = new ArrayList<>();
+        for (TutorEmpresaDto pedido : pedidos) {
+            TutorEmpresa tutor = pedido.id() == null
+                    ? new TutorEmpresa(empresa, pedido.nombre())
+                    : sobrantes.remove(pedido.id());
+            if (tutor == null) {
+                throw EmpresaException.tutorEmpresaNoEncontrado();
+            }
+            tutor.setNombre(pedido.nombre().trim());
+            tutor.setCargo(vacioANulo(pedido.cargo()));
+            tutor.setTelefono(vacioANulo(pedido.telefono()));
+            tutor.setCorreo(vacioANulo(pedido.correo()));
+            if (pedido.id() == null) {
+                nuevos.add(tutor);
+            }
+        }
+
+        if (!sobrantes.isEmpty()) {
+            asignacionRepository.findByTutorEmpresaIdIn(List.copyOf(sobrantes.keySet()))
+                    .forEach(asignacion -> asignacion.setTutorEmpresa(null));
+            empresa.getTutores().removeIf(tutor -> sobrantes.containsKey(tutor.getId()));
+        }
+        empresa.getTutores().addAll(nuevos);
+    }
+
+    private static String vacioANulo(String valor) {
+        return valor == null || valor.isBlank() ? null : valor.trim();
     }
 
     private Empresa buscarEmpresa(Long id) {

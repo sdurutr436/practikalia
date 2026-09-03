@@ -18,9 +18,13 @@ import { ToastService } from '../../compartido/toast/toast.service';
 import { Empresa } from '../../empresas/empresa.model';
 import { EmpresaService } from '../../empresas/empresa.service';
 import { AsignacionService } from '../asignacion.service';
+import { Profesor, ProfesoradoService } from '../../profesorado/profesorado.service';
 
 /** Filas apiladas y no tarjetas: caben más por pantalla que las 3×3 de los listados. */
 const POR_PAGINA = 10;
+
+/** El claustro de un centro cabe de sobra: el desplegable los quiere todos. */
+const PROFESORES_MAXIMOS = 200;
 
 /** Las pastillas. La clave viaja en `?estado=`, igual que en alumnado y reseñas. */
 const PASTILLAS = [
@@ -66,6 +70,7 @@ export class AsignacionesPage {
   private readonly asignacionService = inject(AsignacionService);
   private readonly empresaService = inject(EmpresaService);
   private readonly registroService = inject(RegistroService);
+  private readonly profesoradoService = inject(ProfesoradoService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
@@ -76,11 +81,16 @@ export class AsignacionesPage {
   protected readonly resultado = signal<PaginaAlumnos | null>(null);
   protected readonly empresas = signal<Empresa[]>([]);
   protected readonly grados = signal<GradoOpcion[]>([]);
+  protected readonly profesores = signal<Profesor[]>([]);
   protected readonly guardandoId = signal<number | null>(null);
   protected readonly errorFila = signal<{ id: number; mensaje: string } | null>(null);
 
   /** Empresa elegida en cada fila mientras no se guarda, por id de alumno. */
   private readonly seleccion = signal<Record<number, number>>({});
+  /** Tutor de prácticas elegido en cada fila, por id de alumno. */
+  private readonly tutores = signal<Record<number, number>>({});
+  /** Tutor de empresa elegido en cada fila; `null` es «sin tutor de empresa». */
+  private readonly tutoresEmpresa = signal<Record<number, number | null>>({});
 
   private readonly parametros = toSignal(this.route.queryParamMap, { requireSync: true });
 
@@ -107,6 +117,24 @@ export class AsignacionesPage {
   protected readonly opcionesEmpresa = computed(() =>
     this.empresas().map((empresa) => ({ valor: empresa.id, etiqueta: empresa.nombre })),
   );
+  /** Sale el claustro entero: tutorizar prácticas no depende de tener clase. */
+  protected readonly opcionesProfesor = computed(() =>
+    this.profesores().map((profesor) => ({
+      valor: profesor.id,
+      etiqueta: nombreCompleto(profesor, profesor.correo),
+    })),
+  );
+
+  /** Los tutores de la empresa que tenga elegida esa fila. */
+  protected opcionesTutorEmpresa(alumno: Alumno) {
+    const empresa = this.empresas().find((una) => una.id === this.elegida(alumno));
+    return [
+      { valor: '', etiqueta: 'Sin tutor de empresa' },
+      ...(empresa?.tutores ?? [])
+        .filter((tutor) => tutor.id !== null)
+        .map((tutor) => ({ valor: tutor.id!, etiqueta: tutor.nombre })),
+    ];
+  }
 
   protected readonly mensajeVacio = computed(() =>
     this.texto() || this.gradoId() !== null
@@ -134,13 +162,59 @@ export class AsignacionesPage {
 
   protected elegir(alumno: Alumno, empresaId: number): void {
     this.seleccion.update((actuales) => ({ ...actuales, [alumno.id]: empresaId }));
+    // El tutor de empresa era de la empresa anterior: vuelve a su valor por
+    // defecto, que es el primero de la que se acaba de elegir.
+    this.tutoresEmpresa.update(({ [alumno.id]: _, ...resto }) => resto);
     this.errorFila.set(null);
   }
 
-  /** Solo se guarda si la elección cambia lo que ya había. */
+  /** Lo elegido en la fila, o el tutor que ya tiene; si no, el tutor de su clase. */
+  protected tutorElegido(alumno: Alumno): number | null {
+    return (
+      this.tutores()[alumno.id] ??
+      alumno.tutorId ??
+      this.profesores().find((profesor) => profesor.clase?.id === alumno.grado?.id)?.id ??
+      null
+    );
+  }
+
+  protected elegirTutor(alumno: Alumno, tutorId: string): void {
+    this.tutores.update((actuales) => ({ ...actuales, [alumno.id]: Number(tutorId) }));
+    this.errorFila.set(null);
+  }
+
+  /** Lo elegido en la fila, o el que ya tiene; si no, el primero de la empresa. */
+  protected tutorEmpresaElegido(alumno: Alumno): number | null {
+    const elegidos = this.tutoresEmpresa();
+    if (alumno.id in elegidos) {
+      return elegidos[alumno.id];
+    }
+    if (alumno.tutorEmpresaId !== null && alumno.empresaId === this.elegida(alumno)) {
+      return alumno.tutorEmpresaId;
+    }
+    const empresa = this.empresas().find((una) => una.id === this.elegida(alumno));
+    return empresa?.tutores?.[0]?.id ?? null;
+  }
+
+  protected elegirTutorEmpresa(alumno: Alumno, tutorId: string): void {
+    this.tutoresEmpresa.update((actuales) => ({
+      ...actuales,
+      [alumno.id]: tutorId ? Number(tutorId) : null,
+    }));
+    this.errorFila.set(null);
+  }
+
+  /** Se guarda si cambia la empresa o cualquiera de los dos tutores. */
   protected puedeGuardar(alumno: Alumno): boolean {
     const elegida = this.elegida(alumno);
-    return elegida !== null && elegida !== alumno.empresaId && this.guardandoId() !== alumno.id;
+    if (elegida === null || this.guardandoId() === alumno.id) {
+      return false;
+    }
+    return (
+      elegida !== alumno.empresaId ||
+      this.tutorElegido(alumno) !== alumno.tutorId ||
+      this.tutorEmpresaElegido(alumno) !== alumno.tutorEmpresaId
+    );
   }
 
   protected buscar(texto: string): void {
@@ -163,11 +237,17 @@ export class AsignacionesPage {
     this.guardandoId.set(alumno.id);
     this.errorFila.set(null);
     try {
-      const asignacion = await this.asignacionService.asignar(alumno.id, empresaId);
+      const asignacion = await this.asignacionService.asignar(alumno.id, {
+        empresaId,
+        tutorCentroId: this.tutorElegido(alumno),
+        tutorEmpresaId: this.tutorEmpresaElegido(alumno),
+      });
       this.toast.mostrar(`${this.nombre(alumno)} va a ${asignacion.empresaNombre}.`);
       // La elección ya está guardada: lo que se pinte a partir de ahora sale de
       // la respuesta del servidor, no de lo que quedó elegido en la fila.
       this.seleccion.update(({ [alumno.id]: _, ...resto }) => resto);
+      this.tutores.update(({ [alumno.id]: _, ...resto }) => resto);
+      this.tutoresEmpresa.update(({ [alumno.id]: _, ...resto }) => resto);
       await this.cargar();
     } catch (e) {
       this.errorFila.set({ id: alumno.id, mensaje: mensajeDeError(e, MENSAJES_ASIGNACION) });
@@ -186,7 +266,7 @@ export class AsignacionesPage {
   }
 
   /**
-   * Los tres catálogos van en paralelo y cada uno por su cuenta: juntos en un
+   * Los catálogos van en paralelo y cada uno por su cuenta: juntos en un
    * `Promise.all`, un fallo de los filtros dejaba la pantalla sin el catálogo de
    * empresas, que es lo único sin lo que no se puede hacer nada aquí.
    */
@@ -200,6 +280,13 @@ export class AsignacionesPage {
     void this.registroService
       .listarGrados()
       .then((grados) => this.grados.set(grados))
+      .catch(() => undefined);
+
+    // El claustro alimenta el desplegable de tutor de prácticas y, con su clase,
+    // el valor por defecto de cada fila.
+    void this.profesoradoService
+      .listar(null, 0, PROFESORES_MAXIMOS)
+      .then((pagina) => this.profesores.set(pagina.contenido))
       .catch(() => undefined);
   }
 

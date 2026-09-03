@@ -5,6 +5,19 @@ export interface Etiqueta {
 }
 
 /**
+ * Personal de la empresa que puede tutorizar a un alumno en prácticas. No es
+ * una cuenta de la aplicación: es un dato de la ficha de su empresa.
+ */
+export interface TutorEmpresa {
+  /** `null` mientras no se ha guardado. */
+  id: number | null;
+  nombre: string;
+  cargo: string | null;
+  telefono: string | null;
+  correo: string | null;
+}
+
+/**
  * Campos comunes a EmpresaAlumnoDto y EmpresaProfesorDto. Los exclusivos de
  * profesor/admin son opcionales: el backend decide cuáles manda según el rol
  * de quien pregunta, el frontend no lo asume por su cuenta.
@@ -18,6 +31,7 @@ export interface Empresa {
   sector: Etiqueta;
   etiquetas: Etiqueta[];
   observaciones?: string | null;
+  tutores?: TutorEmpresa[];
   contactoNombre?: string | null;
   contactoTelefono?: string | null;
   contactoEmail?: string | null;
@@ -58,6 +72,8 @@ export interface EmpresaRequest {
   sectorId: number;
   etiquetaIds: number[];
   observaciones: string;
+  /** Reemplazo completo: los que falten se borran. Hace falta al menos uno. */
+  tutores: TutorEmpresa[];
   contactoNombre: string;
   contactoTelefono: string;
   contactoEmail: string;

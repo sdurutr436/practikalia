@@ -21,6 +21,7 @@ const REQUEST: EmpresaRequest = {
   sectorId: 10,
   etiquetaIds: [20],
   observaciones: '',
+  tutores: [{ id: null, nombre: 'Rosa', cargo: null, telefono: null, correo: null }],
   contactoNombre: '',
   contactoTelefono: '',
   contactoEmail: '',
