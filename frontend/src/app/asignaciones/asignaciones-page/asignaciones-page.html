@@ -16,16 +16,9 @@
       [opciones]="opcionesClase()"
       [valor]="gradoId()"
       (cambia)="filtrar('gradoId', $event)"
-    >
-      <option value="">Todas las clases</option>
-    </app-desplegable>
-
-    <app-desplegable
-      etiqueta="Curso académico"
-      [opciones]="opcionesCurso()"
-      [valor]="cursoElegido()"
-      (cambia)="filtrar('anio', $event)"
     />
+
+    <app-selector-curso [valor]="anio()" (cambia)="filtrar('anio', $event)" />
   </div>
 
   <p class="c-asignacion__nota">
@@ -54,12 +47,13 @@
           </div>
 
           <div class="c-asignacion__control">
-            <app-selector-busqueda
-              [opciones]="empresas()"
+            <app-desplegable
+              [opciones]="opcionesEmpresa()"
               [valor]="elegida(alumno)"
               [etiqueta]="'Empresa de ' + nombre(alumno)"
+              marcador="Sin asignar"
               vacio="Ninguna empresa confirmada coincide."
-              (elegida)="elegir(alumno, $event)"
+              (cambia)="elegir(alumno, +$event)"
             />
             <app-boton
               icono="guardar"

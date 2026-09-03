@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Alumno, PaginaAlumnos, nombreCompleto } from '../../alumnado/alumnado.service';
+import { SelectorCursoComponent } from '../../alumnado/selector-curso/selector-curso';
 import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
 import { GradoOpcion, RegistroService } from '../../auth/registro.service';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
@@ -12,10 +13,9 @@ import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
 import { PastillasComponent } from '../../compartido/pastillas/pastillas';
-import { SelectorBusquedaComponent } from '../../compartido/selector-busqueda/selector-busqueda';
 import { Empresa } from '../../empresas/empresa.model';
 import { EmpresaService } from '../../empresas/empresa.service';
-import { AsignacionService, Cursos } from '../asignacion.service';
+import { AsignacionService } from '../asignacion.service';
 
 /** Filas apiladas y no tarjetas: caben más por pantalla que las 3×3 de los listados. */
 const POR_PAGINA = 10;
@@ -56,7 +56,7 @@ const numero = (valor: string | null) => (valor ? Number(valor) : null);
     DesplegableComponent,
     PaginacionComponent,
     PastillasComponent,
-    SelectorBusquedaComponent,
+    SelectorCursoComponent,
   ],
   templateUrl: './asignaciones-page.html',
 })
@@ -73,7 +73,6 @@ export class AsignacionesPage {
   protected readonly resultado = signal<PaginaAlumnos | null>(null);
   protected readonly empresas = signal<Empresa[]>([]);
   protected readonly grados = signal<GradoOpcion[]>([]);
-  protected readonly cursos = signal<Cursos | null>(null);
   protected readonly guardandoId = signal<number | null>(null);
   protected readonly errorFila = signal<{ id: number; mensaje: string } | null>(null);
   protected readonly aviso = signal<string | null>(null);
@@ -92,24 +91,19 @@ export class AsignacionesPage {
   );
   protected readonly texto = computed(() => this.parametros().get('texto') ?? '');
   protected readonly gradoId = computed(() => numero(this.parametros().get('gradoId')));
-  private readonly anio = computed(() => numero(this.parametros().get('anio')));
+  protected readonly anio = computed(() => numero(this.parametros().get('anio')));
   protected readonly paginaActual = computed(() => Number(this.parametros().get('pagina') ?? 0));
-
-  /** Sin `?anio=` manda el curso en marcha, y cuál es lo dice el backend. */
-  protected readonly cursoElegido = computed(() => this.anio() ?? this.cursos()?.actual ?? null);
 
   protected readonly alumnos = computed(() => this.resultado()?.contenido ?? []);
   protected readonly paginas = computed(() => this.resultado()?.paginas ?? 0);
   protected readonly total = computed(() => this.resultado()?.total ?? 0);
-  /** Los dos catálogos con la forma que pide el desplegable. */
-  protected readonly opcionesClase = computed(() =>
-    this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
-  );
-  protected readonly opcionesCurso = computed(() =>
-    (this.cursos()?.cursos ?? []).map((curso) => ({
-      valor: curso,
-      etiqueta: `${curso}/${curso + 1}`,
-    })),
+  /** Los catálogos con la forma que pide el desplegable. */
+  protected readonly opcionesClase = computed(() => [
+    { valor: '', etiqueta: 'Todas las clases' },
+    ...this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
+  ]);
+  protected readonly opcionesEmpresa = computed(() =>
+    this.empresas().map((empresa) => ({ valor: empresa.id, etiqueta: empresa.nombre })),
   );
 
   protected readonly mensajeVacio = computed(() =>
@@ -206,14 +200,10 @@ export class AsignacionesPage {
       .then((pagina) => this.empresas.set(pagina.contenido))
       .catch(() => this.error.set('No se pudo cargar el catálogo de empresas confirmadas.'));
 
-    // Sin estos dos la pantalla sigue sirviendo: se pierde poder filtrar.
+    // Sin el catálogo de clases la pantalla sigue sirviendo: se pierde filtrar.
     void this.registroService
       .listarGrados()
       .then((grados) => this.grados.set(grados))
-      .catch(() => undefined);
-    void this.asignacionService
-      .listarCursos()
-      .then((cursos) => this.cursos.set(cursos))
       .catch(() => undefined);
   }
 

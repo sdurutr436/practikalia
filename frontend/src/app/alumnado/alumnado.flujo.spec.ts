@@ -55,7 +55,13 @@ describe('listado de alumnado', () => {
     auth = TestBed.inject(AuthService);
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    // El selector de curso de la ficha pide su catálogo al abrirse el modal.
+    http
+      .match('/api/alumnos/cursos')
+      .forEach((peticion) => peticion.flush({ actual: 2026, cursos: [2026] }));
+    http.verify();
+  });
 
   const entrar = async (esAdmin: boolean) => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');

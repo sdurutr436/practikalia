@@ -87,12 +87,13 @@ describe('pantalla de asignaciones', () => {
     return harness;
   };
 
+  // Dentro de las filas: en la barra de filtros hay otros dos desplegables.
   const entradas = (raiz: Element) => [
-    ...raiz.querySelectorAll<HTMLInputElement>('.c-selector__entrada'),
+    ...raiz.querySelectorAll<HTMLInputElement>('.c-asignacion .c-desplegable__entrada'),
   ];
 
   const opciones = (raiz: Element) => [
-    ...raiz.querySelectorAll<HTMLElement>('.c-selector__opcion'),
+    ...raiz.querySelectorAll<HTMLElement>('.c-asignacion .c-desplegable__opcion'),
   ];
 
   const guardarDe = (raiz: Element) =>

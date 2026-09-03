@@ -33,6 +33,11 @@
   gap: s.$espaciado-pequeno;
 }
 
+// El desplegable de empresa se come el hueco que dejan el nombre y el botón.
+.c-asignacion__control .c-desplegable {
+  flex: 1;
+}
+
 .c-asignacion__nota {
   margin: 0;
   font-size: s.$texto-pequeno;

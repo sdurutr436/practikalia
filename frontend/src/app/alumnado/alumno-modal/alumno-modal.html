@@ -64,19 +64,16 @@
     </app-campo>
 
     <app-campo etiqueta="Clase" icono="grado" para="alumno-grado">
-      <app-desplegable id="alumno-grado" [control]="form.controls.gradoId" [opciones]="clases()">
-        <option value="">Sin clase</option>
-      </app-desplegable>
+      <app-desplegable id="alumno-grado" [control]="form.controls.gradoId" [opciones]="clases()" />
     </app-campo>
 
-    <app-campo
-      etiqueta="Año"
-      icono="fecha"
-      para="alumno-anio"
-      [control]="form.controls.anio"
-      error="Escribe un año entre 2000 y 2100."
-    >
-      <input class="c-campo__entrada" id="alumno-anio" type="number" formControlName="anio" />
+    <app-campo etiqueta="Curso" icono="fecha" para="alumno-anio">
+      <app-selector-curso
+        id="alumno-anio"
+        etiqueta="Curso academico"
+        vacio="Sin curso"
+        [control]="form.controls.anio"
+      />
     </app-campo>
   </form>
 

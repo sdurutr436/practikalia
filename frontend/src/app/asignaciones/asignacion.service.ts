@@ -12,12 +12,6 @@ export interface ConsultaAlumnado {
   pagina: number;
   tamano: number;
 }
-
-/** Cursos que ofrece el selector — `actual` es el que se lista si no se pide otro. */
-export interface Cursos {
-  actual: number;
-  cursos: number[];
-}
 import {
   ActualizarAsignacionRequest,
   ActualizarGradoRequest,
@@ -53,11 +47,6 @@ export class AsignacionService {
     if (consulta.texto) params = params.set('texto', consulta.texto);
     if (consulta.asignado != null) params = params.set('asignado', consulta.asignado);
     return firstValueFrom(this.http.get<PaginaAlumnos>('/api/alumnos/curso', { params }));
-  }
-
-  /** Los cursos del selector, con cuál es el que está en marcha. */
-  listarCursos(): Promise<Cursos> {
-    return firstValueFrom(this.http.get<Cursos>('/api/alumnos/cursos'));
   }
 
   /** Pone empresa a un alumno: crea su asignación, o corrige la que tenga abierta. */

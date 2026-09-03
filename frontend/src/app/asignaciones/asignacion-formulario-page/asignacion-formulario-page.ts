@@ -35,19 +35,15 @@ export class AsignacionFormularioPage {
   protected readonly tutores = signal<UsuarioResumen[]>([]);
   protected readonly grados = signal<Grado[]>([]);
 
-  // El 0 deshabilitado de cada uno es el «elige uno», no una opción real.
-  protected readonly opcionesAlumno = computed(() => [
-    { valor: 0, etiqueta: 'Selecciona un alumno', deshabilitada: true },
-    ...this.alumnos().map((alumno) => ({ valor: alumno.id, etiqueta: alumno.correo })),
-  ]);
-  protected readonly opcionesTutor = computed(() => [
-    { valor: 0, etiqueta: 'Selecciona un tutor', deshabilitada: true },
-    ...this.tutores().map((tutor) => ({ valor: tutor.id, etiqueta: tutor.correo })),
-  ]);
-  protected readonly opcionesGrado = computed(() => [
-    { valor: 0, etiqueta: 'Selecciona un grado', deshabilitada: true },
-    ...this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
-  ]);
+  protected readonly opcionesAlumno = computed(() =>
+    this.alumnos().map((alumno) => ({ valor: alumno.id, etiqueta: alumno.correo })),
+  );
+  protected readonly opcionesTutor = computed(() =>
+    this.tutores().map((tutor) => ({ valor: tutor.id, etiqueta: tutor.correo })),
+  );
+  protected readonly opcionesGrado = computed(() =>
+    this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
+  );
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     alumnoId: [0, [Validators.required, Validators.min(1)]],

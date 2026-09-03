@@ -40,11 +40,9 @@ export class AlumnoAsignacionesPage {
   protected readonly asignacionesConReview = signal<Set<number>>(new Set());
 
   protected readonly grados = signal<Grado[]>([]);
-  /** El 0 deshabilitado es el «elige uno» del formulario, no un grado. */
-  protected readonly opcionesGrado = computed(() => [
-    { valor: 0, etiqueta: 'Selecciona un grado', deshabilitada: true },
-    ...this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
-  ]);
+  protected readonly opcionesGrado = computed(() =>
+    this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
+  );
   protected readonly guardandoGrado = signal(false);
   protected readonly errorGrado = signal<string | null>(null);
   protected readonly gradoActualizado = signal<UsuarioGrado | null>(null);

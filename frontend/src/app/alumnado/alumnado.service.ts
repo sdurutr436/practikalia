@@ -28,6 +28,12 @@ export function nombreCompleto(alumno: Alumno, respaldo = 'Sin nombre'): string 
   return partes.length > 0 ? partes.join(' ') : respaldo;
 }
 
+/** Cursos que ofrece el selector — `actual` es el que está en marcha. */
+export interface Cursos {
+  actual: number;
+  cursos: number[];
+}
+
 export interface PaginaAlumnos {
   contenido: Alumno[];
   pagina: number;
@@ -50,6 +56,17 @@ export interface FichaAlumnoRequest {
 @Injectable({ providedIn: 'root' })
 export class AlumnadoService {
   private readonly http = inject(HttpClient);
+
+  private cursosPedidos?: Promise<Cursos>;
+
+  /**
+   * Los cursos del selector. Se pide una sola vez por sesión: el catálogo lo
+   * consultan varias pantallas a la vez y no cambia mientras se navega.
+   */
+  listarCursos(): Promise<Cursos> {
+    this.cursosPedidos ??= firstValueFrom(this.http.get<Cursos>('/api/alumnos/cursos'));
+    return this.cursosPedidos;
+  }
 
   /** Alta a mano: nace confirmada y su contraseña es el DNI sin la letra. */
   crear(ficha: FichaAlumnoRequest): Promise<Alumno> {

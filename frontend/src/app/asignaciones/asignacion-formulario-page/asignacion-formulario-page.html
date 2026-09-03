@@ -20,6 +20,7 @@
       >
         <app-desplegable
           id="alumno"
+          marcador="Selecciona un alumno"
           [control]="form.controls.alumnoId"
           [opciones]="opcionesAlumno()"
         />
@@ -34,6 +35,7 @@
       >
         <app-desplegable
           id="tutor"
+          marcador="Selecciona un tutor"
           [control]="form.controls.tutorCentroId"
           [opciones]="opcionesTutor()"
         />
@@ -48,6 +50,7 @@
       >
         <app-desplegable
           id="grado"
+          marcador="Selecciona un grado"
           [control]="form.controls.gradoId"
           [opciones]="opcionesGrado()"
         />

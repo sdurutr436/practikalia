@@ -82,16 +82,14 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
-    http
-      .expectOne('/api/auth/me')
-      .flush({
-        id: 5,
-        correo: 'profesor@centro.es',
-        rol: 'PROFESOR',
-        esAdmin: false,
-        debeCambiarContrasena: false,
-        etiquetas: [],
-      });
+    http.expectOne('/api/auth/me').flush({
+      id: 5,
+      correo: 'profesor@centro.es',
+      rol: 'PROFESOR',
+      esAdmin: false,
+      debeCambiarContrasena: false,
+      etiquetas: [],
+    });
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -104,12 +102,19 @@ describe('sección de asignaciones en el detalle de empresa', () => {
       '.c-ficha-empresa__gestion:last-of-type',
     ) as HTMLElement;
     const inputFecha = contenedor.querySelector('input[type="date"]') as HTMLInputElement;
-    const select = contenedor.querySelector('select') as HTMLSelectElement;
     const boton = contenedor.querySelector('button.c-boton') as HTMLButtonElement;
     inputFecha.value = '2027-06-30';
-    select.value = 'true';
-    // El desplegable se entera por el evento, igual que cuando lo usa una persona.
-    select.dispatchEvent(new Event('change'));
+
+    // El desplegable se abre al enfocarlo y se elige pulsando su opción.
+    const desplegable = contenedor.querySelector('.c-desplegable__entrada') as HTMLInputElement;
+    desplegable.dispatchEvent(new Event('focus'));
+    harness.detectChanges();
+    const contratado = [...contenedor.querySelectorAll<HTMLElement>('.c-desplegable__opcion')].find(
+      (opcion) => opcion.textContent?.includes('Contratado'),
+    )!;
+    contratado.click();
+    harness.detectChanges();
+
     boton.click();
 
     const peticion = http.expectOne('/api/asignaciones/5');
@@ -136,16 +141,14 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
-    http
-      .expectOne('/api/auth/me')
-      .flush({
-        id: 5,
-        correo: 'profesor@centro.es',
-        rol: 'PROFESOR',
-        esAdmin: false,
-        debeCambiarContrasena: false,
-        etiquetas: [],
-      });
+    http.expectOne('/api/auth/me').flush({
+      id: 5,
+      correo: 'profesor@centro.es',
+      rol: 'PROFESOR',
+      esAdmin: false,
+      debeCambiarContrasena: false,
+      etiquetas: [],
+    });
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -279,16 +282,14 @@ describe('formulario de crear asignación', () => {
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
-    http
-      .expectOne('/api/auth/me')
-      .flush({
-        id: 5,
-        correo: 'profesor@centro.es',
-        rol: 'PROFESOR',
-        esAdmin: false,
-        debeCambiarContrasena: false,
-        etiquetas: [],
-      });
+    http.expectOne('/api/auth/me').flush({
+      id: 5,
+      correo: 'profesor@centro.es',
+      rol: 'PROFESOR',
+      esAdmin: false,
+      debeCambiarContrasena: false,
+      etiquetas: [],
+    });
     await esperarMicrotareas();
 
     expect(router.url).toBe('/empresas/2');

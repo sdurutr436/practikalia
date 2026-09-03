@@ -106,9 +106,10 @@ export class EmpresasListadoPage {
   }
 
   /** El catálogo de sectores tal y como lo pide el desplegable. */
-  protected readonly opcionesSector = computed(() =>
-    this.catalogo().map((etiqueta) => ({ valor: etiqueta.id, etiqueta: etiqueta.nombre })),
-  );
+  protected readonly opcionesSector = computed(() => [
+    { valor: '', etiqueta: 'Cualquiera' },
+    ...this.catalogo().map((etiqueta) => ({ valor: etiqueta.id, etiqueta: etiqueta.nombre })),
+  ]);
 
   protected cambiarSector(valor: string): void {
     this.navegar({ sectorId: valor || null });

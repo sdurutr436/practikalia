@@ -193,11 +193,10 @@
         >
           <app-desplegable
             id="gradoId"
+            marcador="Selecciona tu clase"
             [control]="formRegistro.controls.gradoId"
             [opciones]="opcionesGrado()"
-          >
-            <option value="" disabled>Selecciona tu clase</option>
-          </app-desplegable>
+          />
           @if (errorGrados(); as mensaje) {
             <p class="c-campo__error">{{ mensaje }}</p>
           }
