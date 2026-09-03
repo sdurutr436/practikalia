@@ -1,0 +1,94 @@
+<app-modal [titulo]="titulo()" (salir)="pedirSalida()">
+  <form class="o-ficha" [formGroup]="form()" (ngSubmit)="enviar()">
+    <app-campo
+      etiqueta="Nombre"
+      icono="persona"
+      [para]="id('nombre')"
+      [requerido]="true"
+      [control]="form().controls['nombre']"
+      error="El nombre es obligatorio."
+    >
+      <input class="c-campo__entrada" [id]="id('nombre')" type="text" formControlName="nombre" />
+    </app-campo>
+
+    <app-campo
+      etiqueta="Primer apellido"
+      [para]="id('apellido1')"
+      [requerido]="true"
+      [control]="form().controls['apellido1']"
+      error="El primer apellido es obligatorio."
+    >
+      <input
+        class="c-campo__entrada"
+        [id]="id('apellido1')"
+        type="text"
+        formControlName="apellido1"
+      />
+    </app-campo>
+
+    <app-campo etiqueta="Segundo apellido" [para]="id('apellido2')">
+      <input
+        class="c-campo__entrada"
+        [id]="id('apellido2')"
+        type="text"
+        formControlName="apellido2"
+      />
+    </app-campo>
+
+    <app-campo
+      etiqueta="DNI"
+      icono="numero"
+      [para]="id('dni')"
+      [requerido]="true"
+      [control]="form().controls['dni']"
+      [ayuda]="ayudaDni()"
+      error="Revisa el número y la letra."
+    >
+      <input class="c-campo__entrada" [id]="id('dni')" type="text" formControlName="dni" />
+    </app-campo>
+
+    <app-campo
+      etiqueta="Correo"
+      icono="correo"
+      [para]="id('correo')"
+      [requerido]="true"
+      [control]="form().controls['correo']"
+      ayuda="Es el correo con el que inicia sesión."
+      error="Escribe un correo válido."
+    >
+      <input class="c-campo__entrada" [id]="id('correo')" type="email" formControlName="correo" />
+    </app-campo>
+
+    <!-- Lo propio de cada pantalla: clase, curso, tutorías, permisos… -->
+    <ng-content />
+  </form>
+
+  @if (error(); as mensaje) {
+    <app-alerta>{{ mensaje }}</app-alerta>
+  }
+
+  <div acciones class="c-acciones">
+    <app-boton
+      icono="guardar"
+      [cargando]="guardando()"
+      [deshabilitado]="form().invalid"
+      (click)="enviar()"
+    >
+      {{ textoGuardar() }}
+    </app-boton>
+    <app-boton [secundario]="true" [deshabilitado]="guardando()" (click)="pedirSalida()">
+      Cancelar
+    </app-boton>
+  </div>
+</app-modal>
+
+@if (confirmandoSalida()) {
+  <app-modal titulo="¿Seguro que quieres salir?" (salir)="seguirEditando()">
+    <p>Se perderá lo que has escrito en la ficha.</p>
+
+    <div acciones class="c-acciones">
+      <app-boton icono="salir" (click)="cerrar.emit()">Salir sin guardar</app-boton>
+      <app-boton [secundario]="true" (click)="seguirEditando()">Seguir editando</app-boton>
+    </div>
+  </app-modal>
+}

@@ -1,108 +1,24 @@
-<app-modal [titulo]="titulo()" (salir)="pedirSalida()">
-  <form class="c-ficha" [formGroup]="form" (ngSubmit)="enviar()">
-    <app-campo
-      etiqueta="Nombre"
-      icono="persona"
-      para="alumno-nombre"
-      [requerido]="true"
-      [control]="form.controls.nombre"
-      error="El nombre es obligatorio."
-    >
-      <input class="c-campo__entrada" id="alumno-nombre" type="text" formControlName="nombre" />
-    </app-campo>
+<app-ficha-persona
+  [form]="form"
+  [titulo]="titulo()"
+  prefijo="alumno"
+  [esAlta]="esAlta()"
+  [textoGuardar]="esAlta() ? 'Crear alumno' : 'Guardar cambios'"
+  [guardando]="guardando()"
+  [error]="error()"
+  (guardar)="enviar()"
+  (cerrar)="cerrar.emit()"
+>
+  <app-campo etiqueta="Clase" icono="grado" para="alumno-grado">
+    <app-desplegable id="alumno-grado" [control]="form.controls.gradoId" [opciones]="clases()" />
+  </app-campo>
 
-    <app-campo
-      etiqueta="Primer apellido"
-      para="alumno-apellido1"
-      [requerido]="true"
-      [control]="form.controls.apellido1"
-      error="El primer apellido es obligatorio."
-    >
-      <input
-        class="c-campo__entrada"
-        id="alumno-apellido1"
-        type="text"
-        formControlName="apellido1"
-      />
-    </app-campo>
-
-    <app-campo etiqueta="Segundo apellido" para="alumno-apellido2">
-      <input
-        class="c-campo__entrada"
-        id="alumno-apellido2"
-        type="text"
-        formControlName="apellido2"
-      />
-    </app-campo>
-
-    <app-campo
-      etiqueta="DNI"
-      icono="numero"
-      para="alumno-dni"
-      [requerido]="true"
-      [control]="form.controls.dni"
-      [ayuda]="
-        esAlta()
-          ? 'Será su contraseña de entrada, sin la letra.'
-          : 'Cambiarlo no cambia su contraseña.'
-      "
-      error="Revisa el número y la letra."
-    >
-      <input class="c-campo__entrada" id="alumno-dni" type="text" formControlName="dni" />
-    </app-campo>
-
-    <app-campo
-      etiqueta="Correo"
-      icono="correo"
-      para="alumno-correo"
-      [requerido]="true"
-      [control]="form.controls.correo"
-      ayuda="Es el correo con el que inicia sesión."
-      error="Escribe un correo válido."
-    >
-      <input class="c-campo__entrada" id="alumno-correo" type="email" formControlName="correo" />
-    </app-campo>
-
-    <app-campo etiqueta="Clase" icono="grado" para="alumno-grado">
-      <app-desplegable id="alumno-grado" [control]="form.controls.gradoId" [opciones]="clases()" />
-    </app-campo>
-
-    <app-campo etiqueta="Curso" icono="fecha" para="alumno-anio">
-      <app-selector-curso
-        id="alumno-anio"
-        etiqueta="Curso academico"
-        vacio="Sin curso"
-        [control]="form.controls.anio"
-      />
-    </app-campo>
-  </form>
-
-  @if (error(); as mensaje) {
-    <app-alerta>{{ mensaje }}</app-alerta>
-  }
-
-  <div acciones class="c-acciones">
-    <app-boton
-      icono="guardar"
-      [cargando]="guardando()"
-      [deshabilitado]="form.invalid"
-      (click)="enviar()"
-    >
-      {{ esAlta() ? 'Crear alumno' : 'Guardar cambios' }}
-    </app-boton>
-    <app-boton [secundario]="true" [deshabilitado]="guardando()" (click)="pedirSalida()">
-      Cancelar
-    </app-boton>
-  </div>
-</app-modal>
-
-@if (confirmandoSalida()) {
-  <app-modal titulo="¿Seguro que quieres salir?" (salir)="seguirEditando()">
-    <p>Se perderá lo que has escrito en la ficha.</p>
-
-    <div acciones class="c-acciones">
-      <app-boton icono="salir" (click)="cerrar.emit()">Salir sin guardar</app-boton>
-      <app-boton [secundario]="true" (click)="seguirEditando()">Seguir editando</app-boton>
-    </div>
-  </app-modal>
-}
+  <app-campo etiqueta="Curso" icono="fecha" para="alumno-anio">
+    <app-selector-curso
+      id="alumno-anio"
+      etiqueta="Curso academico"
+      vacio="Sin curso"
+      [control]="form.controls.anio"
+    />
+  </app-campo>
+</app-ficha-persona>

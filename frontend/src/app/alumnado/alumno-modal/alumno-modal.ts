@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output } from '@angular/core';
 import {
   AbstractControl,
   NonNullableFormBuilder,
@@ -7,13 +7,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { dniValido } from '../../auth/login-page/login-page';
-import { AlertaComponent } from '../../compartido/alerta/alerta';
-import { BotonComponent } from '../../compartido/boton/boton';
 import { CampoComponent } from '../../compartido/campo/campo';
-import { ModalComponent } from '../../compartido/modal/modal';
+import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
+import { FichaPersonaComponent } from '../../compartido/ficha-persona/ficha-persona';
 import { GradoOpcion } from '../../auth/registro.service';
 import { Alumno, FichaAlumnoRequest } from '../alumnado.service';
-import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 import { SelectorCursoComponent } from '../selector-curso/selector-curso';
 
 /** Un año lectivo se escribe con cuatro cifras; el rango evita erratas de tecleo. */
@@ -27,7 +25,8 @@ function anioValido(control: AbstractControl<string>): ValidationErrors | null {
 
 /**
  * Ficha de alumno, la misma para dar de alta y para editar: con `alumno` en
- * `null` el modal se abre vacío y titula «Nuevo alumno».
+ * `null` el modal se abre vacío y titula «Nuevo alumno». El nombre, el DNI y el
+ * correo los pone `app-ficha-persona`; aquí solo la clase y el curso.
  *
  * Al editar, cambiar el correo cambia con cuál inicia sesión esa persona, y
  * cambiar el DNI **no** recalcula su contraseña: puede haber entrado ya y
@@ -37,10 +36,8 @@ function anioValido(control: AbstractControl<string>): ValidationErrors | null {
   selector: 'app-alumno-modal',
   imports: [
     ReactiveFormsModule,
-    ModalComponent,
+    FichaPersonaComponent,
     CampoComponent,
-    BotonComponent,
-    AlertaComponent,
     DesplegableComponent,
     SelectorCursoComponent,
   ],
@@ -56,7 +53,6 @@ export class AlumnoModalComponent {
   readonly guardar = output<FichaAlumnoRequest>();
   readonly cerrar = output<void>();
 
-  protected readonly confirmandoSalida = signal(false);
   /** El catálogo de clases tal y como lo pide el desplegable. */
   protected readonly clases = computed(() => [
     { valor: '', etiqueta: 'Sin clase' },
@@ -76,10 +72,6 @@ export class AlumnoModalComponent {
     anio: ['', anioValido],
   });
 
-  /** Guarda lo que había al abrir, para saber si hay cambios sin guardar. */
-  private readonly inicial = signal('');
-  protected readonly sucio = computed(() => this.form.dirty);
-
   constructor() {
     effect(() => {
       const alumno = this.alumno();
@@ -93,31 +85,10 @@ export class AlumnoModalComponent {
         anio: alumno?.anio ? String(alumno.anio) : '',
       });
       this.form.markAsPristine();
-      this.inicial.set(JSON.stringify(this.form.getRawValue()));
     });
   }
 
-  /** Con cambios sin guardar se confirma antes de tirarlos; sin ellos se cierra directo. */
-  protected pedirSalida(): void {
-    if (JSON.stringify(this.form.getRawValue()) === this.inicial()) {
-      this.cerrar.emit();
-      return;
-    }
-    this.confirmandoSalida.set(true);
-  }
-
-  protected seguirEditando(): void {
-    this.confirmandoSalida.set(false);
-  }
-
   protected enviar(): void {
-    if (this.guardando()) {
-      return;
-    }
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
     const valores = this.form.getRawValue();
     this.guardar.emit({
       nombre: valores.nombre.trim(),

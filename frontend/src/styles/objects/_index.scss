@@ -39,6 +39,15 @@
   list-style: none;
 }
 
+// Rejilla de la ficha de un modal. El ancho mínimo de columna es lo que la
+// ensancha: con la columna al ancho de sus controles, los rótulos de ayuda
+// envolvían a dos líneas y la ficha ya no entraba en el alto del modal.
+.o-ficha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(s.$ancho-ficha-min, 1fr));
+  gap: s.$espaciado-medio;
+}
+
 // Rejilla de tarjetas (listados).
 .o-rejilla {
   display: grid;
