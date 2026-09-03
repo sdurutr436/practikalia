@@ -1,6 +1,7 @@
 package practikalia.empresa;
 
 import practikalia.asignacion.AsignacionRepository;
+import practikalia.common.ImagenSubidaService;
 import practikalia.common.PaginaDto;
 import practikalia.empresa.tutor.TutorEmpresa;
 import practikalia.empresa.tutor.TutorEmpresaDto;
@@ -32,19 +33,19 @@ public class EmpresaService {
     private final EmpresaRepository empresaRepository;
     private final EtiquetaRepository etiquetaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final ImagenEmpresaService imagenEmpresaService;
+    private final ImagenSubidaService imagenSubidaService;
     private final AsignacionRepository asignacionRepository;
 
     public EmpresaService(
             EmpresaRepository empresaRepository,
             EtiquetaRepository etiquetaRepository,
             UsuarioRepository usuarioRepository,
-            ImagenEmpresaService imagenEmpresaService,
+            ImagenSubidaService imagenSubidaService,
             AsignacionRepository asignacionRepository) {
         this.empresaRepository = empresaRepository;
         this.etiquetaRepository = etiquetaRepository;
         this.usuarioRepository = usuarioRepository;
-        this.imagenEmpresaService = imagenEmpresaService;
+        this.imagenSubidaService = imagenSubidaService;
         this.asignacionRepository = asignacionRepository;
     }
 
@@ -159,7 +160,7 @@ public class EmpresaService {
     @Transactional
     public EmpresaProfesorDto actualizarImagen(Long id, MultipartFile fichero) {
         Empresa empresa = buscarEmpresa(id);
-        empresa.setImagen(imagenEmpresaService.guardar(fichero));
+        empresa.setImagen(imagenSubidaService.guardar(fichero, "empresas"));
         empresaRepository.save(empresa);
         return EmpresaProfesorDto.de(empresa);
     }

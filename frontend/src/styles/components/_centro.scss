@@ -1,0 +1,97 @@
+// Pantalla de configuración del centro: identidad (logo + nombre) lado a
+// lado, y la whitelist de correos en su propia tarjeta ancha con la lista y
+// el alta en dos columnas. Los títulos y campos son los mismos bloques que el
+// resto de la aplicación (`.c-formulario__titulo`, `.c-campo`).
+@use '../settings' as s;
+@use '../tools' as t;
+
+// Fila superior: logo y nombre, cada uno en su tarjeta, del mismo alto.
+.c-config__fila {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: s.$espaciado-grande;
+  align-items: stretch;
+}
+
+// Como `.c-formulario` pero sin su tope de 26rem: aquí la tarjeta tiene que
+// llenar la columna que le da la rejilla, no quedarse angosta con toda la
+// pantalla vacía alrededor.
+.c-config__tarjeta {
+  @include t.panel;
+  display: grid;
+  align-content: start;
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-grande;
+}
+
+.c-centro__logo {
+  width: 6rem;
+  height: 6rem;
+  object-fit: contain;
+}
+
+// El mismo cuadro, de respaldo mientras no hay logo subido.
+.c-centro__logo--vacio {
+  display: grid;
+  place-items: center;
+  border-radius: s.$radio;
+  background: s.$color-apagado;
+  color: s.$color-texto-apagado;
+  font-size: 1.75rem; // .c-icono mide 1.1em: escala el icono, no el cuadro
+}
+
+// Cuerpo de la tarjeta de correos: la lista a la izquierda, el alta a la
+// derecha, en vez de una debajo de la otra.
+.c-config__correos-cuerpo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(s.$ancho-columna-min, 1fr));
+  align-items: start;
+  gap: s.$espaciado-grande;
+}
+
+// El buscador y la lista, apilados; el buscador solo aparece con >0 correos.
+.c-config__lista {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+  align-content: start;
+}
+
+.c-correos {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+  // Acotada y con scroll propio: con la whitelist poblada, la lista no puede
+  // marcar el alto de toda la tarjeta ni dejar el alta flotando con un hueco
+  // enorme debajo. Deliberadamente más baja que las columnas del catálogo de
+  // sectores (24rem): aquí ya hay buscador para llegar a un correo concreto.
+  max-height: 14rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.c-correos__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+
+  // Confirmando un borrado la fila pasa de una línea a un aviso + botones.
+  &--confirmando {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.c-correos__texto {
+  overflow-wrap: anywhere;
+}
+
+.c-correos__quitar {
+  @include t.boton-icono;
+  flex-shrink: 0;
+}
+
+.c-correos__alta {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+  align-content: start;
+}

@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { CentroService } from '../centro/centro.service';
 import { FondoComponent } from '../compartido/fondo/fondo';
 import { IconoComponent, NombreIcono } from '../compartido/icono/icono';
 import { BotonComponent } from '../compartido/boton/boton';
@@ -15,11 +16,11 @@ interface Seccion {
 }
 
 /**
- * Menú del profesorado. Configuración todavía no tiene pantalla: su ruta existe
- * y apunta a la página de "en construcción", así que el menú no cambia de forma
- * cuando se cree. Sectores y etiquetas solo sale con `esAdmin`, y Actividad no
- * sale: la sección no tiene sentido en esta aplicación, aunque su ruta siga
- * respondiendo si se escribe a mano.
+ * Menú del profesorado. Configuración es la misma pantalla para todo el
+ * mundo; solo el propio formulario se restringe a `esAdmin`, con un aviso para
+ * el resto. Sectores y etiquetas sí sale solo con `esAdmin` en el menú.
+ * Actividad no sale: la sección no tiene sentido en esta aplicación, aunque su
+ * ruta siga respondiendo si se escribe a mano.
  */
 const SECCIONES_PROFESOR: Seccion[] = [
   { etiqueta: 'Panel', icono: 'panel', ruta: '/panel' },
@@ -73,6 +74,7 @@ const SECCIONES_ALUMNO: Seccion[] = [
 export class MarcoComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly centroService = inject(CentroService);
 
   protected readonly sesion = this.auth.sesion;
   // Cerrado al entrar: el menú flota sobre la página, y abierto por defecto

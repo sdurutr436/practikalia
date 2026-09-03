@@ -24,6 +24,7 @@ import { AlumnadoPage } from './alumnado/alumnado-page/alumnado-page';
 import { AsignacionesPage } from './asignaciones/asignaciones-page/asignaciones-page';
 import { SectoresPage } from './sectores/sectores-page/sectores-page';
 import { ProfesoradoPage } from './profesorado/profesorado-page/profesorado-page';
+import { ConfiguracionPage } from './centro/configuracion-page';
 
 export const routes: Routes = [
   // El marco (menú lateral + barra superior) lo pone app.ts alrededor del
@@ -190,7 +191,7 @@ export const routes: Routes = [
   },
   {
     path: 'configuracion',
-    component: ProximamentePage,
+    component: ConfiguracionPage,
     title: 'Configuración',
     canActivate: [autenticadoGuard],
   },
