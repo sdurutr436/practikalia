@@ -16,16 +16,9 @@ export interface Alumno {
   activo: boolean;
   empresaId: number | null;
   empresaNombre: string | null;
-}
-
-/**
- * Nombre y apellidos de un alumno. El respaldo es lo que se pinta mientras la
- * ficha no tiene nombre: las cuentas dadas de alta por un profesor desde
- * `POST /api/usuarios` nacen sin él.
- */
-export function nombreCompleto(alumno: Alumno, respaldo = 'Sin nombre'): string {
-  const partes = [alumno.nombre, alumno.apellido1, alumno.apellido2].filter(Boolean);
-  return partes.length > 0 ? partes.join(' ') : respaldo;
+  /** Tutor de prácticas de su asignación abierta. */
+  tutorId: number | null;
+  tutorNombre: string | null;
 }
 
 /** Cursos que ofrece el selector — `actual` es el que está en marcha. */

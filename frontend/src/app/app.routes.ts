@@ -23,6 +23,7 @@ import { AfinidadPage } from './afinidad/afinidad-page/afinidad-page';
 import { AlumnadoPage } from './alumnado/alumnado-page/alumnado-page';
 import { AsignacionesPage } from './asignaciones/asignaciones-page/asignaciones-page';
 import { SectoresPage } from './sectores/sectores-page/sectores-page';
+import { ProfesoradoPage } from './profesorado/profesorado-page/profesorado-page';
 
 export const routes: Routes = [
   // El marco (menú lateral + barra superior) lo pone app.ts alrededor del
@@ -147,21 +148,28 @@ export const routes: Routes = [
     canActivate: [adminGuard],
   },
 
+  // El profesorado lo consulta cualquier profesor; dar de alta y editar es
+  // solo del admin, y eso lo decide el propio backend.
+  {
+    path: 'profesorado',
+    component: ProfesoradoPage,
+    title: 'Profesorado',
+    canActivate: [profesorGuard],
+  },
+
   // Secciones del menú que todavía no tienen pantalla. Las rutas existen ya
   // para que el menú no cambie de forma según se vayan construyendo: crear
   // una pantalla es cambiar su `component` aquí y nada más.
+  //
+  // `actividad` está fuera del menú a propósito: la sección no tiene sentido en
+  // esta aplicación, pero la ruta sigue respondiendo si se escribe a mano.
   {
     path: 'actividad',
     component: ProximamentePage,
     title: 'Actividad',
     canActivate: [profesorGuard],
   },
-  {
-    path: 'profesorado',
-    component: ProximamentePage,
-    title: 'Profesorado',
-    canActivate: [profesorGuard],
-  },
+
   {
     path: 'mis-resenas',
     component: ProximamentePage,

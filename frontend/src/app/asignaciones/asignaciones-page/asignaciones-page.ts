@@ -1,7 +1,8 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Alumno, PaginaAlumnos, nombreCompleto } from '../../alumnado/alumnado.service';
+import { Alumno, PaginaAlumnos } from '../../alumnado/alumnado.service';
+import { nombreCompleto } from '../../compartido/nombre';
 import { SelectorCursoComponent } from '../../alumnado/selector-curso/selector-curso';
 import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
 import { GradoOpcion, RegistroService } from '../../auth/registro.service';

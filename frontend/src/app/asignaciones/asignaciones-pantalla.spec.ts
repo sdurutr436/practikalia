@@ -26,6 +26,8 @@ const SIN_ASIGNAR: Alumno = {
   activo: true,
   empresaId: null,
   empresaNombre: null,
+  tutorId: null,
+  tutorNombre: null,
 };
 
 const ASIGNADO: Alumno = {
@@ -36,6 +38,8 @@ const ASIGNADO: Alumno = {
   correo: 'ivan@centro.es',
   empresaId: 3,
   empresaNombre: 'Bahía Solar',
+  tutorId: 4,
+  tutorNombre: 'Marta Núñez',
 };
 
 const EMPRESAS = [

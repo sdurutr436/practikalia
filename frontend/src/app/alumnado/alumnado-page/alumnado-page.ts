@@ -22,13 +22,8 @@ import { ToastService } from '../../compartido/toast/toast.service';
 import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
 import { PastillasComponent } from '../../compartido/pastillas/pastillas';
 import { AlumnoModalComponent } from '../alumno-modal/alumno-modal';
-import {
-  Alumno,
-  AlumnadoService,
-  FichaAlumnoRequest,
-  PaginaAlumnos,
-  nombreCompleto,
-} from '../alumnado.service';
+import { Alumno, AlumnadoService, FichaAlumnoRequest, PaginaAlumnos } from '../alumnado.service';
+import { nombreCompleto } from '../../compartido/nombre';
 
 /** Tres columnas por tres filas, igual que empresas y reseñas. */
 const POR_PAGINA = 9;
