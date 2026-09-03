@@ -91,3 +91,11 @@
   gap: s.$espaciado-base;
   padding: s.$espaciado-base;
 }
+
+// Columnas de igual ancho que se apilan en pantalla estrecha (catálogo de
+// sectores). Solo el reparto: lo de dentro se pinta con .c-catalogo.
+.o-columnas {
+  display: grid;
+  gap: s.$espaciado-base;
+  grid-template-columns: repeat(auto-fit, minmax(s.$ancho-columna-min, 1fr));
+}

@@ -10,13 +10,15 @@ interface Seccion {
   etiqueta: string;
   icono: NombreIcono;
   ruta: string;
+  /** Solo para quien tenga `esAdmin`; el resto del profesorado ni la ve. */
+  soloAdmin?: boolean;
 }
 
 /**
- * Menú del profesorado. Alumnado y Sectores, Actividad, Profesorado y
- * Configuración todavía no tienen pantalla: sus rutas existen y apuntan a la
- * página de "en construcción", así que el menú no cambia de forma cuando se
- * vayan creando.
+ * Menú del profesorado. Actividad, Profesorado y Configuración todavía no
+ * tienen pantalla: sus rutas existen y apuntan a la página de "en
+ * construcción", así que el menú no cambia de forma cuando se vayan creando.
+ * Sectores y etiquetas solo sale con `esAdmin`.
  */
 const SECCIONES_PROFESOR: Seccion[] = [
   { etiqueta: 'Panel', icono: 'panel', ruta: '/panel' },
@@ -24,7 +26,7 @@ const SECCIONES_PROFESOR: Seccion[] = [
   { etiqueta: 'Reseñas', icono: 'moderacion', ruta: '/reviews' },
   { etiqueta: 'Alumnado', icono: 'persona', ruta: '/alumnado' },
   { etiqueta: 'Asignaciones', icono: 'asignaciones', ruta: '/asignaciones' },
-  { etiqueta: 'Sectores y etiquetas', icono: 'etiqueta', ruta: '/sectores' },
+  { etiqueta: 'Sectores y etiquetas', icono: 'etiqueta', ruta: '/sectores', soloAdmin: true },
   { etiqueta: 'Actividad', icono: 'actividad', ruta: '/actividad' },
   { etiqueta: 'Profesorado', icono: 'grado', ruta: '/profesorado' },
   { etiqueta: 'Configuración', icono: 'configuracion', ruta: '/configuracion' },
@@ -77,9 +79,14 @@ export class MarcoComponent {
   // taparía el contenido nada más cargar.
   protected readonly abierto = signal(false);
 
-  protected readonly secciones = computed(() =>
-    this.sesion()?.rol === 'ALUMNO' ? SECCIONES_ALUMNO : SECCIONES_PROFESOR,
-  );
+  protected readonly secciones = computed(() => {
+    const sesion = this.sesion();
+    if (sesion?.rol === 'ALUMNO') {
+      return SECCIONES_ALUMNO;
+    }
+    // Enseñar una sección que el guard va a rebotar es peor que no enseñarla.
+    return SECCIONES_PROFESOR.filter((seccion) => !seccion.soloAdmin || sesion?.esAdmin);
+  });
 
   protected readonly rolLegible = computed(() =>
     this.sesion()?.rol === 'ALUMNO' ? 'Alumnado' : 'Profesorado',

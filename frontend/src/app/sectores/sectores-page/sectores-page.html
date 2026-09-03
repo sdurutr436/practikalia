@@ -1,0 +1,63 @@
+<main class="o-pagina">
+  <app-cabecera titulo="Sectores y etiquetas" />
+
+  <p class="c-nota">
+    De izquierda a derecha: elige o crea un sector, luego a qué se dedica la empresa dentro de él y
+    luego las etiquetas de esa actividad. Los grupos transversales no son sectores: sus etiquetas
+    valen para cualquier empresa.
+  </p>
+
+  @if (fallo(); as mensaje) {
+    <app-alerta>{{ mensaje }}</app-alerta>
+  }
+
+  <app-estado [cargando]="cargando()" [error]="error()">
+    <div class="o-columnas">
+      <app-columna-catalogo
+        titulo="Sectores"
+        marcador="Nuevo sector…"
+        marcaAlta="Es un grupo transversal (vale para todos los sectores)"
+        vacio="Todavía no hay ningún sector."
+        [items]="sectores()"
+        [elegido]="sectorId()"
+        [ocupada]="ocupada()"
+        (elegir)="elegirSector($event)"
+        (crear)="crearSector($event)"
+        (renombrar)="renombrar($event)"
+        (borrar)="borrar($event)"
+      />
+
+      <app-columna-catalogo
+        [titulo]="tituloActividades()"
+        marcador="Nueva…"
+        pista="Elige un sector para ver lo que cuelga de él."
+        [vacio]="vacioActividades()"
+        [items]="actividades()"
+        [elegido]="actividadId()"
+        [activa]="hayActividades()"
+        [ocupada]="ocupada()"
+        (elegir)="elegirActividad($event)"
+        (crear)="crearActividad($event)"
+        (renombrar)="renombrar($event)"
+        (borrar)="borrar($event)"
+      />
+
+      <app-columna-catalogo
+        titulo="Etiquetas"
+        marcador="Nueva etiqueta…"
+        [pista]="
+          esTransversal()
+            ? 'Un grupo transversal llega hasta sus etiquetas: no tiene un tercer nivel.'
+            : 'Elige una actividad para ver sus etiquetas.'
+        "
+        vacio="Esta actividad todavía no tiene etiquetas."
+        [items]="etiquetas()"
+        [activa]="hayEtiquetas()"
+        [ocupada]="ocupada()"
+        (crear)="crearEtiqueta($event)"
+        (renombrar)="renombrar($event)"
+        (borrar)="borrar($event)"
+      />
+    </div>
+  </app-estado>
+</main>

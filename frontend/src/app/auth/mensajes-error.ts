@@ -42,6 +42,16 @@ export const MENSAJES_ASIGNACION: Record<string, string> = {
   ALUMNO_SIN_CLASE: 'Ponle clase al alumno en Alumnado antes de asignarle empresa.',
 };
 
+/** Mensajes de UI por código del contrato de mantenimiento de /api/etiquetas. */
+export const MENSAJES_CATALOGO: Record<string, string> = {
+  ETIQUETA_REPETIDA: 'Ya hay un sector o una etiqueta con ese nombre.',
+  ETIQUETA_CON_HIJAS: 'Todavía cuelgan actividades o etiquetas de aquí; vacíalo antes de borrarlo.',
+  ETIQUETA_EN_USO: 'No se puede borrar: alguna empresa o algún alumno la está usando.',
+  ETIQUETA_NO_ENCONTRADA: 'Ese sector o esa etiqueta ya no existe.',
+  NIVEL_MAXIMO: 'El catálogo llega hasta la etiqueta: sector, actividad y etiqueta.',
+  CAMPO_INVALIDO: 'Escribe un nombre.',
+};
+
 /** Mensajes de UI por código del contrato de PUT /api/usuarios/{id}/grado. */
 export const MENSAJES_GRADO: Record<string, string> = {
   USUARIO_NO_ENCONTRADO: 'El alumno no existe.',

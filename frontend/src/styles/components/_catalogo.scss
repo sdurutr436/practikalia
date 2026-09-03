@@ -1,0 +1,173 @@
+// Columna del catálogo de sectores: un rótulo, la lista de lo que hay en ese
+// nivel y el alta al pie. Las tres columnas de la pantalla (sectores,
+// actividades y etiquetas) son este mismo bloque, así que aquí no hay nada que
+// sepa de qué nivel se está pintando.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-catalogo {
+  @include t.panel;
+  display: grid;
+  align-content: start;
+  gap: s.$espaciado-medio;
+  padding: s.$espaciado-base;
+}
+
+// Sin nada elegido en la columna de la izquierda no hay qué listar: la columna
+// se queda en su sitio (si desapareciera, las de al lado bailarían) pero se
+// apaga y explica qué falta.
+.c-catalogo--apagada {
+  // Apagada pero opaca: sin fondo propio se cuelan por dentro las figuras
+  // decorativas de la pantalla y la columna se vuelve ilegible.
+  background: s.$color-apagado;
+  color: s.$color-texto-apagado;
+  box-shadow: none;
+  border-style: dashed;
+}
+
+.c-catalogo__titulo {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  font-weight: s.$peso-medio;
+  letter-spacing: s.$tracking-amplio;
+  text-transform: uppercase;
+  color: s.$color-texto-apagado;
+}
+
+.c-catalogo__pista {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+  text-wrap: pretty;
+}
+
+.c-catalogo__lista {
+  display: grid;
+  gap: s.$espaciado-diminuto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  // Con un catálogo poblado la columna crecería más que la pantalla y el alta
+  // del pie quedaría fuera de la vista.
+  max-height: 24rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+// Rótulo de separación dentro de la lista: hoy separa los sectores de los
+// grupos transversales, que no son sectores aunque compartan columna.
+.c-catalogo__grupo {
+  padding-block-start: s.$espaciado-pequeno;
+  font-size: s.$texto-diminuto;
+  letter-spacing: s.$tracking-amplio;
+  text-transform: uppercase;
+  color: s.$color-texto-apagado;
+}
+
+.c-catalogo__fila {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-diminuto;
+  border-radius: s.$radio-m;
+
+  &:hover {
+    background: s.$color-apagado;
+  }
+}
+
+.c-catalogo__fila--elegida {
+  background: color-mix(in srgb, s.$color-primario 12%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, s.$color-primario 18%, transparent);
+  }
+}
+
+// El nombre es el botón que elige la fila: ocupa todo el hueco para que se
+// pueda pulsar en cualquier parte, no solo sobre las letras.
+.c-catalogo__nombre {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+  padding: s.$espaciado-pequeno s.$espaciado-medio;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+.c-catalogo__fila--elegida .c-catalogo__nombre {
+  font-weight: s.$peso-medio;
+}
+
+// Lo que cuelga de esta fila. En la columna de la derecha no hay contador
+// porque no hay un cuarto nivel del que contar.
+.c-catalogo__cuenta {
+  flex: none;
+  font-size: s.$texto-diminuto;
+  color: s.$color-texto-apagado;
+}
+
+.c-catalogo__acciones {
+  display: flex;
+  flex: none;
+  gap: s.$espaciado-diminuto;
+  padding-inline-end: s.$espaciado-diminuto;
+}
+
+.c-catalogo__accion {
+  @include t.boton-icono;
+}
+
+.c-catalogo__accion--peligro:hover:not(:disabled) {
+  background: color-mix(in srgb, s.$color-error 15%, transparent);
+  color: s.$color-error;
+}
+
+// Alta y renombrado comparten forma: una entrada que se come el ancho y los
+// botones al lado.
+.c-catalogo__alta {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-catalogo__entrada {
+  @include t.control;
+  flex: 1;
+  // Sin esto el ancho intrínseco del `input` empuja la columna y rompe el
+  // reparto en partes iguales de .o-columnas.
+  min-width: 0;
+}
+
+.c-catalogo__marca {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-diminuto;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
+// Confirmación de borrado, en la propia fila: no merece un modal y así se ve
+// justo encima de lo que se va a borrar.
+.c-catalogo__confirmar {
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+  padding: s.$espaciado-pequeno s.$espaciado-medio;
+  font-size: s.$texto-pequeno;
+}
+
+.c-catalogo__aviso {
+  flex: 1;
+  color: s.$color-error;
+}

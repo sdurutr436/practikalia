@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import {
+  adminGuard,
   alumnoGuard,
   autenticadoGuard,
   cambioContrasenaPendienteGuard,
@@ -21,6 +22,7 @@ import { MisEtiquetasPage } from './perfil/mis-etiquetas-page/mis-etiquetas-page
 import { AfinidadPage } from './afinidad/afinidad-page/afinidad-page';
 import { AlumnadoPage } from './alumnado/alumnado-page/alumnado-page';
 import { AsignacionesPage } from './asignaciones/asignaciones-page/asignaciones-page';
+import { SectoresPage } from './sectores/sectores-page/sectores-page';
 
 export const routes: Routes = [
   // El marco (menú lateral + barra superior) lo pone app.ts alrededor del
@@ -136,15 +138,18 @@ export const routes: Routes = [
     canActivate: [profesorGuard],
   },
 
+  // El catálogo toca la clasificación de todas las empresas y la afinidad del
+  // alumnado, así que es de administradores y no de todo el profesorado.
+  {
+    path: 'sectores',
+    component: SectoresPage,
+    title: 'Sectores y etiquetas',
+    canActivate: [adminGuard],
+  },
+
   // Secciones del menú que todavía no tienen pantalla. Las rutas existen ya
   // para que el menú no cambie de forma según se vayan construyendo: crear
   // una pantalla es cambiar su `component` aquí y nada más.
-  {
-    path: 'sectores',
-    component: ProximamentePage,
-    title: 'Sectores y etiquetas',
-    canActivate: [profesorGuard],
-  },
   {
     path: 'actividad',
     component: ProximamentePage,

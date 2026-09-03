@@ -1,0 +1,146 @@
+<section class="c-catalogo" [class.c-catalogo--apagada]="!activa()">
+  <h2 class="c-catalogo__titulo">{{ titulo() }}</h2>
+
+  @if (!activa()) {
+    <p class="c-catalogo__pista">{{ pista() }}</p>
+  } @else {
+    @if (items().length === 0) {
+      <p class="c-catalogo__pista">{{ vacio() }}</p>
+    } @else {
+      <ul class="c-catalogo__lista">
+        @for (item of items(); track item.id; let i = $index) {
+          @if (abreGrupo(i)) {
+            <li class="c-catalogo__grupo" aria-hidden="true">{{ item.grupo }}</li>
+          }
+
+          <li class="c-catalogo__fila" [class.c-catalogo__fila--elegida]="item.id === elegido()">
+            @if (editando() === item.id) {
+              <input
+                class="c-catalogo__entrada"
+                type="text"
+                [attr.aria-label]="'Nuevo nombre de ' + item.nombre"
+                [value]="borrador()"
+                (input)="borrador.set($any($event.target).value)"
+                (keydown.enter)="confirmarRenombrado(item)"
+                (keydown.escape)="editando.set(null)"
+              />
+              <div class="c-catalogo__acciones">
+                <button
+                  class="c-catalogo__accion"
+                  type="button"
+                  title="Guardar el nombre"
+                  [attr.aria-label]="'Guardar el nombre de ' + item.nombre"
+                  [disabled]="ocupada()"
+                  (click)="confirmarRenombrado(item)"
+                >
+                  <app-icono nombre="aprobar" />
+                </button>
+                <button
+                  class="c-catalogo__accion"
+                  type="button"
+                  title="Dejarlo como estaba"
+                  aria-label="Dejarlo como estaba"
+                  (click)="editando.set(null)"
+                >
+                  <app-icono nombre="rechazar" />
+                </button>
+              </div>
+            } @else if (confirmando() === item.id) {
+              <p class="c-catalogo__confirmar">
+                <span class="c-catalogo__aviso">¿Borrar «{{ item.nombre }}»?</span>
+              </p>
+              <div class="c-catalogo__acciones">
+                <button
+                  class="c-catalogo__accion c-catalogo__accion--peligro"
+                  type="button"
+                  title="Sí, borrar"
+                  [attr.aria-label]="'Sí, borrar ' + item.nombre"
+                  [disabled]="ocupada()"
+                  (click)="confirmarBorrado(item)"
+                >
+                  <app-icono nombre="aprobar" />
+                </button>
+                <button
+                  class="c-catalogo__accion"
+                  type="button"
+                  title="No borrar"
+                  aria-label="No borrar"
+                  (click)="confirmando.set(null)"
+                >
+                  <app-icono nombre="rechazar" />
+                </button>
+              </div>
+            } @else {
+              <button
+                class="c-catalogo__nombre"
+                type="button"
+                [attr.aria-pressed]="item.id === elegido()"
+                (click)="elegir.emit(item.id)"
+              >
+                {{ item.nombre }}
+                @if (item.cuenta !== undefined) {
+                  <span class="c-catalogo__cuenta">{{ item.cuenta }}</span>
+                }
+              </button>
+              <div class="c-catalogo__acciones">
+                <button
+                  class="c-catalogo__accion"
+                  type="button"
+                  title="Renombrar"
+                  [attr.aria-label]="'Renombrar ' + item.nombre"
+                  [disabled]="ocupada()"
+                  (click)="empezarRenombrado(item)"
+                >
+                  <app-icono nombre="editar" />
+                </button>
+                <button
+                  class="c-catalogo__accion c-catalogo__accion--peligro"
+                  type="button"
+                  title="Borrar"
+                  [attr.aria-label]="'Borrar ' + item.nombre"
+                  [disabled]="ocupada()"
+                  (click)="pedirBorrado(item)"
+                >
+                  <app-icono nombre="rechazar" />
+                </button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (marcaAlta(); as rotulo) {
+      <label class="c-catalogo__marca">
+        <input
+          type="checkbox"
+          [checked]="marcado()"
+          (change)="marcado.set($any($event.target).checked)"
+        />
+        {{ rotulo }}
+      </label>
+    }
+
+    <div class="c-catalogo__alta">
+      <input
+        class="c-catalogo__entrada"
+        type="text"
+        [attr.aria-label]="'Añadir a ' + titulo()"
+        [placeholder]="marcador()"
+        [value]="nuevo()"
+        (input)="nuevo.set($any($event.target).value)"
+        (keydown.enter)="anadir()"
+      />
+      <button
+        class="c-catalogo__accion"
+        type="button"
+        title="Añadir"
+        [attr.aria-label]="'Añadir a ' + titulo()"
+        [disabled]="ocupada() || nuevo().trim().length === 0"
+        (click)="anadir()"
+      >
+        <app-icono nombre="anadir" />
+      </button>
+    </div>
+  }
+</section>
