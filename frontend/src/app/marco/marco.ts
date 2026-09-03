@@ -15,10 +15,11 @@ interface Seccion {
 }
 
 /**
- * Menú del profesorado. Actividad, Profesorado y Configuración todavía no
- * tienen pantalla: sus rutas existen y apuntan a la página de "en
- * construcción", así que el menú no cambia de forma cuando se vayan creando.
- * Sectores y etiquetas solo sale con `esAdmin`.
+ * Menú del profesorado. Configuración todavía no tiene pantalla: su ruta existe
+ * y apunta a la página de "en construcción", así que el menú no cambia de forma
+ * cuando se cree. Sectores y etiquetas solo sale con `esAdmin`, y Actividad no
+ * sale: la sección no tiene sentido en esta aplicación, aunque su ruta siga
+ * respondiendo si se escribe a mano.
  */
 const SECCIONES_PROFESOR: Seccion[] = [
   { etiqueta: 'Panel', icono: 'panel', ruta: '/panel' },
@@ -27,7 +28,6 @@ const SECCIONES_PROFESOR: Seccion[] = [
   { etiqueta: 'Alumnado', icono: 'persona', ruta: '/alumnado' },
   { etiqueta: 'Asignaciones', icono: 'asignaciones', ruta: '/asignaciones' },
   { etiqueta: 'Sectores y etiquetas', icono: 'etiqueta', ruta: '/sectores', soloAdmin: true },
-  { etiqueta: 'Actividad', icono: 'actividad', ruta: '/actividad' },
   { etiqueta: 'Profesorado', icono: 'grado', ruta: '/profesorado' },
   { etiqueta: 'Configuración', icono: 'configuracion', ruta: '/configuracion' },
 ];
