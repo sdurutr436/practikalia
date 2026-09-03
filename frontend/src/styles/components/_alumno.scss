@@ -86,8 +86,11 @@
   }
 }
 
-// Rejilla de la ficha del modal: una columna, que el modal ya es estrecho.
+// Rejilla de la ficha del modal. El ancho mínimo de columna es lo que la
+// ensancha: con la columna al ancho de sus controles, los rótulos de ayuda
+// envolvían a dos líneas y la ficha ya no entraba en el alto del modal.
 .c-ficha {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: s.$espaciado-medio;
 }
