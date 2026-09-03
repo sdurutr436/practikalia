@@ -26,6 +26,23 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     long countByRolAndActivoTrue(Rol rol);
 
+    /** Cuántos administradores quedan: el último no puede dejar de serlo. */
+    long countByEsAdminTrue();
+
+    /**
+     * El profesorado del centro, para su pantalla. {@code conClase} filtra las
+     * pastillas: {@code true} los que tutorizan una clase, {@code false} los que
+     * no, {@code null} todos.
+     */
+    @Query("""
+            select u from Usuario u
+            where u.rol = :rol
+              and (:conClase is null
+                   or (:conClase = true and exists (select g.id from Grado g where g.tutor = u))
+                   or (:conClase = false and not exists (select g.id from Grado g where g.tutor = u)))
+            """)
+    Page<Usuario> buscarProfesorado(Rol rol, Boolean conClase, Pageable pageable);
+
     /**
      * El alumnado de un curso académico, para la pantalla de asignaciones. Un
      * alumno pertenece al curso de su año de matrícula; si no lo tiene puesto

@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -336,6 +338,19 @@ public class AlumnoService {
                 alumno.getAnio(),
                 alumno.isActivo(),
                 abierta == null ? null : abierta.getEmpresa().getId(),
-                abierta == null ? null : abierta.getEmpresa().getNombre());
+                abierta == null ? null : abierta.getEmpresa().getNombre(),
+                abierta == null ? null : abierta.getTutorCentro().getId(),
+                abierta == null ? null : nombreDe(abierta.getTutorCentro()));
+    }
+
+    /**
+     * Nombre y apellidos de un tutor. Con el correo de respaldo: las cuentas de
+     * profesor dadas de alta desde {@code POST /api/usuarios} nacen sin nombre.
+     */
+    private static String nombreDe(Usuario usuario) {
+        String nombre = Stream.of(usuario.getNombre(), usuario.getApellido1(), usuario.getApellido2())
+                .filter(parte -> parte != null && !parte.isBlank())
+                .collect(Collectors.joining(" "));
+        return nombre.isBlank() ? usuario.getCorreo() : nombre;
     }
 }

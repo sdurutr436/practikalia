@@ -15,6 +15,9 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, Long> {
     /** La asignación en curso de un alumno. Solo puede haber una abierta a la vez. */
     Optional<Asignacion> findFirstByAlumnoIdAndFechaFinIsNull(Long alumnoId);
 
+    /** Las asignaciones abiertas de varios tutores a la vez: su tutoría de prácticas en curso. */
+    List<Asignacion> findByTutorCentroIdInAndFechaFinIsNull(List<Long> tutorIds);
+
     List<Asignacion> findByEmpresaId(Long empresaId);
 
     boolean existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(Long alumnoId, Long empresaId, Long gradoId, int anio);

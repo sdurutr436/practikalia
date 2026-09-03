@@ -81,6 +81,12 @@ public class UsuarioException extends ApiException {
         return new UsuarioException(HttpStatus.UNAUTHORIZED, "CONTRASENA_ACTUAL_INCORRECTA", "La contraseña actual no es correcta");
     }
 
+    /** Se le quita el permiso de administrador al último que le queda al centro. */
+    public static UsuarioException ultimoAdministrador() {
+        return new UsuarioException(HttpStatus.CONFLICT, "ULTIMO_ADMINISTRADOR",
+                "El centro se quedaría sin ningún administrador");
+    }
+
     /** La contraseña nueva no cumple la política (mínimo 8 caracteres, mayúscula, minúscula, número y carácter especial). */
     public static UsuarioException contrasenaNoCumplePolitica() {
         return new UsuarioException(HttpStatus.BAD_REQUEST, "CONTRASENA_NO_CUMPLE_POLITICA",
