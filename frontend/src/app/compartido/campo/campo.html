@@ -21,7 +21,7 @@
 </ng-template>
 
 @if (grupo()) {
-  <fieldset class="c-campo" [class.u-crecer]="crecer()">
+  <fieldset class="c-campo c-campo--grupo" [class.u-crecer]="crecer()">
     <legend class="c-campo__etiqueta"><ng-container [ngTemplateOutlet]="rotulo" /></legend>
     <ng-container [ngTemplateOutlet]="cuerpo" />
   </fieldset>

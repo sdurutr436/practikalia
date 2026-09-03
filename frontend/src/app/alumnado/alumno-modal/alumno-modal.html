@@ -2,18 +2,17 @@
   [form]="form"
   [titulo]="titulo()"
   prefijo="alumno"
-  [esAlta]="esAlta()"
   [textoGuardar]="esAlta() ? 'Crear alumno' : 'Guardar cambios'"
   [guardando]="guardando()"
   [error]="error()"
   (guardar)="enviar()"
   (cerrar)="cerrar.emit()"
 >
-  <app-campo etiqueta="Clase" icono="grado" para="alumno-grado">
+  <app-campo campoExtra etiqueta="Clase" icono="grado" para="alumno-grado">
     <app-desplegable id="alumno-grado" [control]="form.controls.gradoId" [opciones]="clases()" />
   </app-campo>
 
-  <app-campo etiqueta="Curso" icono="fecha" para="alumno-anio">
+  <app-campo campoExtra etiqueta="Curso" icono="fecha" para="alumno-anio">
     <app-selector-curso
       id="alumno-anio"
       etiqueta="Curso academico"

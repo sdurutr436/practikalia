@@ -1,65 +1,83 @@
 <app-modal [titulo]="titulo()" (salir)="pedirSalida()">
   <form class="o-ficha" [formGroup]="form()" (ngSubmit)="enviar()">
-    <app-campo
-      etiqueta="Nombre"
-      icono="persona"
-      [para]="id('nombre')"
-      [requerido]="true"
-      [control]="form().controls['nombre']"
-      error="El nombre es obligatorio."
-    >
-      <input class="c-campo__entrada" [id]="id('nombre')" type="text" formControlName="nombre" />
-    </app-campo>
+    <!-- Datos comunes en dos columnas por fila (Nombre|Apellido1,
+         Apellido2|DNI, Correo|lo que añada la pantalla): `align-items: start`
+         en `.o-ficha__datos` es lo que hace que un error en una celda no
+         desplace verticalmente a la de al lado — cada campo se queda pegado
+         arriba de su fila en vez de estirarse a la altura de la más alta. -->
+    <div class="o-ficha__datos">
+      <app-campo
+        etiqueta="Nombre"
+        icono="persona"
+        [para]="id('nombre')"
+        [requerido]="true"
+        [control]="form().controls['nombre']"
+        error="Este campo no puede estar vacío."
+      >
+        <input
+          class="c-campo__entrada"
+          [id]="id('nombre')"
+          type="text"
+          formControlName="nombre"
+        />
+      </app-campo>
 
-    <app-campo
-      etiqueta="Primer apellido"
-      [para]="id('apellido1')"
-      [requerido]="true"
-      [control]="form().controls['apellido1']"
-      error="El primer apellido es obligatorio."
-    >
-      <input
-        class="c-campo__entrada"
-        [id]="id('apellido1')"
-        type="text"
-        formControlName="apellido1"
-      />
-    </app-campo>
+      <app-campo
+        etiqueta="Primer apellido"
+        [para]="id('apellido1')"
+        [requerido]="true"
+        [control]="form().controls['apellido1']"
+        error="Este campo no puede estar vacío."
+      >
+        <input
+          class="c-campo__entrada"
+          [id]="id('apellido1')"
+          type="text"
+          formControlName="apellido1"
+        />
+      </app-campo>
 
-    <app-campo etiqueta="Segundo apellido" [para]="id('apellido2')">
-      <input
-        class="c-campo__entrada"
-        [id]="id('apellido2')"
-        type="text"
-        formControlName="apellido2"
-      />
-    </app-campo>
+      <app-campo etiqueta="Segundo apellido" [para]="id('apellido2')">
+        <input
+          class="c-campo__entrada"
+          [id]="id('apellido2')"
+          type="text"
+          formControlName="apellido2"
+        />
+      </app-campo>
 
-    <app-campo
-      etiqueta="DNI"
-      icono="numero"
-      [para]="id('dni')"
-      [requerido]="true"
-      [control]="form().controls['dni']"
-      [ayuda]="ayudaDni()"
-      error="Revisa el número y la letra."
-    >
-      <input class="c-campo__entrada" [id]="id('dni')" type="text" formControlName="dni" />
-    </app-campo>
+      <app-campo
+        etiqueta="DNI"
+        icono="numero"
+        [para]="id('dni')"
+        [requerido]="true"
+        [control]="form().controls['dni']"
+        error="Revisa el número y la letra."
+      >
+        <input class="c-campo__entrada" [id]="id('dni')" type="text" formControlName="dni" />
+      </app-campo>
 
-    <app-campo
-      etiqueta="Correo"
-      icono="correo"
-      [para]="id('correo')"
-      [requerido]="true"
-      [control]="form().controls['correo']"
-      ayuda="Es el correo con el que inicia sesión."
-      error="Escribe un correo válido."
-    >
-      <input class="c-campo__entrada" [id]="id('correo')" type="email" formControlName="correo" />
-    </app-campo>
+      <app-campo
+        etiqueta="Correo"
+        icono="correo"
+        [para]="id('correo')"
+        [requerido]="true"
+        [control]="form().controls['correo']"
+        error="Escribe un correo válido."
+      >
+        <input
+          class="c-campo__entrada"
+          [id]="id('correo')"
+          type="email"
+          formControlName="correo"
+        />
+      </app-campo>
 
-    <!-- Lo propio de cada pantalla: clase, curso, tutorías, permisos… -->
+      <!-- Sigue completando la rejilla: la clase de alumno/profesor, el curso… -->
+      <ng-content select="[campoExtra]" />
+    </div>
+
+    <!-- Grupos propios de cada pantalla, a todo lo ancho: permisos, tutorías… -->
     <ng-content />
   </form>
 

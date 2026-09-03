@@ -2,7 +2,6 @@
   [form]="form"
   [titulo]="titulo()"
   prefijo="profesor"
-  [esAlta]="esAlta()"
   [textoGuardar]="esAlta() ? 'Crear profesor' : 'Guardar cambios'"
   [guardando]="guardando()"
   [error]="error()"
@@ -10,21 +9,18 @@
   (guardar)="enviar()"
   (cerrar)="cerrar.emit()"
 >
-  <app-campo
-    etiqueta="Clase de la que es tutor"
-    icono="grado"
-    para="profesor-grado"
-    ayuda="Sus alumnos le tienen como tutor de clase. Una clase, un tutor."
-  >
+  <app-campo campoExtra etiqueta="Clase de la que es tutor" icono="grado" para="profesor-grado">
     <app-desplegable id="profesor-grado" [control]="form.controls.gradoId" [opciones]="clases()" />
   </app-campo>
 
-  <app-campo
-    etiqueta="Alumnado de prácticas"
-    icono="asignaciones"
-    para="profesor-practicas"
-    ayuda="Solo sale quien ya tiene empresa. Para quitarle un alumno hay que dárselo a otro tutor."
-  >
+  <app-campo etiqueta="Permisos" icono="configuracion" [grupo]="true">
+    <label class="c-checkbox">
+      <input type="checkbox" [formControl]="form.controls.esAdmin" />
+      Es administrador
+    </label>
+  </app-campo>
+
+  <app-campo etiqueta="Alumnos de prácticas asociados" icono="asignaciones" [grupo]="true">
     <app-desplegable
       id="profesor-practicas"
       [control]="aAnadir"
@@ -41,12 +37,5 @@
         }
       </ul>
     }
-  </app-campo>
-
-  <app-campo etiqueta="Permisos" icono="configuracion" [grupo]="true">
-    <label class="c-checkbox">
-      <input type="checkbox" [formControl]="form.controls.esAdmin" />
-      Es administrador
-    </label>
   </app-campo>
 </app-ficha-persona>

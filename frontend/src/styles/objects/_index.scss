@@ -39,12 +39,23 @@
   list-style: none;
 }
 
-// Rejilla de la ficha de un modal. El ancho mínimo de columna es lo que la
-// ensancha: con la columna al ancho de sus controles, los rótulos de ayuda
-// envolvían a dos líneas y la ficha ya no entraba en el alto del modal.
+// Ficha de un modal: la rejilla de datos y, debajo, los grupos propios de cada
+// pantalla (permisos, tutorías…) apilados a todo lo ancho.
 .o-ficha {
+  display: flex;
+  flex-direction: column;
+  gap: s.$espaciado-grande;
+}
+
+// La rejilla en sí. El ancho mínimo de columna es lo que la ensancha: con la
+// columna al ancho de sus controles, la ficha no entraba en el alto del modal.
+// `align-items: start` es lo que evita que un error en una celda estire la
+// fila entera: cada campo se queda pegado arriba de su fila, no centrado ni
+// estirado a la altura de la más alta.
+.o-ficha__datos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(s.$ancho-ficha-min, 1fr));
+  align-items: start;
   gap: s.$espaciado-medio;
 }
 

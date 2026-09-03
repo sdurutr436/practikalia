@@ -1,4 +1,4 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AlertaComponent } from '../alerta/alerta';
 import { BotonComponent } from '../boton/boton';
@@ -7,9 +7,11 @@ import { ModalComponent } from '../modal/modal';
 
 /**
  * Modal de ficha de una persona del centro: nombre y apellidos, DNI y correo,
- * que es lo que comparten el alta de alumnado y la de profesorado. Lo que cada
- * pantalla tiene de propio —la clase, el curso, las tutorías, los permisos— se
- * proyecta detrás de estos campos.
+ * que es lo que comparten el alta de alumnado y la de profesorado, en dos
+ * columnas dentro de `.o-ficha__datos`. Lo que cada pantalla tiene de propio va
+ * en dos sitios: lo que sigue completando esa misma rejilla (una clase, un
+ * curso) se proyecta con `campoExtra`; lo que es un grupo aparte a todo lo
+ * ancho (permisos, tutorías) va en el `ng-content` por defecto, detrás.
  *
  * El formulario lo sigue montando cada pantalla y llega entero por `form`: aquí
  * solo se pintan sus cinco controles comunes, se avisa antes de tirar lo escrito
@@ -30,8 +32,6 @@ export class FichaPersonaComponent {
   /** Prefijo de los `id` de los campos, para que no choquen con los de la pantalla. */
   readonly prefijo = input.required<string>();
   readonly textoGuardar = input.required<string>();
-  /** Cambia la ayuda del DNI: al dar de alta es la contraseña inicial. */
-  readonly esAlta = input(false);
   readonly guardando = input(false);
   readonly error = input<string | null>(null);
   /** Cambios sin guardar que no viven en el formulario (una lista, una selección). */
@@ -41,12 +41,6 @@ export class FichaPersonaComponent {
   readonly cerrar = output<void>();
 
   protected readonly confirmandoSalida = signal(false);
-
-  protected readonly ayudaDni = computed(() =>
-    this.esAlta()
-      ? 'Será su contraseña de entrada, sin la letra.'
-      : 'Cambiarlo no cambia su contraseña.',
-  );
 
   protected id(campo: string): string {
     return `${this.prefijo()}-${campo}`;
