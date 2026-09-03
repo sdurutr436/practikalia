@@ -197,10 +197,7 @@ describe('listado de profesorado', () => {
     harness.detectChanges();
 
     // El desplegable se abre al enfocarlo, se filtra tecleando y elige con un clic.
-    // El id va al anfitrión del componente; quien escucha es su <input> de dentro.
-    const entrada = raiz.querySelector(
-      '#profesor-practicas .c-desplegable__entrada',
-    ) as HTMLInputElement;
+    const entrada = raiz.querySelector('#profesor-practicas') as HTMLInputElement;
     entrada.dispatchEvent(new Event('focus'));
     entrada.value = 'ivan';
     entrada.dispatchEvent(new Event('input'));

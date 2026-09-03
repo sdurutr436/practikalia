@@ -47,7 +47,10 @@ let contador = 0;
   selector: 'app-desplegable',
   imports: [IconoComponent],
   templateUrl: './desplegable.html',
-  host: { class: 'u-contenidos' },
+  // El `id` es una entrada que se pinta en el <input> de dentro: sin esto, el
+  // atributo estático se queda también en el anfitrión y hay dos elementos con
+  // el mismo id (y el `for` del rótulo apunta al que no es un control).
+  host: { class: 'u-contenidos', '[attr.id]': 'null' },
 })
 export class DesplegableComponent {
   readonly opciones = input<readonly OpcionDesplegable[]>([]);
@@ -175,6 +178,10 @@ export class DesplegableComponent {
     if (control) {
       control.setValue(opcion.valor);
       control.markAsTouched();
+      // `setValue` no ensucia el control por sí solo, y esto es alguien
+      // eligiendo a mano: sin esto, un formulario que solo cambia aquí se
+      // cierra sin avisar de que hay algo sin guardar.
+      control.markAsDirty();
     }
     this.cambia.emit(`${opcion.valor}`);
   }
