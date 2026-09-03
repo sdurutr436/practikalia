@@ -54,8 +54,17 @@
 }
 
 .c-barra__marca {
+  display: inline-flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
   font-weight: s.$peso-fuerte;
   letter-spacing: s.$tracking-ajustado;
+}
+
+.c-barra__logo {
+  width: 1.5em;
+  height: 1.5em;
+  object-fit: contain;
 }
 
 // Cabecera estrecha: la marca manda, centrada, y todo lo demás baja al

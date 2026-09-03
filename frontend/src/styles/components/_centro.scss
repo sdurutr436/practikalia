@@ -1,0 +1,49 @@
+// Pantalla de configuración del centro: el logo subido y la lista de correos
+// permitidos. El formulario y sus campos son los mismos bloques que el resto
+// de la aplicación (`.c-formulario`, `.c-campo`).
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-centro__logo {
+  max-width: 8rem;
+  max-height: 8rem;
+  object-fit: contain;
+}
+
+.c-correos {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-correos__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+
+  // Confirmando un borrado la fila pasa de una línea a un aviso + botones.
+  &--confirmando {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.c-correos__texto {
+  overflow-wrap: anywhere;
+}
+
+.c-correos__quitar {
+  @include t.boton-icono;
+  flex-shrink: 0;
+}
+
+.c-correos__alta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: s.$espaciado-pequeno;
+
+  .c-campo {
+    flex: 1 1 s.$ancho-campo-min;
+  }
+}
