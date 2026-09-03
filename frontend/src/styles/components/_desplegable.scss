@@ -1,0 +1,116 @@
+// El desplegable de la aplicación: la entrada con su lupa y, colgando de ella,
+// la lista pintada por nosotros. Sustituye al <select> nativo, cuya lista es
+// cromo del navegador y no admite CSS ni hereda el tema.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-desplegable {
+  @include t.control;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-diminuto;
+  // Se ajusta a su contenido salvo que quien lo coloca diga otra cosa: en una
+  // fila de filtros cada uno mide lo suyo, en una ficha ocupan el ancho entero.
+  flex: 0 1 auto;
+  min-width: 0;
+  background: s.$color-superficie;
+
+  &:focus-within {
+    @include t.anillo-foco;
+    border-color: s.$color-anillo;
+  }
+}
+
+.c-desplegable__lupa {
+  flex: none;
+  color: s.$color-texto-apagado;
+}
+
+.c-desplegable__entrada {
+  // Sin ancho propio: el intrínseco del <input> (su atributo size) es lo que
+  // da el ancho al bloque cuando nadie lo estira, y flex lo estira cuando sí.
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-overflow: ellipsis;
+  cursor: pointer;
+
+  // El anillo lo pinta el contenedor entero, igual que en .c-buscador.
+  &:focus {
+    outline: none;
+  }
+}
+
+// La lista cuelga de la entrada igual que el menú de hamburguesa cuelga de su
+// botón: misma superficie de panel, mismo margen de separación y la misma
+// animación de desplegar. La barra de desplazamiento va fina y en el color del
+// tema, que la del sistema desentona con todo lo demás.
+.c-desplegable__lista {
+  @include t.panel;
+  position: absolute;
+  // Elevado y no superpuesto: tiene que tapar lo que venga debajo, pero pasar
+  // por debajo de la cabecera pegajosa cuando la página está desplazada.
+  z-index: s.$z-elevado;
+  inset-inline: 0;
+  top: 100%;
+  min-width: max-content;
+  max-height: 14rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: s.$espaciado-pequeno 0 0;
+  padding: s.$espaciado-diminuto;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, s.$color-borde 25%, transparent) transparent;
+  transform-origin: top;
+  animation: desplegar s.$transicion ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+
+  // Cuando no cabe debajo, cuelga hacia arriba: mismo margen, otro lado.
+  &--arriba {
+    top: auto;
+    bottom: 100%;
+    margin: 0 0 s.$espaciado-pequeno;
+    transform-origin: bottom;
+  }
+}
+
+// Mismo tacto que una sección del menú de hamburguesa.
+.c-desplegable__opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+  padding: s.$espaciado-pequeno s.$espaciado-medio;
+  border-radius: s.$radio-m;
+  font-size: s.$texto-pequeno;
+  cursor: pointer;
+
+  // Un solo resaltado para teclado y ratón: el hover mueve el mismo índice.
+  &--resaltada {
+    background: s.$color-apagado;
+  }
+}
+
+.c-desplegable__nombre {
+  overflow-wrap: anywhere;
+}
+
+.c-desplegable__marca {
+  flex: none;
+  color: s.$color-primario;
+}
+
+.c-desplegable__nada {
+  padding: s.$espaciado-pequeno s.$espaciado-medio;
+  color: s.$color-texto-apagado;
+  font-size: s.$texto-pequeno;
+}

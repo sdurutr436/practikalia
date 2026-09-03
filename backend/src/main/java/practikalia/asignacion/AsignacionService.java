@@ -11,6 +11,7 @@ import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioException;
 import practikalia.usuario.UsuarioRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -42,12 +43,49 @@ public class AsignacionService {
         Empresa empresa = empresaRepository.findById(request.empresaId()).orElseThrow(EmpresaException::noEncontrada);
         Grado grado = gradoRepository.findById(request.gradoId()).orElseThrow(GradoException::noEncontrado);
 
-        if (asignacionRepository.existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(
-                alumno.getId(), empresa.getId(), grado.getId(), request.anio())) {
-            throw AsignacionException.yaExiste();
-        }
+        exigirNoRepetida(alumno.getId(), empresa.getId(), grado.getId(), request.anio());
 
         Asignacion asignacion = new Asignacion(alumno, empresa, tutorCentro, grado, request.anio(), request.fechaInicio());
+        asignacionRepository.save(asignacion);
+        return AsignacionDto.de(asignacion);
+    }
+
+    /**
+     * Pone empresa a un alumno desde la pantalla de asignaciones. Si ya tenía
+     * una asignación abierta se le cambia la empresa en vez de cerrarla y abrir
+     * otra: equivocarse de opción en un desplegable es un error de tecleo, no un
+     * cambio de empresa real, y el histórico no debería recoger la equivocación.
+     * Si no tenía ninguna, nace una nueva con quien llama como tutor, la clase
+     * del alumno y el curso en marcha.
+     */
+    @Transactional
+    public AsignacionDto asignar(Long alumnoId, Long empresaId, String correoProfesor) {
+        Usuario alumno = buscarAlumno(alumnoId);
+        Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(EmpresaException::noEncontrada);
+        if (!empresa.isPublicada()) {
+            throw AsignacionException.empresaNoPublicada();
+        }
+
+        Asignacion abierta = asignacionRepository.findFirstByAlumnoIdAndFechaFinIsNull(alumnoId).orElse(null);
+        if (abierta != null) {
+            if (!abierta.getEmpresa().getId().equals(empresaId)) {
+                exigirNoRepetida(alumnoId, empresaId, abierta.getGrado().getId(), abierta.getAnio());
+                abierta.setEmpresa(empresa);
+                asignacionRepository.save(abierta);
+            }
+            return AsignacionDto.de(abierta);
+        }
+
+        // El grado es el snapshot de la asignación y no admite nulos: sin clase
+        // no hay nada que fotografiar, y el mensaje dice dónde se arregla.
+        if (alumno.getGrado() == null) {
+            throw AsignacionException.alumnoSinClase();
+        }
+        int curso = Curso.actual();
+        exigirNoRepetida(alumnoId, empresaId, alumno.getGrado().getId(), curso);
+
+        Asignacion asignacion = new Asignacion(
+                alumno, empresa, buscarTutor(correoProfesor), alumno.getGrado(), curso, LocalDate.now());
         asignacionRepository.save(asignacion);
         return AsignacionDto.de(asignacion);
     }
@@ -94,6 +132,21 @@ public class AsignacionService {
             throw AsignacionException.alumnoInvalido();
         }
         return alumno;
+    }
+
+    /** El tutor de una asignación creada desde la pantalla: siempre quien la crea. */
+    private Usuario buscarTutor(String correo) {
+        Usuario tutor = usuarioRepository.findByCorreo(correo).orElseThrow(AsignacionException::tutorNoEncontrado);
+        if (tutor.getRol() != Rol.PROFESOR) {
+            throw AsignacionException.tutorInvalido();
+        }
+        return tutor;
+    }
+
+    private void exigirNoRepetida(Long alumnoId, Long empresaId, Long gradoId, int anio) {
+        if (asignacionRepository.existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(alumnoId, empresaId, gradoId, anio)) {
+            throw AsignacionException.yaExiste();
+        }
     }
 
     private Usuario buscarTutor(Long id) {

@@ -1,0 +1,96 @@
+// Tarjeta de alumno y barra del listado de alumnado. Las tarjetas son bajas a
+// propósito: en Practikalia el alumnado no tiene foto de perfil, así que no hay
+// nada que reservar arriba.
+@use '../settings' as s;
+@use '../tools' as t;
+
+// Pastillas a la izquierda, acciones pegadas a la derecha. Envuelve en estrecho
+// en vez de encoger los botones.
+.c-barra-alumnado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-medio;
+}
+
+.c-barra-alumnado__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: s.$espaciado-pequeno;
+  margin-inline-start: auto;
+}
+
+.c-alumno {
+  gap: s.$espaciado-diminuto;
+}
+
+.c-alumno__cabecera {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-alumno__nombre {
+  margin: 0;
+  font-weight: s.$peso-fuerte;
+  text-wrap: balance;
+}
+
+.c-alumno__correo,
+.c-alumno__clase {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+  overflow-wrap: anywhere;
+}
+
+.c-alumno__pies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: s.$espaciado-diminuto;
+  margin-top: s.$espaciado-diminuto;
+}
+
+// Lápiz arriba a la derecha de la tarjeta.
+.c-alumno__editar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  flex-shrink: 0;
+  padding: 0.25em 0.5em;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: none;
+  color: s.$color-primario;
+  font: inherit;
+  font-size: s.$texto-pequeno;
+  font-weight: s.$peso-medio;
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, s.$color-primario 10%, transparent);
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+// En una columna la tarjeta es estrecha: el lápiz se queda solo con el icono.
+// El botón mantiene su aria-label, así que sigue anunciándose entero.
+@media (width < 37.5rem) {
+  .c-alumno__editar-texto {
+    display: none;
+  }
+}
+
+// Rejilla de la ficha del modal. El ancho mínimo de columna es lo que la
+// ensancha: con la columna al ancho de sus controles, los rótulos de ayuda
+// envolvían a dos líneas y la ficha ya no entraba en el alto del modal.
+.c-ficha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: s.$espaciado-medio;
+}

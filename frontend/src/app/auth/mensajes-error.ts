@@ -38,6 +38,8 @@ export const MENSAJES_ASIGNACION: Record<string, string> = {
   TUTOR_NO_ENCONTRADO: 'El tutor seleccionado no existe.',
   EMPRESA_NO_ENCONTRADA: 'La empresa no existe.',
   GRADO_NO_ENCONTRADO: 'El grado seleccionado no existe.',
+  EMPRESA_NO_PUBLICADA: 'Esa empresa todavía no está confirmada.',
+  ALUMNO_SIN_CLASE: 'Ponle clase al alumno en Alumnado antes de asignarle empresa.',
 };
 
 /** Mensajes de UI por código del contrato de PUT /api/usuarios/{id}/grado. */

@@ -15,6 +15,7 @@ import { GradoOpcion, RegistroService } from '../registro.service';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 
 // Catálogo local de frases. Si algún día las sirve la API, esta constante es
 // lo único que cambia: el resto ya trabaja contra una señal.
@@ -87,6 +88,7 @@ export function correoInstitucional(control: AbstractControl<string>): Validatio
     AlertaComponent,
     CampoComponent,
     BotonComponent,
+    DesplegableComponent,
   ],
   templateUrl: './login-page.html',
 })
@@ -105,6 +107,10 @@ export class LoginPage {
   protected readonly registroEnviado = signal(false);
   protected readonly grados = signal<GradoOpcion[] | null>(null);
   protected readonly errorGrados = signal<string | null>(null);
+  /** El catálogo de clases tal y como lo pide el desplegable. */
+  protected readonly opcionesGrado = computed(() =>
+    (this.grados() ?? []).map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
+  );
 
   private readonly indice = signal(diaDelAno());
   protected readonly frase = computed(() => FRASES[this.indice() % FRASES.length]);

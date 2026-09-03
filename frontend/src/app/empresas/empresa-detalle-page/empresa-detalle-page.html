@@ -214,26 +214,17 @@
                       icono="aprobar"
                       [para]="'contratado-' + asignacion.id"
                     >
-                      <select
-                        class="c-campo__entrada"
-                        [id]="'contratado-' + asignacion.id"
+                      <app-desplegable
                         #contratado
-                      >
-                        <option value="" [selected]="asignacion.contratadoPosterior === null">
-                          Sin decidir
-                        </option>
-                        <option value="true" [selected]="asignacion.contratadoPosterior === true">
-                          Contratado
-                        </option>
-                        <option value="false" [selected]="asignacion.contratadoPosterior === false">
-                          No contratado
-                        </option>
-                      </select>
+                        [id]="'contratado-' + asignacion.id"
+                        [valor]="textoContratado(asignacion)"
+                        [opciones]="CONTRATACION"
+                      />
                     </app-campo>
                     <app-boton
                       icono="guardar"
                       [cargando]="guardandoId() === asignacion.id"
-                      (click)="cerrarAsignacion(asignacion, fechaFin.value, contratado.value)"
+                      (click)="cerrarAsignacion(asignacion, fechaFin.value, contratado.elegido())"
                     >
                       Guardar
                     </app-boton>

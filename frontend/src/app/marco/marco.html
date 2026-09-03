@@ -25,7 +25,9 @@
         <nav class="c-acciones c-barra__acciones" aria-label="Acciones de la sesión">
           @if (sesion()?.rol === 'PROFESOR') {
             <app-boton icono="anadir" enlace="/empresas/nueva">Nueva empresa</app-boton>
-            <app-boton icono="persona" enlace="/alumnos/nuevo">Nuevo alumno</app-boton>
+            <app-boton icono="persona" enlace="/alumnado" [params]="{ nuevo: 1 }">
+              Nuevo alumno
+            </app-boton>
           }
           <app-boton icono="salir" [secundario]="true" (click)="cerrarSesion()">
             Cerrar sesión

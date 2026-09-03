@@ -22,6 +22,14 @@ import { VolverComponent } from '../../compartido/volver/volver';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
+
+/** Las tres respuestas posibles a «¿acabó contratado?»; `''` es «todavía no se sabe». */
+const CONTRATACION = [
+  { valor: '', etiqueta: 'Sin decidir' },
+  { valor: 'true', etiqueta: 'Contratado' },
+  { valor: 'false', etiqueta: 'No contratado' },
+];
 
 @Component({
   selector: 'app-empresa-detalle-page',
@@ -34,6 +42,7 @@ import { BotonComponent } from '../../compartido/boton/boton';
     AlertaComponent,
     CampoComponent,
     BotonComponent,
+    DesplegableComponent,
   ],
   templateUrl: './empresa-detalle-page.html',
 })
@@ -48,6 +57,7 @@ export class EmpresaDetallePage {
   protected readonly esVistaProfesor = esVistaProfesor;
   protected readonly textoContratacion = textoContratacion;
   protected readonly sesion = this.authService.sesion;
+  protected readonly CONTRATACION = CONTRATACION;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly empresa = signal<Empresa | null>(null);
@@ -205,6 +215,11 @@ export class EmpresaDetallePage {
     } finally {
       this.cargandoAsignaciones.set(false);
     }
+  }
+
+  /** Con qué opción arranca el desplegable de contratación de esa asignación. */
+  protected textoContratado(asignacion: Asignacion): string {
+    return asignacion.contratadoPosterior === null ? '' : `${asignacion.contratadoPosterior}`;
   }
 
   protected async cerrarAsignacion(

@@ -1,0 +1,92 @@
+// Modal sobre <dialog> nativo. El navegador ya pone el fondo, el foco atrapado
+// y la top layer: aquí solo queda vestir la caja. Sin z-index a propósito —
+// dos <dialog> abiertos con showModal() se apilan por orden de apertura, que
+// es lo que hace que la confirmación de salida caiga por encima del rechazo.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-modal {
+  // display:flex para que .c-modal__caja sea ítem y respete el max-height: con
+  // el <dialog> en block, la caja crece a su contenido y se sale por abajo en
+  // vez de scrollear por dentro (móvil apaisado, o con el teclado abierto).
+  display: flex;
+  // El margen que se le deja a los lados, en una custom property porque lo
+  // usan el ancho y el alto. No hace falta calc() al consumirla: min() y el
+  // calc() de max-height ya abren contexto matemático.
+  --margen-modal: calc(#{s.$espaciado-grande} * 2);
+  max-width: min(34rem, calc(100dvw - var(--margen-modal)));
+  max-height: calc(100dvh - var(--margen-modal));
+  padding: 0;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio;
+  background: s.$color-superficie;
+  color: s.$color-superficie-texto;
+  box-shadow: s.$sombra-grande;
+
+  &::backdrop {
+    background: color-mix(in srgb, #000 45%, transparent);
+  }
+}
+
+.c-modal__caja {
+  display: flex;
+  flex-direction: column;
+  // Sin min-height:0 un ítem flex no baja de su contenido y el scroll no llega
+  // nunca al cuerpo.
+  min-height: 0;
+  width: 100%;
+  gap: s.$espaciado-base;
+  padding: s.$espaciado-grande;
+}
+
+.c-modal__cabecera {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: s.$espaciado-medio;
+}
+
+.c-modal__titulo {
+  margin: 0;
+  font-size: s.$texto-grande;
+  font-weight: s.$peso-fuerte;
+  letter-spacing: s.$tracking-ajustado;
+}
+
+.c-modal__cerrar {
+  display: grid;
+  place-items: center;
+  padding: s.$espaciado-diminuto;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: none;
+  color: s.$color-texto-apagado;
+  cursor: pointer;
+  transition:
+    background s.$transicion,
+    color s.$transicion;
+
+  &:hover {
+    background: s.$color-apagado;
+    color: s.$color-superficie-texto;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}
+
+.c-modal__cuerpo {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: s.$espaciado-base;
+  overflow-y: auto;
+  // Una reseña puede traer una URL larga sin espacios; sin esto ensancha el
+  // modal y saca scroll horizontal.
+  overflow-wrap: anywhere;
+}
+
+.c-modal__acciones:empty {
+  display: none;
+}

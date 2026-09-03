@@ -36,6 +36,18 @@ public class AsignacionException extends ApiException {
         return new AsignacionException(HttpStatus.CONFLICT, "ASIGNACION_YA_EXISTE", "Ya existe una asignación de ese alumno a esa empresa");
     }
 
+    /** La empresa elegida todavía no está publicada: solo se asigna alumnado a empresas confirmadas. */
+    public static AsignacionException empresaNoPublicada() {
+        return new AsignacionException(HttpStatus.BAD_REQUEST, "EMPRESA_NO_PUBLICADA",
+                "La empresa todavía no está confirmada");
+    }
+
+    /** El alumno no tiene clase, y la asignación la exige como snapshot del grado. */
+    public static AsignacionException alumnoSinClase() {
+        return new AsignacionException(HttpStatus.BAD_REQUEST, "ALUMNO_SIN_CLASE",
+                "El alumno no tiene clase asignada");
+    }
+
     /** El id de asignación indicado no existe. */
     public static AsignacionException noEncontrada() {
         return new AsignacionException(HttpStatus.NOT_FOUND, "ASIGNACION_NO_ENCONTRADA", "La asignación no existe");

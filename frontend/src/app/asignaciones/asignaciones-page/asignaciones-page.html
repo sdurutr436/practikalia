@@ -1,0 +1,82 @@
+<main class="o-pagina">
+  <app-cabecera titulo="Asignaciones" />
+
+  <app-buscador
+    etiqueta="Buscar alumnado"
+    marcador="Nombre, apellidos o correo…"
+    [valor]="texto()"
+    (buscar)="buscar($event)"
+  />
+
+  <div class="c-filtros">
+    <app-pastillas [opciones]="pastillas" [activa]="clave()" ruta="/asignaciones" />
+
+    <app-desplegable
+      etiqueta="Clase"
+      [opciones]="opcionesClase()"
+      [valor]="gradoId()"
+      (cambia)="filtrar('gradoId', $event)"
+    />
+
+    <app-selector-curso [valor]="anio()" (cambia)="filtrar('anio', $event)" />
+  </div>
+
+  <p class="c-asignacion__nota">
+    Solo el alumnado matriculado en el curso elegido, y solo empresas ya confirmadas.
+  </p>
+
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="alumnos().length === 0"
+    [mensajeVacio]="mensajeVacio()"
+  >
+    <ul class="o-lista">
+      @for (alumno of alumnos(); track alumno.id) {
+        <li class="c-fila c-asignacion">
+          <div class="c-asignacion__alumno">
+            <p class="c-asignacion__nombre">{{ nombre(alumno) }}</p>
+            <p class="c-asignacion__dato">{{ alumno.correo }}</p>
+            @if (alumno.grado; as grado) {
+              <p class="c-asignacion__dato">{{ grado.nombre }}</p>
+            }
+          </div>
+
+          <div class="c-asignacion__control">
+            <app-desplegable
+              [opciones]="opcionesEmpresa()"
+              [valor]="elegida(alumno)"
+              [etiqueta]="'Empresa de ' + nombre(alumno)"
+              marcador="Sin asignar"
+              vacio="Ninguna empresa confirmada coincide."
+              (cambia)="elegir(alumno, +$event)"
+            />
+            <app-boton
+              icono="guardar"
+              [cargando]="guardandoId() === alumno.id"
+              [deshabilitado]="!puedeGuardar(alumno)"
+              (click)="guardar(alumno)"
+            >
+              Guardar
+            </app-boton>
+          </div>
+
+          @if (errorFila(); as fallo) {
+            @if (fallo.id === alumno.id) {
+              <app-alerta>{{ fallo.mensaje }}</app-alerta>
+            }
+          }
+        </li>
+      }
+    </ul>
+  </app-estado>
+
+  <app-paginacion
+    [pagina]="paginaActual()"
+    [paginas]="paginas()"
+    seccion="asignaciones"
+    [total]="total()"
+    nombre="alumnos"
+    (ir)="irAPagina($event)"
+  />
+</main>

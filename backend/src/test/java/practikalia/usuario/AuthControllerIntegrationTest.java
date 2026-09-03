@@ -1,5 +1,7 @@
 package practikalia.usuario;
 
+import practikalia.grado.Grado;
+import practikalia.grado.GradoRepository;
 import practikalia.usuario.jwt.JwtService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -7,6 +9,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +46,11 @@ class AuthControllerIntegrationTest {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private GradoRepository gradoRepository;
+
+    /** 12345678 % 23 = 14, y la letra 14 de la cadena de control es la Z. */
+    private static final String DNI_VALIDO = "12345678Z";
 
     private Usuario guardarUsuario(String correo, String contrasena, Rol rol, boolean debeCambiarContrasena) {
         Usuario usuario = new Usuario(correo, passwordEncoder.encode(contrasena), rol);
@@ -256,5 +264,113 @@ class AuthControllerIntegrationTest {
                         .with(user("cualquiera@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.codigo").value("ACCESO_DENEGADO"));
+    }
+
+    private RegistroRequest registro(String correo, String dni, Long gradoId) {
+        return new RegistroRequest("Lucía", "Pérez", "Gómez", dni, gradoId, correo, "");
+    }
+
+    @Test
+    void registroValidoDejaLaCuentaPendienteDeAprobacion() throws Exception {
+        Grado grado = gradoRepository.save(new Grado("DAM"));
+
+        mockMvc.perform(post("/api/auth/registro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registro("lucia@iesejemplo.es", DNI_VALIDO, grado.getId()))))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(""));
+
+        Usuario creado = usuarioRepository.findByCorreo("lucia@iesejemplo.es").orElseThrow();
+        assertThat(creado.isActivo()).isFalse();
+        assertThat(creado.getRol()).isEqualTo(Rol.ALUMNO);
+        assertThat(creado.isEsAdmin()).isFalse();
+        assertThat(creado.isDebeCambiarContrasena()).isTrue();
+        assertThat(creado.getDni()).isEqualTo(DNI_VALIDO);
+        // La contraseña inicial es el DNI sin la letra: el alumno la sabe sin
+        // que el centro tenga que repartirle nada.
+        assertThat(passwordEncoder.matches("12345678", creado.getContrasenaHash())).isTrue();
+        assertThat(creado.getGrado().getId()).isEqualTo(grado.getId());
+    }
+
+    @Test
+    void registroConLetraDeDniIncorrectaDevuelve400() throws Exception {
+        Grado grado = gradoRepository.save(new Grado("DAM"));
+
+        mockMvc.perform(post("/api/auth/registro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registro("lucia@iesejemplo.es", "12345678A", grado.getId()))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("DNI_INVALIDO"));
+
+        assertThat(usuarioRepository.findByCorreo("lucia@iesejemplo.es")).isEmpty();
+    }
+
+    @Test
+    void registroConDominioFueraDeLaListaDevuelve400() throws Exception {
+        Grado grado = gradoRepository.save(new Grado("DAM"));
+
+        mockMvc.perform(post("/api/auth/registro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registro("lucia@gmail.com", DNI_VALIDO, grado.getId()))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("CORREO_DOMINIO_NO_PERMITIDO"));
+    }
+
+    @Test
+    void registroConGradoInexistenteDevuelve404() throws Exception {
+        mockMvc.perform(post("/api/auth/registro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registro("lucia@iesejemplo.es", DNI_VALIDO, 9999L))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.codigo").value("GRADO_NO_ENCONTRADO"));
+    }
+
+    @Test
+    void registroConCorreoYaRegistradoDevuelve409() throws Exception {
+        Grado grado = gradoRepository.save(new Grado("DAM"));
+        guardarUsuario("lucia@iesejemplo.es", "Correcta123!", Rol.ALUMNO, false);
+
+        mockMvc.perform(post("/api/auth/registro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registro("lucia@iesejemplo.es", DNI_VALIDO, grado.getId()))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("CORREO_YA_EXISTE"));
+    }
+
+    @Test
+    void registroConHoneypotRellenoNoCreaLaCuenta() throws Exception {
+        Grado grado = gradoRepository.save(new Grado("DAM"));
+
+        mockMvc.perform(post("/api/auth/registro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegistroRequest(
+                                "Lucía", "Pérez", null, DNI_VALIDO, grado.getId(), "lucia@iesejemplo.es", "soy-un-bot"))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("CREDENCIALES_INVALIDAS"));
+
+        assertThat(usuarioRepository.findByCorreo("lucia@iesejemplo.es")).isEmpty();
+    }
+
+    @Test
+    void loginConCuentaRecienAutoregistradaDevuelve403() throws Exception {
+        Grado grado = gradoRepository.save(new Grado("DAM"));
+        mockMvc.perform(post("/api/auth/registro")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registro("lucia@iesejemplo.es", DNI_VALIDO, grado.getId()))))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new LoginRequest("lucia@iesejemplo.es", "loQueSea1!", ""))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CUENTA_NO_DISPONIBLE"));
     }
 }

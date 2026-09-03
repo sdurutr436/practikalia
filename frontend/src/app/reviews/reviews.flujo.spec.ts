@@ -27,7 +27,9 @@ const REVIEW: Review = {
   id: 1,
   asignacionId: 5,
   empresaId: 2,
+  empresaNombre: 'Beta',
   alumnoCorreo: 'alumno@centro.es',
+  alumnoNombre: 'Ana Ruiz',
   autorCorreo: 'alumno@centro.es',
   contenido: 'Buena experiencia.',
   calificacion: 4,
@@ -263,6 +265,9 @@ describe('cola de moderación', () => {
   let router: Router;
   let auth: AuthService;
 
+  const CONFIG = { min: 1, max: 5 };
+  const MOTIVO = 'Falta detalle sobre las tareas que hizo.';
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -278,7 +283,33 @@ describe('cola de moderación', () => {
 
   afterEach(() => http.verify());
 
-  it('un alumno no puede acceder a la cola de pendientes', async () => {
+  const entrarComoProfesor = async () => {
+    const promesa = auth.login('profesor@centro.es', 'secreta', '');
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    await promesa;
+  };
+
+  /** La pantalla pide el rango de estrellas y la página a la vez al arrancar. */
+  const responderCarga = (reviews: Review[]) => {
+    http.expectOne('/api/reviews/calificacion-config').flush(CONFIG);
+    http.expectOne((r) => r.url === '/api/reviews').flush(pagina(reviews));
+  };
+
+  const abrir = async (url: string, reviews: Review[]) => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl(url);
+    responderCarga(reviews);
+    await esperarMicrotareas();
+    harness.detectChanges();
+    return harness;
+  };
+
+  const boton = (raiz: Element, texto: string) =>
+    [...raiz.querySelectorAll('button')].find((b) => b.textContent?.includes(texto));
+
+  it('un alumno no puede acceder a la cola', async () => {
     const promesa = auth.login('alumno@centro.es', 'secreta', '');
     http
       .expectOne('/api/auth/login')
@@ -286,108 +317,219 @@ describe('cola de moderación', () => {
     await promesa;
 
     const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/reviews/pendientes');
+    await harness.navigateByUrl('/reviews');
     // profesorGuard deniega y "/" redirige al listado.
     http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
     await esperarMicrotareas();
     expect(router.url).toBe('/empresas');
   });
 
-  it('profesor aprueba una review pendiente', async () => {
-    const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http
-      .expectOne('/api/auth/login')
-      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
-    await promesa;
+  it('profesor aprueba una reseña pendiente', async () => {
+    await entrarComoProfesor();
+    const harness = await abrir('/reviews', [REVIEW]);
 
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/reviews/pendientes');
-    http.expectOne('/api/reviews/pendientes').flush([REVIEW]);
-    await esperarMicrotareas();
-    harness.detectChanges();
-
-    const boton = [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find((b) =>
-      b.textContent?.includes('Aprobar'),
-    );
-    boton?.click();
+    boton(harness.routeNativeElement as Element, 'Aprobar')?.click();
 
     const peticion = http.expectOne('/api/reviews/1/moderar');
     expect(peticion.request.method).toBe('PUT');
     expect(peticion.request.body).toEqual({ estado: 'APROBADA', motivoRechazo: null });
     peticion.flush({ ...REVIEW, estado: 'APROBADA' });
     await esperarMicrotareas();
-    harness.detectChanges();
 
-    expect(harness.routeNativeElement?.textContent).toContain('No hay reviews pendientes');
+    // Tras moderar se recarga la página actual de la cola.
+    http.expectOne((r) => r.url === '/api/reviews').flush(pagina([]));
+    await esperarMicrotareas();
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.textContent).toContain('No hay reseñas pendientes');
   });
 
-  it('llegar con ?rechazar= deja el cursor en el motivo de esa review', async () => {
-    const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http
-      .expectOne('/api/auth/login')
-      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
-    await promesa;
+  it('la pastilla de aprobadas pide ese estado y ofrece devolver a pendientes', async () => {
+    await entrarComoProfesor();
+    const aprobada: Review = { ...REVIEW, estado: 'APROBADA' };
 
     const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/reviews/pendientes?rechazar=1');
-    http.expectOne('/api/reviews/pendientes').flush([REVIEW]);
+    await harness.navigateByUrl('/reviews?estado=aprobadas');
+    http.expectOne('/api/reviews/calificacion-config').flush(CONFIG);
+    const carga = http.expectOne((r) => r.url === '/api/reviews');
+    expect(carga.request.params.get('estado')).toBe('APROBADA');
+    carga.flush(pagina([aprobada]));
     await esperarMicrotareas();
     harness.detectChanges();
-    await esperarMicrotareas();
 
-    expect(document.activeElement?.id).toBe('motivo-1');
+    const raiz = harness.routeNativeElement as Element;
+    expect(boton(raiz, 'Aprobar')).toBeUndefined();
+    boton(raiz, 'Devolver a pendientes')?.click();
+
+    const peticion = http.expectOne('/api/reviews/1/revertir');
+    expect(peticion.request.method).toBe('PUT');
+    peticion.flush({ ...REVIEW, estado: 'PENDIENTE' });
+    await esperarMicrotareas();
+    http.expectOne((r) => r.url === '/api/reviews').flush(pagina([]));
+    await esperarMicrotareas();
   });
 
-  it('rechazar sin motivo muestra un error sin llamar al backend', async () => {
-    const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http
-      .expectOne('/api/auth/login')
-      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
-    await promesa;
+  it('llegar con ?rechazar= abre el modal con esa reseña dentro', async () => {
+    await entrarComoProfesor();
+    const harness = await abrir('/reviews?rechazar=1', [REVIEW]);
 
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/reviews/pendientes');
-    http.expectOne('/api/reviews/pendientes').flush([REVIEW]);
-    await esperarMicrotareas();
-    harness.detectChanges();
-
-    const boton = [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find((b) =>
-      b.textContent?.includes('Rechazar'),
-    );
-    boton?.click();
-    await esperarMicrotareas();
-    harness.detectChanges();
-
-    expect(harness.routeNativeElement?.textContent).toContain('Indica un motivo de rechazo');
+    const dialogo = harness.routeNativeElement?.querySelector('dialog');
+    expect(dialogo).toBeTruthy();
+    expect(dialogo?.textContent).toContain('Rechazar reseña');
+    expect(dialogo?.textContent).toContain(REVIEW.contenido);
+    expect(dialogo?.textContent).toContain('Ana Ruiz');
   });
 
-  it('rechazar con motivo manda el PUT con el motivo', async () => {
-    const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http
-      .expectOne('/api/auth/login')
-      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
-    await promesa;
+  it('el motivo por debajo del mínimo deja el botón deshabilitado', async () => {
+    await entrarComoProfesor();
+    const harness = await abrir('/reviews', [REVIEW]);
+    const raiz = harness.routeNativeElement as Element;
 
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/reviews/pendientes');
-    http.expectOne('/api/reviews/pendientes').flush([REVIEW]);
-    await esperarMicrotareas();
+    boton(raiz, 'Rechazar')?.click();
     harness.detectChanges();
 
-    const contenedor = harness.routeNativeElement as HTMLElement;
-    const input = contenedor.querySelector('input[type="text"]') as HTMLInputElement;
-    input.value = 'Poco detallada.';
-    const boton = [...contenedor.querySelectorAll('button')].find((b) =>
-      b.textContent?.includes('Rechazar'),
-    );
-    boton?.click();
+    const area = raiz.querySelector('textarea') as HTMLTextAreaElement;
+    area.value = 'Corto';
+    area.dispatchEvent(new Event('input'));
+    harness.detectChanges();
+
+    expect(boton(raiz, 'Confirmar rechazo')?.disabled).toBe(true);
+    expect(raiz.textContent).toContain('Faltan 15 caracteres');
+  });
+
+  it('rechazar con un motivo válido manda el PUT con el motivo', async () => {
+    await entrarComoProfesor();
+    const harness = await abrir('/reviews', [REVIEW]);
+    const raiz = harness.routeNativeElement as Element;
+
+    boton(raiz, 'Rechazar')?.click();
+    harness.detectChanges();
+
+    const area = raiz.querySelector('textarea') as HTMLTextAreaElement;
+    area.value = MOTIVO;
+    area.dispatchEvent(new Event('input'));
+    harness.detectChanges();
+
+    boton(raiz, 'Confirmar rechazo')?.click();
 
     const peticion = http.expectOne('/api/reviews/1/moderar');
-    expect(peticion.request.body).toEqual({
-      estado: 'RECHAZADA',
-      motivoRechazo: 'Poco detallada.',
-    });
-    peticion.flush({ ...REVIEW, estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
+    expect(peticion.request.body).toEqual({ estado: 'RECHAZADA', motivoRechazo: MOTIVO });
+    peticion.flush({ ...REVIEW, estado: 'RECHAZADA', motivoRechazo: MOTIVO });
     await esperarMicrotareas();
+    http.expectOne((r) => r.url === '/api/reviews').flush(pagina([]));
+    await esperarMicrotareas();
+  });
+
+  it('salir con el motivo escrito pide confirmación antes de tirarlo', async () => {
+    await entrarComoProfesor();
+    const harness = await abrir('/reviews', [REVIEW]);
+    const raiz = harness.routeNativeElement as Element;
+
+    boton(raiz, 'Rechazar')?.click();
+    harness.detectChanges();
+
+    const area = raiz.querySelector('textarea') as HTMLTextAreaElement;
+    area.value = MOTIVO;
+    area.dispatchEvent(new Event('input'));
+    harness.detectChanges();
+
+    boton(raiz, 'Dejar de escribir')?.click();
+    harness.detectChanges();
+
+    // Segundo modal encima del primero: los dos <dialog> siguen abiertos.
+    expect(raiz.querySelectorAll('dialog').length).toBe(2);
+    expect(raiz.textContent).toContain('¿Seguro que quieres salir?');
+
+    boton(raiz, 'Seguir escribiendo')?.click();
+    harness.detectChanges();
+    expect(raiz.querySelectorAll('dialog').length).toBe(1);
+    expect((raiz.querySelector('textarea') as HTMLTextAreaElement).value).toBe(MOTIVO);
+
+    boton(raiz, 'Dejar de escribir')?.click();
+    harness.detectChanges();
+    boton(raiz, 'Salir sin guardar')?.click();
+    harness.detectChanges();
+    expect(raiz.querySelector('dialog')).toBeNull();
+  });
+
+  it('con el motivo vacío, dejar de escribir cierra sin preguntar', async () => {
+    await entrarComoProfesor();
+    const harness = await abrir('/reviews', [REVIEW]);
+    const raiz = harness.routeNativeElement as Element;
+
+    boton(raiz, 'Rechazar')?.click();
+    harness.detectChanges();
+    boton(raiz, 'Dejar de escribir')?.click();
+    harness.detectChanges();
+
+    expect(raiz.querySelector('dialog')).toBeNull();
+  });
+
+  it('en una columna el motivo se escribe dentro de la tarjeta, sin modal', async () => {
+    // jsdom no evalúa media queries de verdad: siempre responde matches:false.
+    const original = window.matchMedia;
+    window.matchMedia = ((consulta: string) => ({
+      matches: true,
+      media: consulta,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia;
+
+    try {
+      await entrarComoProfesor();
+      const harness = await abrir('/reviews', [REVIEW]);
+      const raiz = harness.routeNativeElement as Element;
+
+      boton(raiz, 'Rechazar')?.click();
+      harness.detectChanges();
+
+      expect(raiz.querySelector('dialog')).toBeNull();
+      const area = raiz.querySelector('textarea') as HTMLTextAreaElement;
+      expect(raiz.querySelector('.c-rechazo')?.contains(area)).toBe(true);
+
+      area.value = MOTIVO;
+      area.dispatchEvent(new Event('input'));
+      harness.detectChanges();
+      boton(raiz, 'Confirmar rechazo')?.click();
+
+      const peticion = http.expectOne('/api/reviews/1/moderar');
+      expect(peticion.request.body).toEqual({ estado: 'RECHAZADA', motivoRechazo: MOTIVO });
+      peticion.flush({ ...REVIEW, estado: 'RECHAZADA', motivoRechazo: MOTIVO });
+      await esperarMicrotareas();
+      http.expectOne((r) => r.url === '/api/reviews').flush(pagina([]));
+      await esperarMicrotareas();
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
+  it('en una columna, dejar de escribir cierra sin confirmar aunque haya texto', async () => {
+    const original = window.matchMedia;
+    window.matchMedia = ((consulta: string) => ({
+      matches: true,
+      media: consulta,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia;
+
+    try {
+      await entrarComoProfesor();
+      const harness = await abrir('/reviews', [REVIEW]);
+      const raiz = harness.routeNativeElement as Element;
+
+      boton(raiz, 'Rechazar')?.click();
+      harness.detectChanges();
+      const area = raiz.querySelector('textarea') as HTMLTextAreaElement;
+      area.value = MOTIVO;
+      area.dispatchEvent(new Event('input'));
+      harness.detectChanges();
+
+      boton(raiz, 'Dejar de escribir')?.click();
+      harness.detectChanges();
+
+      expect(raiz.querySelector('textarea')).toBeNull();
+      expect(raiz.textContent).not.toContain('Seguro que quieres salir');
+    } finally {
+      window.matchMedia = original;
+    }
   });
 });

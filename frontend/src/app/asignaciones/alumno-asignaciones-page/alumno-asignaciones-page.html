@@ -25,12 +25,12 @@
         [control]="formGrado.controls.gradoId"
         error="Selecciona un grado."
       >
-        <select class="c-campo__entrada" id="grado-alumno" formControlName="gradoId">
-          <option [value]="0" disabled>Selecciona un grado</option>
-          @for (grado of grados(); track grado.id) {
-            <option [value]="grado.id">{{ grado.nombre }}</option>
-          }
-        </select>
+        <app-desplegable
+          id="grado-alumno"
+          marcador="Selecciona un grado"
+          [control]="formGrado.controls.gradoId"
+          [opciones]="opcionesGrado()"
+        />
       </app-campo>
 
       <app-campo

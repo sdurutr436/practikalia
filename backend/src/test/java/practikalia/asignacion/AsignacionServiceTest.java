@@ -206,4 +206,12 @@ class AsignacionServiceTest {
                 .isInstanceOf(UsuarioException.class)
                 .hasFieldOrPropertyWithValue("codigo", "ACCESO_DENEGADO");
     }
+
+    /** El identificador del curso: 2026 es «2026/2027», y arranca el 1 de septiembre. */
+    @Test
+    void elCursoAcademicoCortaEnSeptiembre() {
+        assertThat(Curso.de(LocalDate.of(2026, 9, 1))).isEqualTo(2026);
+        assertThat(Curso.de(LocalDate.of(2026, 8, 31))).isEqualTo(2025);
+        assertThat(Curso.de(LocalDate.of(2027, 6, 30))).isEqualTo(2026);
+    }
 }

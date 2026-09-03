@@ -1,0 +1,40 @@
+// Píldora de estado. Vivía dentro de _empresa.scss cuando solo la usaba la
+// ficha de empresa; al pintarla también las tarjetas de alumnado se saca aquí.
+@use '../settings' as s;
+
+.c-etiqueta {
+  display: inline-block;
+  padding: 0.125em 0.625em;
+  border-radius: s.$radio-pildora;
+  background: s.$color-apagado;
+  color: s.$color-texto-apagado;
+  font-size: s.$texto-diminuto;
+
+  &--no-publicada {
+    background: color-mix(in srgb, s.$color-error 15%, transparent);
+    color: s.$color-error;
+  }
+
+  // Empresa en la que está haciendo prácticas: es enlace a su ficha, así que
+  // se tiñe del primario para que se vea que se puede pulsar.
+  &--empresa {
+    background: color-mix(in srgb, s.$color-primario 12%, transparent);
+    color: s.$color-primario;
+    text-decoration: none;
+
+    &:hover {
+      background: color-mix(in srgb, s.$color-primario 20%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid s.$color-anillo;
+      outline-offset: 2px;
+    }
+  }
+
+  // Cuenta sin confirmar todavía por el centro.
+  &--pendiente {
+    background: color-mix(in srgb, s.$color-acento 22%, transparent);
+    color: s.$color-superficie-texto;
+  }
+}

@@ -45,17 +45,14 @@
 }
 
 .c-campo__entrada {
-  padding: 0.5em 0.75em;
-  background: transparent;
-  color: inherit;
-  border: 1px solid s.$color-borde-entrada;
-  border-radius: s.$radio-m;
-  font: inherit;
+  @include t.control;
+}
 
-  &:focus-visible {
-    @include t.anillo-foco;
-    border-color: s.$color-anillo;
-  }
+// Área de texto: alto cómodo y sin agarradera horizontal — arrastrarla a lo
+// ancho dentro de un modal estrecho lo desborda.
+.c-campo__entrada--area {
+  min-height: 6rem;
+  resize: vertical;
 }
 
 .c-campo__ayuda {

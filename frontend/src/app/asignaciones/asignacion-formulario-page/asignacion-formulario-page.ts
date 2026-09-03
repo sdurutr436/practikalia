@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
@@ -8,10 +8,18 @@ import { VolverComponent } from '../../compartido/volver/volver';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 
 @Component({
   selector: 'app-asignacion-formulario-page',
-  imports: [ReactiveFormsModule, VolverComponent, AlertaComponent, CampoComponent, BotonComponent],
+  imports: [
+    ReactiveFormsModule,
+    VolverComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+    DesplegableComponent,
+  ],
   templateUrl: './asignacion-formulario-page.html',
 })
 export class AsignacionFormularioPage {
@@ -26,6 +34,16 @@ export class AsignacionFormularioPage {
   protected readonly alumnos = signal<UsuarioResumen[]>([]);
   protected readonly tutores = signal<UsuarioResumen[]>([]);
   protected readonly grados = signal<Grado[]>([]);
+
+  protected readonly opcionesAlumno = computed(() =>
+    this.alumnos().map((alumno) => ({ valor: alumno.id, etiqueta: alumno.correo })),
+  );
+  protected readonly opcionesTutor = computed(() =>
+    this.tutores().map((tutor) => ({ valor: tutor.id, etiqueta: tutor.correo })),
+  );
+  protected readonly opcionesGrado = computed(() =>
+    this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
+  );
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     alumnoId: [0, [Validators.required, Validators.min(1)]],

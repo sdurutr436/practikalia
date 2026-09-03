@@ -34,3 +34,11 @@ legend {
   }
 }
 
+// Entrada del aviso de la esquina: se asoma desde fuera del borde.
+@keyframes asomar {
+  from {
+    transform: translateY(25%);
+    opacity: 0;
+  }
+}
+

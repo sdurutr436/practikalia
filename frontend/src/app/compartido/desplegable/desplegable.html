@@ -1,0 +1,55 @@
+<div class="c-desplegable" #raiz>
+  <app-icono class="c-desplegable__lupa" nombre="buscar" />
+
+  <input
+    #entrada
+    class="c-desplegable__entrada"
+    type="text"
+    role="combobox"
+    autocomplete="off"
+    aria-autocomplete="list"
+    [id]="id()"
+    [attr.size]="tamano()"
+    [attr.aria-controls]="lista"
+    [attr.aria-expanded]="abierto()"
+    [attr.aria-activedescendant]="abierto() && filtradas().length ? opcionId(resaltada()) : null"
+    [attr.aria-label]="etiqueta()"
+    [placeholder]="marcadorActual()"
+    [value]="texto()"
+    (focus)="abrir()"
+    (input)="escribir($any($event.target).value)"
+    (keydown)="teclear($event)"
+    (blur)="cerrar()"
+  />
+
+  @if (abierto()) {
+    <ul
+      class="c-desplegable__lista"
+      [class.c-desplegable__lista--arriba]="haciaArriba()"
+      [id]="lista"
+      role="listbox"
+    >
+      @for (opcion of filtradas(); track opcion.valor; let i = $index) {
+        <!-- El mousedown se anula para que elegir con el ratón no dispare el
+             blur de la entrada, que cerraría la lista antes del click. -->
+        <li
+          class="c-desplegable__opcion"
+          [class.c-desplegable__opcion--resaltada]="i === resaltada()"
+          [id]="opcionId(i)"
+          role="option"
+          [attr.aria-selected]="esElegida(opcion)"
+          (mouseenter)="resaltada.set(i)"
+          (mousedown)="$event.preventDefault()"
+          (click)="elegir(opcion)"
+        >
+          <span class="c-desplegable__nombre">{{ opcion.etiqueta }}</span>
+          @if (esElegida(opcion)) {
+            <app-icono class="c-desplegable__marca" nombre="aprobar" />
+          }
+        </li>
+      } @empty {
+        <li class="c-desplegable__nada">{{ vacio() }}</li>
+      }
+    </ul>
+  }
+</div>

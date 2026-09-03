@@ -1,0 +1,118 @@
+<main class="o-pagina">
+  <app-cabecera titulo="Reseñas" />
+
+  <app-pastillas
+    [opciones]="pastillas"
+    [activa]="clave()"
+    ruta="/reviews"
+    [limpiar]="['rechazar']"
+  />
+
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="reviews().length === 0"
+    [mensajeVacio]="mensajeVacio()"
+  >
+    <ul class="o-rejilla">
+      @for (review of reviews(); track review.id) {
+        <li class="c-fila c-resena">
+          <div class="c-resena__cabecera">
+            <a class="c-resena__empresa" [routerLink]="['/empresas', review.empresaId]">
+              {{ review.empresaNombre }}
+            </a>
+            @if (calificacion(); as rango) {
+              <app-estrellas [valor]="review.calificacion" [maximo]="rango.max" />
+            }
+          </div>
+
+          <p class="c-resena__autor">
+            @if (review.alumnoNombre; as nombre) {
+              <strong class="c-resena__nombre">{{ nombre }}</strong>
+            }
+            <span class="c-resena__correo">{{ review.alumnoCorreo }}</span>
+          </p>
+
+          <blockquote class="c-resena__texto">«{{ review.contenido }}»</blockquote>
+
+          @if (review.motivoRechazo; as motivo) {
+            <p class="c-resena__motivo">
+              <span class="c-resena__motivo-rotulo">Motivo del rechazo:</span> {{ motivo }}
+            </p>
+          }
+
+          @if (errorModeracion()?.id === review.id) {
+            <app-alerta>{{ errorModeracion()?.mensaje }}</app-alerta>
+          }
+
+          <!-- Con el motivo desplegado dentro de la tarjeta, los dos botones
+               sobran: el propio desplegable trae los suyos. Se quitan del DOM y
+               no con [hidden], que .c-acciones anularía con su display:flex. -->
+          @if (!rechazandoAqui(review)) {
+            <div class="c-acciones">
+              @if (esPendiente()) {
+                <app-boton
+                  icono="aprobar"
+                  [deshabilitado]="moderandoId() !== null"
+                  (click)="aprobar(review)"
+                >
+                  Aprobar
+                </app-boton>
+                <app-boton
+                  icono="rechazar"
+                  [secundario]="true"
+                  [deshabilitado]="moderandoId() !== null"
+                  (click)="abrirRechazo(review)"
+                >
+                  Rechazar
+                </app-boton>
+              } @else {
+                <!-- Ya moderada: lo único que queda es devolverla a la cola. -->
+                <app-boton
+                  icono="volver"
+                  [secundario]="true"
+                  [deshabilitado]="moderandoId() !== null"
+                  (click)="revertir(review)"
+                >
+                  Devolver a pendientes
+                </app-boton>
+              }
+            </div>
+          }
+
+          @if (rechazandoAqui(review)) {
+            <app-rechazo-modal
+              [enLinea]="true"
+              [review]="review"
+              [maximoEstrellas]="calificacion()?.max ?? 5"
+              [enviando]="moderandoId() === review.id"
+              [error]="errorRechazo()"
+              (confirmar)="confirmarRechazo($event)"
+              (cerrar)="cerrarRechazo()"
+            />
+          }
+        </li>
+      }
+    </ul>
+  </app-estado>
+
+  <app-paginacion
+    [pagina]="paginaActual()"
+    [paginas]="paginas()"
+    seccion="reseñas"
+    [total]="total()"
+    nombre="reseñas"
+    (ir)="irAPagina($event)"
+  />
+</main>
+
+@if (!esMovil() && rechazando(); as review) {
+  <app-rechazo-modal
+    [review]="review"
+    [maximoEstrellas]="calificacion()?.max ?? 5"
+    [enviando]="moderandoId() === review.id"
+    [error]="errorRechazo()"
+    (confirmar)="confirmarRechazo($event)"
+    (cerrar)="cerrarRechazo()"
+  />
+}

@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { ToastComponent } from './compartido/toast/toast';
 import { MarcoComponent } from './marco/marco';
 
 /** Rutas que se pintan a pantalla completa, sin menú ni barra superior. */
@@ -9,7 +10,7 @@ const SIN_MARCO = ['/login', '/cambiar-contrasena'];
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MarcoComponent],
+  imports: [RouterOutlet, MarcoComponent, ToastComponent],
   templateUrl: './app.html',
 })
 export class App {

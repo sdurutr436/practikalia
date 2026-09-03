@@ -6,6 +6,7 @@ import practikalia.etiqueta.EtiquetaRepository;
 import practikalia.grado.Grado;
 import practikalia.grado.GradoException;
 import practikalia.grado.GradoRepository;
+import practikalia.usuario.correo.CorreoPermitido;
 import practikalia.usuario.correo.CorreoPermitidoRepository;
 import practikalia.usuario.jwt.JwtService;
 
@@ -16,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,9 @@ public class UsuarioService {
 
     private static final Pattern POLITICA_CONTRASENA = Pattern.compile(
             "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$");
+    private static final Pattern FORMATO_DNI = Pattern.compile("^(\\d{8})([A-Z])$");
+    /** Letra de control del DNI: el resto de dividir el número entre 23 indexa esta cadena. */
+    private static final String LETRAS_DNI = "TRWAGMYFPDXBNJZSQVHLCKE";
     private static final String MAYUSCULAS = "ABCDEFGHJKLMNPQRSTUVWXYZ";
     private static final String MINUSCULAS = "abcdefghijkmnpqrstuvwxyz";
     private static final String NUMEROS = "23456789";
@@ -92,6 +97,67 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
 
         return new CrearUsuarioResponse(usuario.getId(), usuario.getCorreo(), usuario.getRol(), contrasenaTemporal);
+    }
+
+    /**
+     * Alta que se hace el propio alumnado desde la pantalla de acceso. La cuenta
+     * queda inactiva hasta que un admin la apruebe, así que la contraseña temporal
+     * generada aquí no se devuelve a nadie: la aprobación genera otra.
+     */
+    @Transactional
+    public void registrarAutoservicio(RegistroRequest request, String ipRemota) {
+        String correo = request.correo().toLowerCase();
+
+        if (request.web() != null && !request.web().isBlank()) {
+            log.warn("Intento de registro sospechoso (honeypot relleno): correo={} ip={}", correo, ipRemota);
+            throw UsuarioException.credencialesInvalidas();
+        }
+
+        String dni = request.dni().trim().toUpperCase();
+        if (!dniValido(dni)) {
+            throw UsuarioException.dniInvalido();
+        }
+        if (!dominioPermitido(correo)) {
+            throw UsuarioException.correoDominioNoPermitido();
+        }
+        Grado grado = gradoRepository.findById(request.gradoId()).orElseThrow(GradoException::noEncontrado);
+        if (usuarioRepository.findByCorreo(correo).isPresent()) {
+            throw UsuarioException.correoYaExiste();
+        }
+
+        Usuario usuario = new Usuario(correo, passwordEncoder.encode(contrasenaInicial(dni)), Rol.ALUMNO);
+        usuario.setNombre(request.nombre().trim());
+        usuario.setApellido1(request.apellido1().trim());
+        usuario.setApellido2(request.apellido2() == null || request.apellido2().isBlank() ? null : request.apellido2().trim());
+        usuario.setDni(dni);
+        usuario.setGrado(grado);
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
+        permitirCorreo(correo);
+    }
+
+    /**
+     * Apunta el correo en la whitelist. Quien se da de alta con un dominio
+     * permitido queda anotado uno a uno, de forma que si el centro estrecha
+     * después `allowed.domains` las cuentas que ya existían siguen entrando.
+     */
+    public void permitirCorreo(String correo) {
+        if (!correoPermitidoRepository.existsByCorreo(correo)) {
+            correoPermitidoRepository.save(new CorreoPermitido(correo));
+        }
+    }
+
+    /**
+     * Confirmación de una cuenta por un admin: solo la activa. Ya no toca la
+     * contraseña — las cuentas que nacen con DNI (auto-registro e importación)
+     * arrancan con él como contraseña, y regenerarla aquí destruiría justo la
+     * que el alumno conoce. Sobre una cuenta ya activa es un no-op.
+     */
+    @Transactional
+    public void activarUsuario(Long id) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioException::noEncontrado);
+        usuario.setActivo(true);
+        usuarioRepository.save(usuario);
     }
 
     @Transactional
@@ -221,8 +287,34 @@ public class UsuarioService {
     }
 
     private boolean correoPermitido(String correo) {
-        String dominio = correo.substring(correo.indexOf('@') + 1).toLowerCase();
-        return dominiosPermitidos.contains(dominio) || correoPermitidoRepository.existsByCorreo(correo);
+        return dominioPermitido(correo) || correoPermitidoRepository.existsByCorreo(correo);
+    }
+
+    /**
+     * Solo `allowed.domains`, no la tabla de correos sueltos: es la puerta por la
+     * que entra alguien que todavía no está en ninguna lista (auto-registro e
+     * importación de alumnado). Quien pasa por aquí acaba añadido a la whitelist.
+     */
+    public boolean dominioPermitido(String correo) {
+        return dominiosPermitidos.contains(correo.substring(correo.indexOf('@') + 1).toLowerCase());
+    }
+
+    /** Formato del DNI, no matriculación: que la persona exista lo comprueba el centro al confirmar la cuenta. */
+    public static boolean dniValido(String dni) {
+        Matcher coincide = FORMATO_DNI.matcher(dni);
+        return coincide.matches()
+                && LETRAS_DNI.charAt(Integer.parseInt(coincide.group(1)) % 23) == coincide.group(2).charAt(0);
+    }
+
+    /**
+     * Contraseña con la que nace una cuenta que trae DNI: el número sin la letra.
+     * Decisión de producto del centro — es débil a propósito, para que el alumno
+     * pueda entrar la primera vez sin que nadie le reparta nada. Sigue viniendo
+     * con {@code debeCambiarContrasena = true}, así que solo vale para ese primer
+     * acceso.
+     */
+    public static String contrasenaInicial(String dni) {
+        return dni.substring(0, 8);
     }
 
     private boolean cumplePolitica(String contrasena) {

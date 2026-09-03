@@ -18,12 +18,12 @@
         [control]="form.controls.alumnoId"
         error="Selecciona un alumno."
       >
-        <select class="c-campo__entrada" id="alumno" formControlName="alumnoId">
-          <option [value]="0" disabled>Selecciona un alumno</option>
-          @for (alumno of alumnos(); track alumno.id) {
-            <option [value]="alumno.id">{{ alumno.correo }}</option>
-          }
-        </select>
+        <app-desplegable
+          id="alumno"
+          marcador="Selecciona un alumno"
+          [control]="form.controls.alumnoId"
+          [opciones]="opcionesAlumno()"
+        />
       </app-campo>
 
       <app-campo
@@ -33,12 +33,12 @@
         [control]="form.controls.tutorCentroId"
         error="Selecciona un tutor."
       >
-        <select class="c-campo__entrada" id="tutor" formControlName="tutorCentroId">
-          <option [value]="0" disabled>Selecciona un tutor</option>
-          @for (tutor of tutores(); track tutor.id) {
-            <option [value]="tutor.id">{{ tutor.correo }}</option>
-          }
-        </select>
+        <app-desplegable
+          id="tutor"
+          marcador="Selecciona un tutor"
+          [control]="form.controls.tutorCentroId"
+          [opciones]="opcionesTutor()"
+        />
       </app-campo>
 
       <app-campo
@@ -48,12 +48,12 @@
         [control]="form.controls.gradoId"
         error="Selecciona un grado."
       >
-        <select class="c-campo__entrada" id="grado" formControlName="gradoId">
-          <option [value]="0" disabled>Selecciona un grado</option>
-          @for (grado of grados(); track grado.id) {
-            <option [value]="grado.id">{{ grado.nombre }}</option>
-          }
-        </select>
+        <app-desplegable
+          id="grado"
+          marcador="Selecciona un grado"
+          [control]="form.controls.gradoId"
+          [opciones]="opcionesGrado()"
+        />
       </app-campo>
 
       <app-campo

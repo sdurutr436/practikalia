@@ -1,0 +1,14 @@
+@if (toast.mensaje(); as mensaje) {
+  <div class="c-toast" role="status">
+    <app-icono class="c-toast__marca" nombre="aprobar" />
+    <p class="c-toast__texto">{{ mensaje }}</p>
+    <button
+      class="c-toast__cerrar"
+      type="button"
+      aria-label="Cerrar el aviso"
+      (click)="toast.cerrar()"
+    >
+      <app-icono nombre="rechazar" />
+    </button>
+  </div>
+}

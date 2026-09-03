@@ -1,5 +1,7 @@
 package practikalia.review;
 
+import practikalia.common.PaginaDto;
+
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,6 +72,26 @@ public class ReviewController {
     @GetMapping("/api/reviews/pendientes")
     public ResponseEntity<List<ReviewDto>> pendientes() {
         return ResponseEntity.ok(reviewService.listarPendientes());
+    }
+
+    @Operation(summary = "Listar reviews por estado", description = "Solo profesor/admin. Paginado: una pastilla por "
+            + "estado en la pantalla de moderación. Orden fijo por fecha de creación descendente.")
+    @GetMapping("/api/reviews")
+    public ResponseEntity<PaginaDto<ReviewDto>> listarPorEstado(
+            @RequestParam EstadoReview estado,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "9") int tamano) {
+        return ResponseEntity.ok(reviewService.listarPorEstado(estado, pagina, tamano));
+    }
+
+    @Operation(summary = "Devolver una review moderada a la cola", description = "Solo profesor/admin. Deshace una "
+            + "aprobación o un rechazo: la review vuelve a `PENDIENTE` y pierde el motivo y el rastro de quién la "
+            + "moderó. Para corregir un clic equivocado sin esperar a que el alumno la edite.")
+    @ApiResponse(responseCode = "400", description = "La review ya estaba en `PENDIENTE`")
+    @ApiResponse(responseCode = "404", description = "La review no existe")
+    @PutMapping("/api/reviews/{id}/revertir")
+    public ResponseEntity<ReviewDto> revertir(@PathVariable Long id) {
+        return ResponseEntity.ok(reviewService.revertirModeracion(id));
     }
 
     @Operation(summary = "Moderar una review pendiente", description = "Solo profesor/admin. Aprobar o rechazar; "

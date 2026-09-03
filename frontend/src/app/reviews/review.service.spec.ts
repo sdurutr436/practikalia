@@ -8,7 +8,9 @@ const REVIEW: Review = {
   id: 1,
   asignacionId: 10,
   empresaId: 20,
+  empresaNombre: 'Beta',
   alumnoCorreo: 'alumno@centro.es',
+  alumnoNombre: 'Ana Ruiz',
   autorCorreo: 'alumno@centro.es',
   contenido: 'Buena experiencia.',
   calificacion: 4,
@@ -81,7 +83,10 @@ describe('ReviewService', () => {
     const promesa = service.moderar(1, { estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
     const peticion = httpMock.expectOne('/api/reviews/1/moderar');
     expect(peticion.request.method).toBe('PUT');
-    expect(peticion.request.body).toEqual({ estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
+    expect(peticion.request.body).toEqual({
+      estado: 'RECHAZADA',
+      motivoRechazo: 'Poco detallada.',
+    });
     peticion.flush({ ...REVIEW, estado: 'RECHAZADA', motivoRechazo: 'Poco detallada.' });
     await promesa;
   });

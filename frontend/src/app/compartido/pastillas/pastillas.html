@@ -1,0 +1,15 @@
+<ul class="o-etiquetas">
+  @for (pastilla of opciones(); track pastilla.clave) {
+    <li>
+      <a
+        class="c-filtro"
+        [class.c-filtro--activo]="activa() === pastilla.clave"
+        [routerLink]="ruta()"
+        [queryParams]="parametros(pastilla)"
+        queryParamsHandling="merge"
+      >
+        {{ pastilla.etiqueta }}
+      </a>
+    </li>
+  }
+</ul>

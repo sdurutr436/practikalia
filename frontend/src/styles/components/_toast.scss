@@ -1,0 +1,55 @@
+// Aviso de «hecho»: se asoma por la esquina inferior derecha y se va solo. No
+// ocupa sitio en el flujo, así que confirmar un guardado ya no empuja la
+// pantalla hacia abajo.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-toast {
+  @include t.panel;
+  position: fixed;
+  inset-block-end: s.$espaciado-base;
+  inset-inline-end: s.$espaciado-base;
+  z-index: s.$z-notificacion;
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+  max-width: min(24rem, calc(100dvw - #{s.$espaciado-base} * 2));
+  padding: s.$espaciado-medio s.$espaciado-base;
+  animation: asomar s.$transicion ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.c-toast__marca {
+  flex: none;
+  color: s.$color-secundario;
+}
+
+.c-toast__texto {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  overflow-wrap: anywhere;
+}
+
+.c-toast__cerrar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: none;
+  color: s.$color-texto-apagado;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: s.$color-superficie-texto;
+  }
+
+  &:focus-visible {
+    @include t.anillo-foco;
+  }
+}

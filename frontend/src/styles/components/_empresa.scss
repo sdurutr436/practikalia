@@ -96,17 +96,3 @@
 .c-ficha-empresa__valor {
   margin: 0 0 s.$espaciado-pequeno;
 }
-
-.c-etiqueta {
-  display: inline-block;
-  padding: 0.125em 0.625em;
-  border-radius: s.$radio-pildora;
-  background: s.$color-apagado;
-  color: s.$color-texto-apagado;
-  font-size: s.$texto-diminuto;
-
-  &--no-publicada {
-    background: color-mix(in srgb, s.$color-error 15%, transparent);
-    color: s.$color-error;
-  }
-}

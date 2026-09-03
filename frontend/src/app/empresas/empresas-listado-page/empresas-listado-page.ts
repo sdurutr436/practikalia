@@ -1,15 +1,6 @@
-import {
-  Component,
-  ElementRef,
-  computed,
-  effect,
-  inject,
-  signal,
-  untracked,
-  viewChild,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { EmpresaService } from '../empresa.service';
@@ -19,22 +10,33 @@ import { TarjetaEmpresaComponent } from '../tarjeta-empresa/tarjeta-empresa';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { IconoComponent } from '../../compartido/icono/icono';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { BuscadorComponent } from '../../compartido/buscador/buscador';
+import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
+import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
+import { PastillasComponent } from '../../compartido/pastillas/pastillas';
+
+/** Las pastillas de publicación. La clave vacía es «Todas», que va sin parámetro. */
+const PASTILLAS = [
+  { clave: '', etiqueta: 'Todas' },
+  { clave: 'true', etiqueta: 'Publicadas' },
+  { clave: 'false', etiqueta: 'Sin publicar' },
+] as const;
 
 /** Tres columnas por tres filas: lo que cabe sin desplazarse. */
 const POR_PAGINA = 9;
 
-/** Lo que se espera a que pare de teclear; cada búsqueda es una consulta. */
-const ESPERA_TECLEO = 250;
-
 @Component({
   selector: 'app-empresas-listado-page',
   imports: [
-    RouterLink,
     EstadoComponent,
     TarjetaEmpresaComponent,
     CabeceraComponent,
     IconoComponent,
     BotonComponent,
+    BuscadorComponent,
+    DesplegableComponent,
+    PaginacionComponent,
+    PastillasComponent,
   ],
   templateUrl: './empresas-listado-page.html',
 })
@@ -46,15 +48,12 @@ export class EmpresasListadoPage {
   private readonly router = inject(Router);
 
   protected readonly esVistaProfesor = esVistaProfesor;
+  protected readonly pastillas = PASTILLAS;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly resultado = signal<PaginaEmpresas | null>(null);
   protected readonly catalogo = signal<Etiqueta[]>([]);
-  protected readonly buscando = signal(false);
   protected readonly filtrosAbiertos = signal(false);
-
-  private readonly entrada = viewChild.required<ElementRef<HTMLInputElement>>('entrada');
-  private temporizador?: ReturnType<typeof setTimeout>;
 
   /**
    * Todo el estado del listado (pastilla, búsqueda, filtros y página) vive en
@@ -64,13 +63,12 @@ export class EmpresasListadoPage {
    */
   private readonly parametros = toSignal(this.route.queryParamMap, { requireSync: true });
   protected readonly filtro = computed(() => this.parametros().get('publicada'));
+  /** La pastilla activa; sin parámetro, la de clave vacía. */
+  protected readonly filtroActivo = computed(() => this.filtro() ?? '');
   protected readonly texto = computed(() => this.parametros().get('texto') ?? '');
   protected readonly sectorId = computed(() => this.parametros().get('sectorId') ?? '');
   protected readonly etiquetaIds = computed(() =>
-    (this.parametros().get('etiquetaIds') ?? '')
-      .split(',')
-      .filter(Boolean)
-      .map(Number),
+    (this.parametros().get('etiquetaIds') ?? '').split(',').filter(Boolean).map(Number),
   );
   protected readonly paginaActual = computed(() => Number(this.parametros().get('pagina') ?? 0));
 
@@ -95,20 +93,8 @@ export class EmpresasListadoPage {
     });
   }
 
-  /** La lupa despliega el campo y le da el foco; cerrarla limpia la búsqueda. */
-  protected alternarBusqueda(): void {
-    if (this.buscando()) {
-      this.buscando.set(false);
-      this.navegar({ texto: null });
-      return;
-    }
-    this.buscando.set(true);
-    this.entrada().nativeElement.focus();
-  }
-
-  protected escribir(valor: string): void {
-    clearTimeout(this.temporizador);
-    this.temporizador = setTimeout(() => this.navegar({ texto: valor || null }), ESPERA_TECLEO);
+  protected buscar(texto: string): void {
+    this.navegar({ texto: texto || null });
   }
 
   /** El catálogo de etiquetas solo hace falta si alguien abre los filtros. */
@@ -118,6 +104,12 @@ export class EmpresasListadoPage {
       this.catalogo.set(await this.perfilService.listarEtiquetas());
     }
   }
+
+  /** El catálogo de sectores tal y como lo pide el desplegable. */
+  protected readonly opcionesSector = computed(() => [
+    { valor: '', etiqueta: 'Cualquiera' },
+    ...this.catalogo().map((etiqueta) => ({ valor: etiqueta.id, etiqueta: etiqueta.nombre })),
+  ]);
 
   protected cambiarSector(valor: string): void {
     this.navegar({ sectorId: valor || null });

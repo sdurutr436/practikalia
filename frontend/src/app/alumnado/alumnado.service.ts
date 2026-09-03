@@ -2,22 +2,102 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-/**
- * Alta de alumno. `contrasenaTemporal` llega en claro y **solo en esta
- * respuesta**: si no se anota aquí, no hay forma de recuperarla.
- */
-export interface AlumnoCreado {
+/** Fila del listado de alumnado. */
+export interface Alumno {
   id: number;
+  nombre: string | null;
+  apellido1: string | null;
+  apellido2: string | null;
+  dni: string | null;
   correo: string;
-  rol: 'ALUMNO';
-  contrasenaTemporal: string;
+  grado: { id: number; nombre: string } | null;
+  anio: number | null;
+  /** `false` = pendiente de confirmar por el centro. */
+  activo: boolean;
+  empresaId: number | null;
+  empresaNombre: string | null;
+}
+
+/**
+ * Nombre y apellidos de un alumno. El respaldo es lo que se pinta mientras la
+ * ficha no tiene nombre: las cuentas dadas de alta por un profesor desde
+ * `POST /api/usuarios` nacen sin él.
+ */
+export function nombreCompleto(alumno: Alumno, respaldo = 'Sin nombre'): string {
+  const partes = [alumno.nombre, alumno.apellido1, alumno.apellido2].filter(Boolean);
+  return partes.length > 0 ? partes.join(' ') : respaldo;
+}
+
+/** Cursos que ofrece el selector — `actual` es el que está en marcha. */
+export interface Cursos {
+  actual: number;
+  cursos: number[];
+}
+
+export interface PaginaAlumnos {
+  contenido: Alumno[];
+  pagina: number;
+  tamano: number;
+  total: number;
+  paginas: number;
+}
+
+/** Ficha del modal. La misma para dar de alta y para editar. */
+export interface FichaAlumnoRequest {
+  nombre: string;
+  apellido1: string;
+  apellido2: string | null;
+  dni: string;
+  correo: string;
+  gradoId: number | null;
+  anio: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AlumnadoService {
   private readonly http = inject(HttpClient);
 
-  crear(correo: string): Promise<AlumnoCreado> {
-    return firstValueFrom(this.http.post<AlumnoCreado>('/api/usuarios', { correo, rol: 'ALUMNO' }));
+  private cursosPedidos?: Promise<Cursos>;
+
+  /**
+   * Los cursos del selector. Se pide una sola vez por sesión: el catálogo lo
+   * consultan varias pantallas a la vez y no cambia mientras se navega.
+   */
+  listarCursos(): Promise<Cursos> {
+    this.cursosPedidos ??= firstValueFrom(this.http.get<Cursos>('/api/alumnos/cursos'));
+    return this.cursosPedidos;
+  }
+
+  /** Alta a mano: nace confirmada y su contraseña es el DNI sin la letra. */
+  crear(ficha: FichaAlumnoRequest): Promise<Alumno> {
+    return firstValueFrom(this.http.post<Alumno>('/api/alumnos', ficha));
+  }
+
+  /** `activo` a `null` para la pastilla «Todos». */
+  listar(activo: boolean | null, pagina: number, tamano: number): Promise<PaginaAlumnos> {
+    const params: Record<string, string | number | boolean> = { pagina, tamano };
+    if (activo !== null) {
+      params['activo'] = activo;
+    }
+    return firstValueFrom(this.http.get<PaginaAlumnos>('/api/alumnos', { params }));
+  }
+
+  editar(id: number, request: FichaAlumnoRequest): Promise<Alumno> {
+    return firstValueFrom(this.http.put<Alumno>(`/api/alumnos/${id}`, request));
+  }
+
+  /** Confirma la cuenta. No devuelve contraseña: la inicial es el DNI del alumno. */
+  confirmar(id: number): Promise<void> {
+    return firstValueFrom(this.http.put<void>(`/api/usuarios/${id}/activar`, {}));
+  }
+
+  importar(fichero: File): Promise<{ creados: number }> {
+    const cuerpo = new FormData();
+    cuerpo.append('fichero', fichero);
+    return firstValueFrom(this.http.post<{ creados: number }>('/api/alumnos/importar', cuerpo));
+  }
+
+  plantillaCsv(): Promise<Blob> {
+    return firstValueFrom(this.http.get('/api/alumnos/plantilla.csv', { responseType: 'blob' }));
   }
 }

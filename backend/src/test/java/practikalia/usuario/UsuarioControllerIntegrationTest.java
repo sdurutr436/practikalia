@@ -7,6 +7,7 @@ import practikalia.grado.GradoRepository;
 import practikalia.usuario.correo.CorreoPermitido;
 import practikalia.usuario.correo.CorreoPermitidoRepository;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -317,5 +318,35 @@ class UsuarioControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(new ActualizarEtiquetasRequest(List.of(999999L)))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.codigo").value("ETIQUETA_NO_ENCONTRADA"));
+    }
+
+    @Test
+    void profesorNoAdminNoPuedeActivarUnaCuenta() throws Exception {
+        Usuario pendiente = guardarAlumno("pendiente1@iesejemplo.es");
+
+        mockMvc.perform(put("/api/usuarios/" + pendiente.getId() + "/activar")
+                        .with(csrf())
+                        .with(user("prof-noadmin@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminConfirmaLaCuentaSinTocarLaContrasena() throws Exception {
+        Usuario pendiente = guardarAlumno("pendiente2@iesejemplo.es");
+        pendiente.setActivo(false);
+        usuarioRepository.save(pendiente);
+        String hashAntes = pendiente.getContrasenaHash();
+
+        mockMvc.perform(put("/api/usuarios/" + pendiente.getId() + "/activar")
+                        .with(csrf())
+                        .with(user("admin@iesejemplo.es").authorities(
+                                new SimpleGrantedAuthority("ROLE_PROFESOR"), new SimpleGrantedAuthority("ADMIN"))))
+                .andExpect(status().isNoContent());
+
+        Usuario activado = usuarioRepository.findById(pendiente.getId()).orElseThrow();
+        assertThat(activado.isActivo()).isTrue();
+        // La contraseña es la que el alumno ya conoce (su DNI si vino con uno):
+        // confirmar no la puede regenerar sin dejarle fuera.
+        assertThat(activado.getContrasenaHash()).isEqualTo(hashAntes);
     }
 }
