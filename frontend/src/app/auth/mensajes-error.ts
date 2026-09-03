@@ -108,6 +108,13 @@ export const MENSAJES_ALTA_ALUMNO: Record<string, string> = {
   ACCESO_DENEGADO: 'No tienes permiso para dar de alta cuentas.',
 };
 
+/** Mensajes de UI por código del contrato de /api/centro y /api/correos-permitidos. */
+export const MENSAJES_CENTRO: Record<string, string> = {
+  CORREO_PERMITIDO_YA_EXISTE: 'Ese correo ya está en la whitelist.',
+  CORREO_PERMITIDO_NO_ENCONTRADO: 'Ese correo ya no está en la whitelist.',
+  IMAGEN_INVALIDA: 'La imagen no es válida: usa JPEG, PNG o WebP de menos de 5 MB.',
+};
+
 /** Código conocido → su mensaje; si no, el mensaje del backend; si no, genérico. */
 export function mensajeDeError(error: unknown, mensajes: Record<string, string>): string {
   if (error instanceof HttpErrorResponse) {

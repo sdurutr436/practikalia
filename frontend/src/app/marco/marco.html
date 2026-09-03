@@ -14,7 +14,12 @@
         <app-icono nombre="menu" />
       </button>
 
-      <span class="c-barra__marca">Practikalia</span>
+      <span class="c-barra__marca">
+        @if (centroService.centro().logo; as logo) {
+          <img class="c-barra__logo" [src]="logo" alt="" />
+        }
+        {{ centroService.centro().nombre }}
+      </span>
 
       <!-- En pantalla estrecha este acordeón es el menú entero: la hamburguesa
            se esconde y tanto las acciones como las secciones se abren aquí, en

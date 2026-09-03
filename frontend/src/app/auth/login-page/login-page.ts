@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { FondoComponent } from '../../compartido/fondo/fondo';
 import { IconoComponent } from '../../compartido/icono/icono';
 import { AuthService } from '../auth.service';
+import { CentroService } from '../../centro/centro.service';
 import { MENSAJES_LOGIN, MENSAJES_REGISTRO, mensajeDeError } from '../mensajes-error';
 import { GradoOpcion, RegistroService } from '../registro.service';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
@@ -94,6 +95,7 @@ export function correoInstitucional(control: AbstractControl<string>): Validatio
 })
 export class LoginPage {
   private readonly auth = inject(AuthService);
+  protected readonly centroService = inject(CentroService);
   private readonly registro = inject(RegistroService);
   private readonly router = inject(Router);
 
