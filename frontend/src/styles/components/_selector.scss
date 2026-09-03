@@ -42,36 +42,48 @@
   }
 }
 
+// La lista cuelga de la entrada igual que el menú de hamburguesa cuelga de su
+// botón: misma superficie de panel, mismo margen de separación y la misma
+// animación de desplegar. La barra de desplazamiento va fina y en el color del
+// tema, que la del sistema desentona con todo lo demás.
 .c-selector__lista {
+  @include t.panel;
   position: absolute;
   // Elevado y no superpuesto: tiene que tapar las filas de debajo, pero pasar
   // por debajo de la cabecera pegajosa cuando la página está desplazada.
   z-index: s.$z-elevado;
   inset-inline: 0;
-  top: calc(100% + #{s.$espaciado-diminuto});
+  top: 100%;
   max-height: 14rem;
   overflow-y: auto;
-  margin: 0;
+  overscroll-behavior: contain;
+  margin: s.$espaciado-pequeno 0 0;
   padding: s.$espaciado-diminuto;
   list-style: none;
-  background: s.$color-superficie;
-  border: 1px solid s.$color-borde;
-  border-radius: s.$radio-m;
-  box-shadow: s.$sombra-grande;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, s.$color-borde 25%, transparent) transparent;
+  transform-origin: top;
+  animation: desplegar s.$transicion ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
+// Mismo tacto que una sección del menú de hamburguesa.
 .c-selector__opcion {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: s.$espaciado-pequeno;
-  padding: 0.4em 0.6em;
+  padding: s.$espaciado-pequeno s.$espaciado-medio;
   border-radius: s.$radio-m;
+  font-size: s.$texto-pequeno;
   cursor: pointer;
 
   // Un solo resaltado para teclado y ratón: el hover mueve el mismo índice.
   &--resaltada {
-    background: color-mix(in srgb, s.$color-primario 12%, transparent);
+    background: s.$color-apagado;
   }
 }
 
@@ -85,7 +97,7 @@
 }
 
 .c-selector__nada {
-  padding: 0.4em 0.6em;
+  padding: s.$espaciado-pequeno s.$espaciado-medio;
   color: s.$color-texto-apagado;
   font-size: s.$texto-pequeno;
 }
