@@ -47,6 +47,30 @@ public class AlumnoController {
         return ResponseEntity.ok(alumnoService.listar(activo, pagina, tamano));
     }
 
+    @Operation(summary = "Listar el alumnado del curso en marcha", description = "Solo profesor/admin — es lo que "
+            + "pinta la pantalla de asignaciones. Solo el alumnado del curso académico vigente (el de su año de "
+            + "matrícula, o el de su alta si no lo tiene puesto), confirmado o no. `asignado` filtra las pastillas: "
+            + "`true` con empresa en curso, `false` sin ninguna, sin el parámetro salen todos. `anio` mira un curso "
+            + "distinto del que está en marcha, `gradoId` filtra por clase y `texto` busca en nombre, apellidos y correo.")
+    @GetMapping("/curso")
+    public ResponseEntity<PaginaDto<AlumnoDto>> listarDelCurso(
+            @RequestParam(required = false) Integer anio,
+            @RequestParam(required = false) Long gradoId,
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) Boolean asignado,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamano) {
+        return ResponseEntity.ok(alumnoService.listarDelCurso(anio, gradoId, texto, asignado, pagina, tamano));
+    }
+
+    @Operation(summary = "Listar los cursos con alumnado", description = "Solo profesor/admin. Alimenta el selector "
+            + "de curso de la pantalla de asignaciones: los cursos que tienen a alguien matriculado, más el que está "
+            + "en marcha aunque todavía esté vacío.")
+    @GetMapping("/cursos")
+    public ResponseEntity<CursosDto> cursos() {
+        return ResponseEntity.ok(alumnoService.cursos());
+    }
+
     @Operation(summary = "Dar de alta un alumno", description = "Solo profesor/admin. Misma ficha que la edición. "
             + "Nace **confirmada** (a diferencia de las importadas) y su contraseña inicial es el DNI sin la letra. "
             + "El correo queda añadido a la whitelist del centro.")

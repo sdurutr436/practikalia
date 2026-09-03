@@ -1,1 +1,17 @@
-<p class="c-alerta c-alerta--{{ tipo() }}" [attr.role]="rol()"><ng-content /></p>
+<p
+  class="c-alerta c-alerta--{{ tipo() }}"
+  [class.c-alerta--cerrable]="cerrable()"
+  [attr.role]="rol()"
+>
+  <ng-content />
+  @if (cerrable()) {
+    <button
+      class="c-alerta__cerrar"
+      type="button"
+      aria-label="Cerrar el aviso"
+      (click)="cerrar.emit()"
+    >
+      <app-icono nombre="rechazar" />
+    </button>
+  }
+</p>

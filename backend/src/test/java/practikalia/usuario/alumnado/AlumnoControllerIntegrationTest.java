@@ -1,5 +1,6 @@
 package practikalia.usuario.alumnado;
 
+import practikalia.asignacion.Curso;
 import practikalia.grado.Grado;
 import practikalia.grado.GradoRepository;
 import practikalia.usuario.Rol;
@@ -275,5 +276,84 @@ class AlumnoControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(
                                 ficha("rocio@iesejemplo.es", "12345678Z", null))))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void alumnoNoPuedeVerElListadoDelCurso() throws Exception {
+        mockMvc.perform(get("/api/alumnos/curso").with(comoAlumno))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void elListadoDelCursoDejaFueraAlAlumnadoDeCursosAnteriores() throws Exception {
+        Usuario esteCurso = guardarAlumno("ana@iesejemplo.es", "Ana", true);
+        esteCurso.setAnio(Curso.actual());
+        usuarioRepository.save(esteCurso);
+
+        Usuario cursoViejo = guardarAlumno("beto@iesejemplo.es", "Beto", true);
+        cursoViejo.setAnio(Curso.actual() - 3);
+        usuarioRepository.save(cursoViejo);
+
+        // Sin año de matrícula manda el curso en el que se dio de alta, que es
+        // este mismo: se acaba de crear.
+        guardarAlumno("carla@iesejemplo.es", "Carla", true);
+
+        // Ordenado por apellido/nombre, y los tres comparten apellido.
+        mockMvc.perform(get("/api/alumnos/curso").with(comoProfesor))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(2))
+                .andExpect(jsonPath("$.contenido[0].correo").value("ana@iesejemplo.es"))
+                .andExpect(jsonPath("$.contenido[1].correo").value("carla@iesejemplo.es"));
+    }
+
+    @Test
+    void elListadoDelCursoFiltraPorClaseYPorTexto() throws Exception {
+        Grado daw = gradoRepository.save(new Grado("DAW"));
+        Usuario ana = guardarAlumno("ana@iesejemplo.es", "Ana", true);
+        ana.setGrado(daw);
+        usuarioRepository.save(ana);
+        guardarAlumno("beto@iesejemplo.es", "Beto", true);
+
+        // Sin filtro de clase sale también quien no tiene ninguna: el join es left.
+        mockMvc.perform(get("/api/alumnos/curso").with(comoProfesor))
+                .andExpect(jsonPath("$.total").value(2));
+
+        mockMvc.perform(get("/api/alumnos/curso")
+                        .param("gradoId", daw.getId().toString())
+                        .with(comoProfesor))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.contenido[0].correo").value("ana@iesejemplo.es"));
+
+        // En mayúsculas y a trozos: el LIKE va en minúsculas por los dos lados.
+        mockMvc.perform(get("/api/alumnos/curso").param("texto", "BET").with(comoProfesor))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.contenido[0].correo").value("beto@iesejemplo.es"));
+    }
+
+    @Test
+    void sePuedeMirarUnCursoDistintoDelQueEstaEnMarcha() throws Exception {
+        Usuario viejo = guardarAlumno("beto@iesejemplo.es", "Beto", true);
+        viejo.setAnio(2019);
+        usuarioRepository.save(viejo);
+
+        mockMvc.perform(get("/api/alumnos/curso").with(comoProfesor))
+                .andExpect(jsonPath("$.total").value(0));
+
+        mockMvc.perform(get("/api/alumnos/curso").param("anio", "2019").with(comoProfesor))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.contenido[0].correo").value("beto@iesejemplo.es"));
+    }
+
+    @Test
+    void elSelectorDeCursosTraeElActualAunqueEsteVacio() throws Exception {
+        Usuario viejo = guardarAlumno("beto@iesejemplo.es", "Beto", true);
+        viejo.setAnio(2019);
+        usuarioRepository.save(viejo);
+
+        mockMvc.perform(get("/api/alumnos/cursos").with(comoProfesor))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.actual").value(Curso.actual()))
+                .andExpect(jsonPath("$.cursos[0]").value(Curso.actual()))
+                .andExpect(jsonPath("$.cursos[1]").value(2019));
     }
 }

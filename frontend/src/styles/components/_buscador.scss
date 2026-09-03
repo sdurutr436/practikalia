@@ -24,6 +24,12 @@
     flex-grow: 1;
   }
 
+  // Barra de ancho completo (asignaciones): siempre abierta y sin el margen
+  // que empuja la versión desplegable contra el borde derecho.
+  &--ancho {
+    margin-inline-start: 0;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     transition: none;
   }
@@ -50,7 +56,8 @@
   }
 
   .c-buscador--abierto &,
-  .c-buscador--fijo & {
+  .c-buscador--fijo &,
+  .c-buscador--ancho & {
     width: 100%;
     padding-inline: s.$espaciado-medio;
     opacity: 1;
@@ -98,7 +105,8 @@
     align-items: stretch;
   }
 
-  .c-buscador:not(.c-buscador--fijo),
+  // La de ancho completo no se esconde: en estrecho es la única que hay.
+  .c-buscador:not(.c-buscador--fijo, .c-buscador--ancho),
   .c-filtros__avanzados {
     display: none;
   }

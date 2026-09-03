@@ -1,0 +1,107 @@
+<main class="o-pagina">
+  <app-cabecera titulo="Asignaciones" />
+
+  <!-- Misma barra que el listado de empresas, pero a todo el ancho y siempre
+       abierta: aquí no compite con nada por el sitio. -->
+  <div class="c-buscador c-buscador--ancho">
+    <app-icono class="c-buscador__icono" nombre="buscar" />
+    <input
+      class="c-buscador__entrada"
+      #busqueda
+      type="search"
+      aria-label="Buscar alumnado"
+      placeholder="Nombre, apellidos o correo…"
+      [value]="texto()"
+      (input)="escribir(busqueda.value)"
+    />
+  </div>
+
+  <div class="c-filtros">
+    <app-pastillas [opciones]="pastillas" [activa]="clave()" ruta="/asignaciones" />
+
+    <select
+      class="c-filtros__seleccion"
+      aria-label="Clase"
+      (change)="filtrar('gradoId', $any($event.target).value)"
+    >
+      <option value="" [selected]="gradoId() === null">Todas las clases</option>
+      @for (grado of grados(); track grado.id) {
+        <option [value]="grado.id" [selected]="grado.id === gradoId()">{{ grado.nombre }}</option>
+      }
+    </select>
+
+    <select
+      class="c-filtros__seleccion"
+      aria-label="Curso académico"
+      (change)="filtrar('anio', $any($event.target).value)"
+    >
+      @for (curso of cursos()?.cursos ?? []; track curso) {
+        <option [value]="curso" [selected]="curso === cursoElegido()">
+          {{ curso }}/{{ curso + 1 }}
+        </option>
+      }
+    </select>
+  </div>
+
+  <p class="c-asignacion__nota">
+    Solo el alumnado matriculado en el curso elegido, y solo empresas ya confirmadas.
+  </p>
+
+  @if (aviso(); as mensaje) {
+    <app-alerta tipo="aviso" [cerrable]="true" (cerrar)="aviso.set(null)">{{ mensaje }}</app-alerta>
+  }
+
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="alumnos().length === 0"
+    [mensajeVacio]="mensajeVacio()"
+  >
+    <ul class="o-lista">
+      @for (alumno of alumnos(); track alumno.id) {
+        <li class="c-fila c-asignacion">
+          <div class="c-asignacion__alumno">
+            <p class="c-asignacion__nombre">{{ nombre(alumno) }}</p>
+            <p class="c-asignacion__dato">{{ alumno.correo }}</p>
+            @if (alumno.grado; as grado) {
+              <p class="c-asignacion__dato">{{ grado.nombre }}</p>
+            }
+          </div>
+
+          <div class="c-asignacion__control">
+            <app-selector-busqueda
+              [opciones]="empresas()"
+              [valor]="elegida(alumno)"
+              [etiqueta]="'Empresa de ' + nombre(alumno)"
+              vacio="Ninguna empresa confirmada coincide."
+              (elegida)="elegir(alumno, $event)"
+            />
+            <app-boton
+              icono="guardar"
+              [cargando]="guardandoId() === alumno.id"
+              [deshabilitado]="!puedeGuardar(alumno)"
+              (click)="guardar(alumno)"
+            >
+              Guardar
+            </app-boton>
+          </div>
+
+          @if (errorFila(); as fallo) {
+            @if (fallo.id === alumno.id) {
+              <app-alerta>{{ fallo.mensaje }}</app-alerta>
+            }
+          }
+        </li>
+      }
+    </ul>
+  </app-estado>
+
+  <app-paginacion
+    [pagina]="paginaActual()"
+    [paginas]="paginas()"
+    seccion="asignaciones"
+    [total]="total()"
+    nombre="alumnos"
+    (ir)="irAPagina($event)"
+  />
+</main>

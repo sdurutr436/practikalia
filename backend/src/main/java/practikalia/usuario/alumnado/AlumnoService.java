@@ -2,6 +2,7 @@ package practikalia.usuario.alumnado;
 
 import practikalia.asignacion.Asignacion;
 import practikalia.asignacion.AsignacionRepository;
+import practikalia.asignacion.Curso;
 import practikalia.common.PaginaDto;
 import practikalia.grado.Grado;
 import practikalia.grado.GradoDto;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +77,42 @@ public class AlumnoService {
 
         Map<Long, Asignacion> abiertas = asignacionesAbiertas(alumnos.getContent());
         return PaginaDto.de(alumnos, alumno -> de(alumno, abiertas.get(alumno.getId())));
+    }
+
+    /**
+     * El alumnado del curso académico en marcha, que es lo que pinta la pantalla
+     * de asignaciones: se asume que las prácticas se hacen en el curso de
+     * matrícula, y ese curso no se repite. A diferencia de {@link #listar} aquí
+     * no se filtra por {@code activo}: una cuenta sin confirmar sigue siendo un
+     * alumno al que hay que buscarle empresa.
+     *
+     * @param anio     el curso que se quiere ver; {@code null} para el que está en marcha.
+     * @param asignado {@code null} para la pastilla "Todas".
+     */
+    @Transactional(readOnly = true)
+    public PaginaDto<AlumnoDto> listarDelCurso(
+            Integer anio, Long gradoId, String texto, Boolean asignado, int pagina, int tamano) {
+        int curso = anio == null ? Curso.actual() : anio;
+        String patron = texto == null || texto.isBlank() ? null : "%" + texto.trim().toLowerCase() + "%";
+
+        Page<Usuario> alumnos = usuarioRepository.buscarDelCurso(
+                Rol.ALUMNO, curso, Curso.inicio(curso), Curso.inicio(curso + 1), gradoId, patron, asignado,
+                PageRequest.of(pagina, tamano, Sort.by(Sort.Direction.ASC, "apellido1", "nombre", "correo")));
+
+        Map<Long, Asignacion> abiertas = asignacionesAbiertas(alumnos.getContent());
+        return PaginaDto.de(alumnos, alumno -> de(alumno, abiertas.get(alumno.getId())));
+    }
+
+    /** Los cursos del selector. El actual entra siempre, aunque todavía no tenga a nadie. */
+    @Transactional(readOnly = true)
+    public CursosDto cursos() {
+        int actual = Curso.actual();
+        List<Integer> cursos = new ArrayList<>(usuarioRepository.cursosConAlumnado(Rol.ALUMNO));
+        if (!cursos.contains(actual)) {
+            cursos.add(actual);
+            cursos.sort(Comparator.reverseOrder());
+        }
+        return new CursosDto(actual, cursos);
     }
 
     /**

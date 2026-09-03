@@ -20,6 +20,7 @@ import { MisInteresesPage } from './intereses/mis-intereses-page/mis-intereses-p
 import { MisEtiquetasPage } from './perfil/mis-etiquetas-page/mis-etiquetas-page';
 import { AfinidadPage } from './afinidad/afinidad-page/afinidad-page';
 import { AlumnadoPage } from './alumnado/alumnado-page/alumnado-page';
+import { AsignacionesPage } from './asignaciones/asignaciones-page/asignaciones-page';
 
 export const routes: Routes = [
   // El marco (menú lateral + barra superior) lo pone app.ts alrededor del
@@ -119,21 +120,25 @@ export const routes: Routes = [
     canActivate: [autenticadoGuard],
   },
 
-  // Secciones del menú que todavía no tienen pantalla. Las rutas existen ya
-  // para que el menú no cambie de forma según se vayan construyendo: crear
-  // una pantalla es cambiar su `component` aquí y nada más.
   {
     path: 'alumnado',
     component: AlumnadoPage,
     title: 'Alumnado',
     canActivate: [profesorGuard],
   },
+
+  // Una sola pantalla; la pastilla (todas/asignados/sin asignar) viaja en
+  // `?estado=`, igual que en alumnado y reseñas.
   {
     path: 'asignaciones',
-    component: ProximamentePage,
+    component: AsignacionesPage,
     title: 'Asignaciones',
     canActivate: [profesorGuard],
   },
+
+  // Secciones del menú que todavía no tienen pantalla. Las rutas existen ya
+  // para que el menú no cambie de forma según se vayan construyendo: crear
+  // una pantalla es cambiar su `component` aquí y nada más.
   {
     path: 'sectores',
     component: ProximamentePage,

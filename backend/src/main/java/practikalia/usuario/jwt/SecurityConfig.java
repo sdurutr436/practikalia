@@ -50,6 +50,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/alumnos/*/afinidad").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         // Sin estos, el listado de alumnado caería en anyRequest(), que admite ROLE_ALUMNO.
                         .requestMatchers(HttpMethod.GET, "/api/alumnos").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/alumnos/curso").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/alumnos/cursos").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/alumnos/*/asignacion").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/alumnos/plantilla.csv").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/alumnos/importar").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/alumnos").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")

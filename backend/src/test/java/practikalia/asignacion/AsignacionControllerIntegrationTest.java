@@ -10,6 +10,7 @@ import practikalia.usuario.Rol;
 import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioRepository;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -242,5 +244,92 @@ class AsignacionControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fechaFin").value("2026-06-30"))
                 .andExpect(jsonPath("$.contratadoPosterior").value(true));
+    }
+
+    // --- Pantalla de asignaciones: PUT /api/alumnos/{id}/asignacion y su listado ---
+
+    private RequestPostProcessor comoProfesor() {
+        return user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"));
+    }
+
+    private org.springframework.test.web.servlet.ResultActions asignar(Long alumnoId, Long empresaId) throws Exception {
+        return mockMvc.perform(put("/api/alumnos/" + alumnoId + "/asignacion")
+                .with(csrf())
+                .with(comoProfesor())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new AsignarEmpresaRequest(empresaId))));
+    }
+
+    @Test
+    void asignarEmpresaCreaLaAsignacionConElCursoEnMarcha() throws Exception {
+        alumno.setGrado(grado);
+        usuarioRepository.save(alumno);
+        empresa.setPublicada(true);
+        empresaRepository.save(empresa);
+
+        asignar(alumno.getId(), empresa.getId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.empresaNombre").value("Acme"))
+                .andExpect(jsonPath("$.tutorCentroCorreo").value("prof@iesejemplo.es"))
+                .andExpect(jsonPath("$.anio").value(Curso.actual()))
+                .andExpect(jsonPath("$.fechaFin").doesNotExist());
+    }
+
+    @Test
+    void reasignarCambiaLaEmpresaDeLaAbiertaSinCerrarlaNiDuplicarla() throws Exception {
+        alumno.setGrado(grado);
+        usuarioRepository.save(alumno);
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, Curso.actual(), LocalDate.now()));
+        Empresa otra = empresaRepository.save(
+                new Empresa("Bahía Solar", "d", "dir", empresa.getSector(), "obs", "c", "t", "e", profesor));
+        otra.setPublicada(true);
+
+        asignar(alumno.getId(), otra.getId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.empresaNombre").value("Bahía Solar"))
+                .andExpect(jsonPath("$.fechaFin").doesNotExist());
+
+        assertThat(asignacionRepository.findByAlumnoId(alumno.getId())).hasSize(1);
+    }
+
+    @Test
+    void noSePuedeAsignarUnaEmpresaSinPublicar() throws Exception {
+        alumno.setGrado(grado);
+        usuarioRepository.save(alumno);
+
+        asignar(alumno.getId(), empresa.getId())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("EMPRESA_NO_PUBLICADA"));
+    }
+
+    @Test
+    void asignarAUnAlumnoSinClaseDevuelve400() throws Exception {
+        empresa.setPublicada(true);
+        empresaRepository.save(empresa);
+
+        asignar(alumno.getId(), empresa.getId())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("ALUMNO_SIN_CLASE"));
+    }
+
+    @Test
+    void lasPastillasDelCursoFiltranPorAsignacionAbierta() throws Exception {
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, Curso.actual(), LocalDate.now()));
+
+        mockMvc.perform(get("/api/alumnos/curso").param("asignado", "true").with(comoProfesor()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.contenido[0].correo").value("alumno@iesejemplo.es"))
+                .andExpect(jsonPath("$.contenido[0].empresaNombre").value("Acme"));
+
+        mockMvc.perform(get("/api/alumnos/curso").param("asignado", "false").with(comoProfesor()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.contenido[0].correo").value("otro@iesejemplo.es"));
+
+        // Sin la pastilla salen los dos, y el profesor no cuenta: solo alumnado.
+        mockMvc.perform(get("/api/alumnos/curso").with(comoProfesor()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(2));
     }
 }

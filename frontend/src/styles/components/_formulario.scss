@@ -211,12 +211,39 @@
     border: 1px solid color-mix(in srgb, s.$color-error 40%, transparent);
   }
 
+  // Con X: el texto a la izquierda y el botón pegado al borde derecho. Es un
+  // modificador aparte porque .c-alerta se usa en 24 sitios sin botón, y
+  // volverla flex ahí no cambiaría nada bueno.
+  &--cerrable {
+    display: flex;
+    align-items: center;
+    gap: s.$espaciado-pequeno;
+  }
+
   // Mensajes role="status" (guardado correcto, aviso informativo): sin
   // modificador el bloque solo ponía padding y quedaba invisible.
   &--aviso {
     color: s.$color-texto-apagado;
     background: s.$color-apagado;
     border: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+  }
+}
+
+.c-alerta__cerrar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    @include t.anillo-foco;
   }
 }
 

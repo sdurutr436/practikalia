@@ -1,0 +1,47 @@
+// Fila de la pantalla de asignaciones: el alumno a la izquierda y su
+// desplegable de empresa con el botón de guardar a la derecha. Apiladas y no
+// en rejilla como el resto de listados, que aquí cada fila es una sola acción.
+@use '../settings' as s;
+
+.c-asignacion {
+  grid-template-columns: minmax(10rem, 1fr) minmax(0, 1.4fr);
+  align-items: center;
+}
+
+.c-asignacion__alumno {
+  display: grid;
+  gap: s.$espaciado-diminuto;
+}
+
+.c-asignacion__nombre {
+  margin: 0;
+  font-weight: s.$peso-fuerte;
+  text-wrap: balance;
+}
+
+.c-asignacion__dato {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+  overflow-wrap: anywhere;
+}
+
+.c-asignacion__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-asignacion__nota {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+}
+
+// Estrecho: el desplegable no cabe al lado del nombre y se va debajo.
+@media (width < 37.5rem) {
+  .c-asignacion {
+    grid-template-columns: 1fr;
+  }
+}

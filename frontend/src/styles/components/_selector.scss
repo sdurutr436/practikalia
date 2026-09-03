@@ -1,0 +1,91 @@
+// Desplegable con búsqueda: la entrada con su lupa y, colgando de ella, la
+// lista pintada por la aplicación. El <datalist> nativo hacía esto solo, pero
+// su lista es cromo del navegador y no admite CSS ni hereda el tema.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: s.$espaciado-diminuto;
+  // El mismo relleno y borde que .c-campo__entrada: es un control más.
+  padding: 0.5em 0.75em;
+  border: 1px solid s.$color-borde-entrada;
+  border-radius: s.$radio-m;
+  background: s.$color-superficie;
+
+  &:focus-within {
+    @include t.anillo-foco;
+    border-color: s.$color-anillo;
+  }
+}
+
+.c-selector__lupa {
+  flex: none;
+  color: s.$color-texto-apagado;
+}
+
+.c-selector__entrada {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-overflow: ellipsis;
+
+  // El anillo lo pinta el contenedor entero, igual que en .c-buscador.
+  &:focus {
+    outline: none;
+  }
+}
+
+.c-selector__lista {
+  position: absolute;
+  // Elevado y no superpuesto: tiene que tapar las filas de debajo, pero pasar
+  // por debajo de la cabecera pegajosa cuando la página está desplazada.
+  z-index: s.$z-elevado;
+  inset-inline: 0;
+  top: calc(100% + #{s.$espaciado-diminuto});
+  max-height: 14rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: s.$espaciado-diminuto;
+  list-style: none;
+  background: s.$color-superficie;
+  border: 1px solid s.$color-borde;
+  border-radius: s.$radio-m;
+  box-shadow: s.$sombra-grande;
+}
+
+.c-selector__opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+  padding: 0.4em 0.6em;
+  border-radius: s.$radio-m;
+  cursor: pointer;
+
+  // Un solo resaltado para teclado y ratón: el hover mueve el mismo índice.
+  &--resaltada {
+    background: color-mix(in srgb, s.$color-primario 12%, transparent);
+  }
+}
+
+.c-selector__nombre {
+  overflow-wrap: anywhere;
+}
+
+.c-selector__marca {
+  flex: none;
+  color: s.$color-primario;
+}
+
+.c-selector__nada {
+  padding: 0.4em 0.6em;
+  color: s.$color-texto-apagado;
+  font-size: s.$texto-pequeno;
+}
