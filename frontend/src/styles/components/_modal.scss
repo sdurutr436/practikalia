@@ -54,26 +54,7 @@
 }
 
 .c-modal__cerrar {
-  display: grid;
-  place-items: center;
-  padding: s.$espaciado-diminuto;
-  border: 0;
-  border-radius: s.$radio-m;
-  background: none;
-  color: s.$color-texto-apagado;
-  cursor: pointer;
-  transition:
-    background s.$transicion,
-    color s.$transicion;
-
-  &:hover {
-    background: s.$color-apagado;
-    color: s.$color-superficie-texto;
-  }
-
-  &:focus-visible {
-    @include t.anillo-foco;
-  }
+  @include t.boton-icono;
 }
 
 .c-modal__cuerpo {
