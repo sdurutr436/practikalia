@@ -6,17 +6,13 @@
          ancha desaparece entera y mandan la lupa y la pastilla de "Filtros" de
          debajo; solo una de las dos existe a la vez para el lector de pantalla,
          porque la otra está en display:none. -->
-    <div class="c-buscador c-buscador--fijo">
-      <app-icono class="c-buscador__icono" nombre="buscar" />
-      <input
-        class="c-buscador__entrada"
-        #movil
-        type="search"
-        aria-label="Buscar empresas"
-        placeholder="Nombre, sector, etiqueta…"
-        [value]="texto()"
-        (input)="escribir(movil.value)"
-      />
+    <app-buscador
+      modo="fijo"
+      etiqueta="Buscar empresas"
+      marcador="Nombre, sector, etiqueta…"
+      [valor]="texto()"
+      (buscar)="buscar($event)"
+    >
       <button
         class="c-buscador__ajustes"
         type="button"
@@ -27,7 +23,7 @@
       >
         <app-icono nombre="configuracion" />
       </button>
-    </div>
+    </app-buscador>
 
     @if (esProfesor()) {
       <app-pastillas
@@ -53,44 +49,26 @@
       }
     </button>
 
-    <div class="c-buscador" [class.c-buscador--abierto]="buscando()">
-      <input
-        class="c-buscador__entrada"
-        #entrada
-        type="search"
-        aria-label="Buscar empresas"
-        placeholder="Nombre, sector, etiqueta…"
-        [attr.tabindex]="buscando() ? null : -1"
-        [value]="texto()"
-        (input)="escribir(entrada.value)"
-        (keydown.escape)="alternarBusqueda()"
-      />
-      <button
-        class="c-buscador__lupa"
-        type="button"
-        [attr.aria-expanded]="buscando()"
-        [attr.aria-label]="buscando() ? 'Cerrar la búsqueda' : 'Buscar empresas'"
-        (click)="alternarBusqueda()"
-      >
-        <app-icono nombre="buscar" />
-      </button>
-    </div>
+    <app-buscador
+      modo="desplegable"
+      etiqueta="Buscar empresas"
+      marcador="Nombre, sector, etiqueta…"
+      [valor]="texto()"
+      (buscar)="buscar($event)"
+    />
   </div>
 
   @if (filtrosAbiertos()) {
     <div class="c-panel-filtros" id="filtros-avanzados">
       <label class="c-campo">
         <span class="c-campo__etiqueta"><app-icono nombre="etiqueta" />Sector</span>
-        <select
-          class="c-campo__entrada"
-          [value]="sectorId()"
-          (change)="cambiarSector($any($event.target).value)"
+        <app-desplegable
+          [opciones]="opcionesSector()"
+          [valor]="sectorId()"
+          (cambia)="cambiarSector($event)"
         >
           <option value="">Cualquiera</option>
-          @for (etiqueta of catalogo(); track etiqueta.id) {
-            <option [value]="etiqueta.id">{{ etiqueta.nombre }}</option>
-          }
-        </select>
+        </app-desplegable>
       </label>
 
       <fieldset class="c-panel-filtros__etiquetas">

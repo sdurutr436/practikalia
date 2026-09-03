@@ -1,0 +1,35 @@
+<!-- Dos ramas porque una directiva no se puede poner a medias: o hay
+     `[formControl]` o no lo hay. Las opciones son las mismas y salen de la
+     misma plantilla, que es donde estaba el bulto. -->
+@if (control(); as formulario) {
+  <select
+    class="c-desplegable"
+    [id]="id()"
+    [attr.aria-label]="etiqueta()"
+    [formControl]="formulario"
+  >
+    <ng-container [ngTemplateOutlet]="lista" />
+  </select>
+} @else {
+  <select
+    class="c-desplegable"
+    [id]="id()"
+    [attr.aria-label]="etiqueta()"
+    (change)="elegir($any($event.target).value)"
+  >
+    <ng-container [ngTemplateOutlet]="lista" />
+  </select>
+}
+
+<ng-template #lista>
+  <ng-content />
+  @for (opcion of opciones(); track opcion.valor) {
+    <option
+      [value]="opcion.valor"
+      [disabled]="opcion.deshabilitada ?? false"
+      [selected]="esElegida(opcion)"
+    >
+      {{ opcion.etiqueta }}
+    </option>
+  }
+</ng-template>

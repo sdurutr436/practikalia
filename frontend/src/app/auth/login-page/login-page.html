@@ -191,12 +191,13 @@
           [control]="formRegistro.controls.gradoId"
           error="Selecciona tu clase."
         >
-          <select class="c-campo__entrada" id="gradoId" formControlName="gradoId">
+          <app-desplegable
+            id="gradoId"
+            [control]="formRegistro.controls.gradoId"
+            [opciones]="opcionesGrado()"
+          >
             <option value="" disabled>Selecciona tu clase</option>
-            @for (grado of grados(); track grado.id) {
-              <option [value]="grado.id">{{ grado.nombre }}</option>
-            }
-          </select>
+          </app-desplegable>
           @if (errorGrados(); as mensaje) {
             <p class="c-campo__error">{{ mensaje }}</p>
           }

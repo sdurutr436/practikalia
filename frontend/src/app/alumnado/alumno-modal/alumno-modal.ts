@@ -13,6 +13,7 @@ import { CampoComponent } from '../../compartido/campo/campo';
 import { ModalComponent } from '../../compartido/modal/modal';
 import { GradoOpcion } from '../../auth/registro.service';
 import { Alumno, FichaAlumnoRequest } from '../alumnado.service';
+import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 
 /** Un año lectivo se escribe con cuatro cifras; el rango evita erratas de tecleo. */
 function anioValido(control: AbstractControl<string>): ValidationErrors | null {
@@ -33,7 +34,14 @@ function anioValido(control: AbstractControl<string>): ValidationErrors | null {
  */
 @Component({
   selector: 'app-alumno-modal',
-  imports: [ReactiveFormsModule, ModalComponent, CampoComponent, BotonComponent, AlertaComponent],
+  imports: [
+    ReactiveFormsModule,
+    ModalComponent,
+    CampoComponent,
+    BotonComponent,
+    AlertaComponent,
+    DesplegableComponent,
+  ],
   templateUrl: './alumno-modal.html',
 })
 export class AlumnoModalComponent {
@@ -47,6 +55,11 @@ export class AlumnoModalComponent {
   readonly cerrar = output<void>();
 
   protected readonly confirmandoSalida = signal(false);
+  /** El catálogo de clases tal y como lo pide el desplegable. */
+  protected readonly clases = computed(() =>
+    this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
+  );
+
   protected readonly esAlta = computed(() => this.alumno() === null);
   protected readonly titulo = computed(() => (this.esAlta() ? 'Nuevo alumno' : 'Editar alumno'));
 

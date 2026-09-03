@@ -1,0 +1,39 @@
+<div
+  class="c-buscador"
+  [class.c-buscador--fijo]="modo() === 'fijo'"
+  [class.c-buscador--ancho]="modo() === 'ancho'"
+  [class.c-buscador--abierto]="abierto()"
+>
+  <!-- Plegable la lupa es el botón que abre, y va detrás del campo para que
+       este se estire hacia la izquierda; en los otros modos solo dice qué es
+       esto, y va delante. -->
+  @if (modo() !== 'desplegable') {
+    <app-icono class="c-buscador__icono" nombre="buscar" />
+  }
+
+  <input
+    #entrada
+    class="c-buscador__entrada"
+    type="search"
+    [attr.aria-label]="etiqueta()"
+    [placeholder]="marcador()"
+    [attr.tabindex]="desplegado() ? null : -1"
+    [value]="valor()"
+    (input)="escribir(entrada.value)"
+    (keydown.escape)="cerrarConEscape()"
+  />
+
+  @if (modo() === 'desplegable') {
+    <button
+      class="c-buscador__lupa"
+      type="button"
+      [attr.aria-expanded]="abierto()"
+      [attr.aria-label]="abierto() ? 'Cerrar la búsqueda' : etiqueta()"
+      (click)="alternar()"
+    >
+      <app-icono nombre="buscar" />
+    </button>
+  }
+
+  <ng-content />
+</div>

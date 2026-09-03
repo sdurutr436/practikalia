@@ -1,13 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  computed,
-  effect,
-  inject,
-  signal,
-  untracked,
-  viewChild,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
@@ -19,6 +10,8 @@ import { TarjetaEmpresaComponent } from '../tarjeta-empresa/tarjeta-empresa';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { IconoComponent } from '../../compartido/icono/icono';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { BuscadorComponent } from '../../compartido/buscador/buscador';
+import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
 import { PastillasComponent } from '../../compartido/pastillas/pastillas';
 
@@ -32,9 +25,6 @@ const PASTILLAS = [
 /** Tres columnas por tres filas: lo que cabe sin desplazarse. */
 const POR_PAGINA = 9;
 
-/** Lo que se espera a que pare de teclear; cada búsqueda es una consulta. */
-const ESPERA_TECLEO = 250;
-
 @Component({
   selector: 'app-empresas-listado-page',
   imports: [
@@ -43,6 +33,8 @@ const ESPERA_TECLEO = 250;
     CabeceraComponent,
     IconoComponent,
     BotonComponent,
+    BuscadorComponent,
+    DesplegableComponent,
     PaginacionComponent,
     PastillasComponent,
   ],
@@ -61,11 +53,7 @@ export class EmpresasListadoPage {
   protected readonly error = signal<string | null>(null);
   protected readonly resultado = signal<PaginaEmpresas | null>(null);
   protected readonly catalogo = signal<Etiqueta[]>([]);
-  protected readonly buscando = signal(false);
   protected readonly filtrosAbiertos = signal(false);
-
-  private readonly entrada = viewChild.required<ElementRef<HTMLInputElement>>('entrada');
-  private temporizador?: ReturnType<typeof setTimeout>;
 
   /**
    * Todo el estado del listado (pastilla, búsqueda, filtros y página) vive en
@@ -105,20 +93,8 @@ export class EmpresasListadoPage {
     });
   }
 
-  /** La lupa despliega el campo y le da el foco; cerrarla limpia la búsqueda. */
-  protected alternarBusqueda(): void {
-    if (this.buscando()) {
-      this.buscando.set(false);
-      this.navegar({ texto: null });
-      return;
-    }
-    this.buscando.set(true);
-    this.entrada().nativeElement.focus();
-  }
-
-  protected escribir(valor: string): void {
-    clearTimeout(this.temporizador);
-    this.temporizador = setTimeout(() => this.navegar({ texto: valor || null }), ESPERA_TECLEO);
+  protected buscar(texto: string): void {
+    this.navegar({ texto: texto || null });
   }
 
   /** El catálogo de etiquetas solo hace falta si alguien abre los filtros. */
@@ -128,6 +104,11 @@ export class EmpresasListadoPage {
       this.catalogo.set(await this.perfilService.listarEtiquetas());
     }
   }
+
+  /** El catálogo de sectores tal y como lo pide el desplegable. */
+  protected readonly opcionesSector = computed(() =>
+    this.catalogo().map((etiqueta) => ({ valor: etiqueta.id, etiqueta: etiqueta.nombre })),
+  );
 
   protected cambiarSector(valor: string): void {
     this.navegar({ sectorId: valor || null });

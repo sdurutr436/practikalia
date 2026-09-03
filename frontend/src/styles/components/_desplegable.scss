@@ -1,0 +1,11 @@
+// Desplegable de lista corta: el <select> nativo del tema. Misma forma que la
+// entrada de .c-campo —comparten el mixin `control`— y encima lo suyo: que se
+// pulsa, y que no se encoge por debajo de lo que necesita su opción más larga.
+@use '../settings' as s;
+@use '../tools' as t;
+
+.c-desplegable {
+  @include t.control;
+  min-width: 0;
+  cursor: pointer;
+}

@@ -76,11 +76,22 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
     await esperarMicrotareas();
-    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
-    http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
+    http
+      .expectOne('/api/auth/me')
+      .flush({
+        id: 5,
+        correo: 'profesor@centro.es',
+        rol: 'PROFESOR',
+        esAdmin: false,
+        debeCambiarContrasena: false,
+        etiquetas: [],
+      });
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -89,12 +100,16 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     expect(texto).toContain('DAM');
     expect(texto).toContain('abierta');
 
-    const contenedor = harness.routeNativeElement?.querySelector('.c-ficha-empresa__gestion:last-of-type') as HTMLElement;
+    const contenedor = harness.routeNativeElement?.querySelector(
+      '.c-ficha-empresa__gestion:last-of-type',
+    ) as HTMLElement;
     const inputFecha = contenedor.querySelector('input[type="date"]') as HTMLInputElement;
     const select = contenedor.querySelector('select') as HTMLSelectElement;
     const boton = contenedor.querySelector('button.c-boton') as HTMLButtonElement;
     inputFecha.value = '2027-06-30';
     select.value = 'true';
+    // El desplegable se entera por el evento, igual que cuando lo usa una persona.
+    select.dispatchEvent(new Event('change'));
     boton.click();
 
     const peticion = http.expectOne('/api/asignaciones/5');
@@ -115,15 +130,28 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
     await esperarMicrotareas();
-    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
-    http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
+    http
+      .expectOne('/api/auth/me')
+      .flush({
+        id: 5,
+        correo: 'profesor@centro.es',
+        rol: 'PROFESOR',
+        esAdmin: false,
+        debeCambiarContrasena: false,
+        etiquetas: [],
+      });
     await esperarMicrotareas();
     harness.detectChanges();
 
-    const contenedor = harness.routeNativeElement?.querySelector('.c-ficha-empresa__gestion:last-of-type') as HTMLElement;
+    const contenedor = harness.routeNativeElement?.querySelector(
+      '.c-ficha-empresa__gestion:last-of-type',
+    ) as HTMLElement;
     const inputFecha = contenedor.querySelector('input[type="date"]') as HTMLInputElement;
     const boton = contenedor.querySelector('button.c-boton') as HTMLButtonElement;
     inputFecha.value = '2027-06-30';
@@ -161,7 +189,9 @@ describe('guard de profesor sobre el formulario de crear asignación', () => {
 
   it('un alumno no puede acceder al formulario de crear asignación', async () => {
     const promesa = auth.login('alumno@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
@@ -194,23 +224,38 @@ describe('formulario de crear asignación', () => {
 
   async function loginComoProfesor(): Promise<void> {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
   }
 
   it('carga los selects reales y crea la asignación con empresaId fijado', async () => {
     await loginComoProfesor();
     const harness = await RouterTestingHarness.create();
-    const componente = await harness.navigateByUrl('/empresas/2/asignaciones/nueva', AsignacionFormularioPage);
+    const componente = await harness.navigateByUrl(
+      '/empresas/2/asignaciones/nueva',
+      AsignacionFormularioPage,
+    );
 
-    http.expectOne('/api/usuarios?rol=ALUMNO').flush([{ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO' }]);
-    http.expectOne('/api/usuarios?rol=PROFESOR').flush([{ id: 30, correo: 'profesor@centro.es', rol: 'PROFESOR' }]);
+    http
+      .expectOne('/api/usuarios?rol=ALUMNO')
+      .flush([{ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO' }]);
+    http
+      .expectOne('/api/usuarios?rol=PROFESOR')
+      .flush([{ id: 30, correo: 'profesor@centro.es', rol: 'PROFESOR' }]);
     http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
     await esperarMicrotareas();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const c = componente as any;
-    c.form.patchValue({ alumnoId: 10, tutorCentroId: 30, gradoId: 40, anio: 2026, fechaInicio: '2026-09-01' });
+    c.form.patchValue({
+      alumnoId: 10,
+      tutorCentroId: 30,
+      gradoId: 40,
+      anio: 2026,
+      fechaInicio: '2026-09-01',
+    });
     const envio = c.enviar() as Promise<void>;
 
     const creacion = http.expectOne('/api/asignaciones');
@@ -228,11 +273,22 @@ describe('formulario de crear asignación', () => {
 
     http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
     await esperarMicrotareas();
-    http.expectOne('/api/empresas/2/tasa-contratacion').flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
     http.expectOne('/api/empresas/2/interesados').flush([]);
-    http.expectOne('/api/auth/me').flush({ id: 5, correo: 'profesor@centro.es', rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false, etiquetas: [] });
+    http
+      .expectOne('/api/auth/me')
+      .flush({
+        id: 5,
+        correo: 'profesor@centro.es',
+        rol: 'PROFESOR',
+        esAdmin: false,
+        debeCambiarContrasena: false,
+        etiquetas: [],
+      });
     await esperarMicrotareas();
 
     expect(router.url).toBe('/empresas/2');
@@ -241,16 +297,29 @@ describe('formulario de crear asignación', () => {
   it('un 409 al repetir (alumno, empresa, grado, año) se muestra legible', async () => {
     await loginComoProfesor();
     const harness = await RouterTestingHarness.create();
-    const componente = await harness.navigateByUrl('/empresas/2/asignaciones/nueva', AsignacionFormularioPage);
+    const componente = await harness.navigateByUrl(
+      '/empresas/2/asignaciones/nueva',
+      AsignacionFormularioPage,
+    );
 
-    http.expectOne('/api/usuarios?rol=ALUMNO').flush([{ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO' }]);
-    http.expectOne('/api/usuarios?rol=PROFESOR').flush([{ id: 30, correo: 'profesor@centro.es', rol: 'PROFESOR' }]);
+    http
+      .expectOne('/api/usuarios?rol=ALUMNO')
+      .flush([{ id: 10, correo: 'alumno@centro.es', rol: 'ALUMNO' }]);
+    http
+      .expectOne('/api/usuarios?rol=PROFESOR')
+      .flush([{ id: 30, correo: 'profesor@centro.es', rol: 'PROFESOR' }]);
     http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
     await esperarMicrotareas();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const c = componente as any;
-    c.form.patchValue({ alumnoId: 10, tutorCentroId: 30, gradoId: 40, anio: 2026, fechaInicio: '2026-09-01' });
+    c.form.patchValue({
+      alumnoId: 10,
+      tutorCentroId: 30,
+      gradoId: 40,
+      anio: 2026,
+      fechaInicio: '2026-09-01',
+    });
     const envio = c.enviar() as Promise<void>;
 
     http
@@ -284,7 +353,9 @@ describe('guard de profesor sobre el histórico por alumno', () => {
 
   it('un alumno no puede acceder al histórico de asignaciones de otro alumno', async () => {
     const promesa = auth.login('alumno@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'ALUMNO', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
@@ -315,7 +386,9 @@ describe('histórico de asignaciones por alumno', () => {
 
   it('un profesor ve el histórico completo de un alumno', async () => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
@@ -331,16 +404,23 @@ describe('histórico de asignaciones por alumno', () => {
     expect(texto).toContain('Beta');
     expect(texto).toContain('DAM');
     expect(texto).toContain('Escribir review en nombre del alumno');
-    expect(harness.routeNativeElement?.querySelector('a[href="/alumnos/10/afinidad"]')).toBeTruthy();
+    expect(
+      harness.routeNativeElement?.querySelector('a[href="/alumnos/10/afinidad"]'),
+    ).toBeTruthy();
   });
 
   it('un profesor puede fijar el grado y año de un alumno y ver la confirmación', async () => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
-    const componente = await harness.navigateByUrl('/alumnos/10/asignaciones', AlumnoAsignacionesPage);
+    const componente = await harness.navigateByUrl(
+      '/alumnos/10/asignaciones',
+      AlumnoAsignacionesPage,
+    );
     http.expectOne('/api/alumnos/10/asignaciones').flush([ASIGNACION_ABIERTA]);
     http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
     await esperarMicrotareas();
@@ -355,7 +435,12 @@ describe('histórico de asignaciones por alumno', () => {
     const peticion = http.expectOne('/api/usuarios/10/grado');
     expect(peticion.request.method).toBe('PUT');
     expect(peticion.request.body).toEqual({ gradoId: 40, anio: 2027 });
-    peticion.flush({ id: 10, correo: 'alumno@centro.es', grado: { id: 40, nombre: 'DAM' }, anio: 2027 });
+    peticion.flush({
+      id: 10,
+      correo: 'alumno@centro.es',
+      grado: { id: 40, nombre: 'DAM' },
+      anio: 2027,
+    });
     await guardado;
 
     expect(c.gradoActualizado()?.anio).toBe(2027);
@@ -363,11 +448,16 @@ describe('histórico de asignaciones por alumno', () => {
 
   it('un 404 al fijar el grado de un alumno inexistente se muestra legible', async () => {
     const promesa = auth.login('profesor@centro.es', 'secreta', '');
-    http.expectOne('/api/auth/login').flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
+    http
+      .expectOne('/api/auth/login')
+      .flush({ rol: 'PROFESOR', esAdmin: false, debeCambiarContrasena: false });
     await promesa;
 
     const harness = await RouterTestingHarness.create();
-    const componente = await harness.navigateByUrl('/alumnos/999/asignaciones', AlumnoAsignacionesPage);
+    const componente = await harness.navigateByUrl(
+      '/alumnos/999/asignaciones',
+      AlumnoAsignacionesPage,
+    );
     http.expectOne('/api/alumnos/999/asignaciones').flush([]);
     http.expectOne('/api/grados').flush([{ id: 40, nombre: 'DAM' }]);
     await esperarMicrotareas();

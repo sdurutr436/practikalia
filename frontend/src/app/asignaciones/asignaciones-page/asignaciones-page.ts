@@ -6,9 +6,10 @@ import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
 import { GradoOpcion, RegistroService } from '../../auth/registro.service';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { BuscadorComponent } from '../../compartido/buscador/buscador';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
+import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 import { EstadoComponent } from '../../compartido/estado/estado';
-import { IconoComponent } from '../../compartido/icono/icono';
 import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
 import { PastillasComponent } from '../../compartido/pastillas/pastillas';
 import { SelectorBusquedaComponent } from '../../compartido/selector-busqueda/selector-busqueda';
@@ -18,9 +19,6 @@ import { AsignacionService, Cursos } from '../asignacion.service';
 
 /** Filas apiladas y no tarjetas: caben más por pantalla que las 3×3 de los listados. */
 const POR_PAGINA = 10;
-
-/** Lo que se espera a que pare de teclear; cada búsqueda es una consulta. */
-const ESPERA_TECLEO = 250;
 
 /** Las pastillas. La clave viaja en `?estado=`, igual que en alumnado y reseñas. */
 const PASTILLAS = [
@@ -54,7 +52,8 @@ const numero = (valor: string | null) => (valor ? Number(valor) : null);
     EstadoComponent,
     AlertaComponent,
     BotonComponent,
-    IconoComponent,
+    BuscadorComponent,
+    DesplegableComponent,
     PaginacionComponent,
     PastillasComponent,
     SelectorBusquedaComponent,
@@ -82,8 +81,6 @@ export class AsignacionesPage {
   /** Empresa elegida en cada fila mientras no se guarda, por id de alumno. */
   private readonly seleccion = signal<Record<number, number>>({});
 
-  private temporizador?: ReturnType<typeof setTimeout>;
-
   private readonly parametros = toSignal(this.route.queryParamMap, { requireSync: true });
 
   protected readonly clave = computed(() => {
@@ -104,6 +101,17 @@ export class AsignacionesPage {
   protected readonly alumnos = computed(() => this.resultado()?.contenido ?? []);
   protected readonly paginas = computed(() => this.resultado()?.paginas ?? 0);
   protected readonly total = computed(() => this.resultado()?.total ?? 0);
+  /** Los dos catálogos con la forma que pide el desplegable. */
+  protected readonly opcionesClase = computed(() =>
+    this.grados().map((grado) => ({ valor: grado.id, etiqueta: grado.nombre })),
+  );
+  protected readonly opcionesCurso = computed(() =>
+    (this.cursos()?.cursos ?? []).map((curso) => ({
+      valor: curso,
+      etiqueta: `${curso}/${curso + 1}`,
+    })),
+  );
+
   protected readonly mensajeVacio = computed(() =>
     this.texto() || this.gradoId() !== null
       ? 'Ningún alumno coincide con la búsqueda.'
@@ -144,9 +152,8 @@ export class AsignacionesPage {
     return elegida !== null && elegida !== alumno.empresaId && this.guardandoId() !== alumno.id;
   }
 
-  protected escribir(valor: string): void {
-    clearTimeout(this.temporizador);
-    this.temporizador = setTimeout(() => this.navegar({ texto: valor || null }), ESPERA_TECLEO);
+  protected buscar(texto: string): void {
+    this.navegar({ texto: texto || null });
   }
 
   protected filtrar(clave: 'gradoId' | 'anio', valor: string): void {

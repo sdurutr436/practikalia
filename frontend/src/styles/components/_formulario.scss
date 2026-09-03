@@ -45,17 +45,7 @@
 }
 
 .c-campo__entrada {
-  padding: 0.5em 0.75em;
-  background: transparent;
-  color: inherit;
-  border: 1px solid s.$color-borde-entrada;
-  border-radius: s.$radio-m;
-  font: inherit;
-
-  &:focus-visible {
-    @include t.anillo-foco;
-    border-color: s.$color-anillo;
-  }
+  @include t.control;
 }
 
 // Área de texto: alto cómodo y sin agarradera horizontal — arrastrarla a lo

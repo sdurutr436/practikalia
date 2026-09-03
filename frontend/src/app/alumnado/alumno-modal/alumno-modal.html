@@ -64,12 +64,9 @@
     </app-campo>
 
     <app-campo etiqueta="Clase" icono="grado" para="alumno-grado">
-      <select class="c-campo__entrada" id="alumno-grado" formControlName="gradoId">
+      <app-desplegable id="alumno-grado" [control]="form.controls.gradoId" [opciones]="clases()">
         <option value="">Sin clase</option>
-        @for (grado of grados(); track grado.id) {
-          <option [value]="grado.id">{{ grado.nombre }}</option>
-        }
-      </select>
+      </app-desplegable>
     </app-campo>
 
     <app-campo

@@ -1,46 +1,31 @@
 <main class="o-pagina">
   <app-cabecera titulo="Asignaciones" />
 
-  <!-- Misma barra que el listado de empresas, pero a todo el ancho y siempre
-       abierta: aquí no compite con nada por el sitio. -->
-  <div class="c-buscador c-buscador--ancho">
-    <app-icono class="c-buscador__icono" nombre="buscar" />
-    <input
-      class="c-buscador__entrada"
-      #busqueda
-      type="search"
-      aria-label="Buscar alumnado"
-      placeholder="Nombre, apellidos o correo…"
-      [value]="texto()"
-      (input)="escribir(busqueda.value)"
-    />
-  </div>
+  <app-buscador
+    etiqueta="Buscar alumnado"
+    marcador="Nombre, apellidos o correo…"
+    [valor]="texto()"
+    (buscar)="buscar($event)"
+  />
 
   <div class="c-filtros">
     <app-pastillas [opciones]="pastillas" [activa]="clave()" ruta="/asignaciones" />
 
-    <select
-      class="c-filtros__seleccion"
-      aria-label="Clase"
-      (change)="filtrar('gradoId', $any($event.target).value)"
+    <app-desplegable
+      etiqueta="Clase"
+      [opciones]="opcionesClase()"
+      [valor]="gradoId()"
+      (cambia)="filtrar('gradoId', $event)"
     >
-      <option value="" [selected]="gradoId() === null">Todas las clases</option>
-      @for (grado of grados(); track grado.id) {
-        <option [value]="grado.id" [selected]="grado.id === gradoId()">{{ grado.nombre }}</option>
-      }
-    </select>
+      <option value="">Todas las clases</option>
+    </app-desplegable>
 
-    <select
-      class="c-filtros__seleccion"
-      aria-label="Curso académico"
-      (change)="filtrar('anio', $any($event.target).value)"
-    >
-      @for (curso of cursos()?.cursos ?? []; track curso) {
-        <option [value]="curso" [selected]="curso === cursoElegido()">
-          {{ curso }}/{{ curso + 1 }}
-        </option>
-      }
-    </select>
+    <app-desplegable
+      etiqueta="Curso académico"
+      [opciones]="opcionesCurso()"
+      [valor]="cursoElegido()"
+      (cambia)="filtrar('anio', $event)"
+    />
   </div>
 
   <p class="c-asignacion__nota">

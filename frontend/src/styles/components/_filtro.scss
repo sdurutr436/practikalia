@@ -50,25 +50,6 @@
   gap: s.$espaciado-diminuto;
 }
 
-// Desplegable de la misma fila (clase, curso): con el aspecto de una pastilla
-// para que la fila se lea como una sola cosa. Sigue siendo un <select> nativo:
-// para tres o cuatro opciones sin buscar, su lista del navegador vale — cuando
-// hay que buscar entre muchas está .c-selector.
-.c-filtros__seleccion {
-  padding: s.$espaciado-diminuto s.$espaciado-medio;
-  border: 1px solid s.$color-borde;
-  border-radius: s.$radio-pildora;
-  background: s.$color-superficie;
-  color: s.$color-texto-apagado;
-  font: inherit;
-  font-size: s.$texto-pequeno;
-  cursor: pointer;
-
-  &:focus-visible {
-    @include t.anillo-foco;
-  }
-}
-
 // Bloque plegable con los filtros que no caben en una pastilla. Va en el flujo
 // de la página, debajo de la fila: sin capa superpuesta que atrape el foco.
 .c-panel-filtros {

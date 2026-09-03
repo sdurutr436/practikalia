@@ -18,3 +18,20 @@
   border-radius: s.$radio;
   box-shadow: s.$sombra;
 }
+
+// Aspecto de un control de formulario del tema: relleno, borde y foco. Lo
+// comparten la entrada de .c-campo y el .c-desplegable, que son la misma cosa
+// con distinto elemento HTML detrás.
+@mixin control {
+  padding: 0.5em 0.75em;
+  background: transparent;
+  color: inherit;
+  border: 1px solid s.$color-borde-entrada;
+  border-radius: s.$radio-m;
+  font: inherit;
+
+  &:focus-visible {
+    @include anillo-foco;
+    border-color: s.$color-anillo;
+  }
+}
