@@ -79,52 +79,67 @@
            otra, que en una tarjeta ancha dejaba el alta lejos de lo que acaba
            de escribirse. -->
       <div class="c-config__correos-cuerpo">
-        <app-estado
-          [cargando]="cargandoCorreos()"
-          [vacio]="correos().length === 0"
-          mensajeVacio="Todavía no hay ningún correo añadido a mano."
-        >
-          <ul class="o-lista c-correos">
-            @for (correo of correos(); track correo.id) {
-              <li
-                class="c-correos__fila"
-                [class.c-correos__fila--confirmando]="confirmandoBorrado() === correo.id"
-              >
-                @if (confirmandoBorrado() === correo.id) {
-                  <p class="c-nota">
-                    Al quitar «{{ correo.correo }}», esa persona no podrá volver a entrar.
-                  </p>
-                  <div class="c-acciones">
-                    <app-boton
-                      icono="rechazar"
-                      [cargando]="borrandoId() === correo.id"
-                      (click)="borrar(correo)"
+        <div class="c-config__lista">
+          @if (correos().length > 0) {
+            <app-buscador
+              etiqueta="Buscar correo"
+              marcador="Buscar correo…"
+              modo="ancho"
+              (buscar)="filtroCorreo.set($event)"
+            />
+          }
+
+          <app-estado
+            [cargando]="cargandoCorreos()"
+            [vacio]="correosFiltrados().length === 0"
+            [mensajeVacio]="
+              correos().length === 0
+                ? 'Todavía no hay ningún correo añadido a mano.'
+                : 'Ningún correo coincide con la búsqueda.'
+            "
+          >
+            <ul class="o-lista c-correos">
+              @for (correo of correosFiltrados(); track correo.id) {
+                <li
+                  class="c-correos__fila"
+                  [class.c-correos__fila--confirmando]="confirmandoBorrado() === correo.id"
+                >
+                  @if (confirmandoBorrado() === correo.id) {
+                    <p class="c-nota">
+                      Al quitar «{{ correo.correo }}», esa persona no podrá volver a entrar.
+                    </p>
+                    <div class="c-acciones">
+                      <app-boton
+                        icono="rechazar"
+                        [cargando]="borrandoId() === correo.id"
+                        (click)="borrar(correo)"
+                      >
+                        Sí, quitar
+                      </app-boton>
+                      <app-boton
+                        [secundario]="true"
+                        [deshabilitado]="borrandoId() !== null"
+                        (click)="confirmandoBorrado.set(null)"
+                      >
+                        Cancelar
+                      </app-boton>
+                    </div>
+                  } @else {
+                    <span class="c-correos__texto">{{ correo.correo }}</span>
+                    <button
+                      class="c-correos__quitar"
+                      type="button"
+                      [attr.aria-label]="'Quitar ' + correo.correo"
+                      (click)="confirmandoBorrado.set(correo.id)"
                     >
-                      Sí, quitar
-                    </app-boton>
-                    <app-boton
-                      [secundario]="true"
-                      [deshabilitado]="borrandoId() !== null"
-                      (click)="confirmandoBorrado.set(null)"
-                    >
-                      Cancelar
-                    </app-boton>
-                  </div>
-                } @else {
-                  <span class="c-correos__texto">{{ correo.correo }}</span>
-                  <button
-                    class="c-correos__quitar"
-                    type="button"
-                    [attr.aria-label]="'Quitar ' + correo.correo"
-                    (click)="confirmandoBorrado.set(correo.id)"
-                  >
-                    <app-icono nombre="rechazar" />
-                  </button>
-                }
-              </li>
-            }
-          </ul>
-        </app-estado>
+                      <app-icono nombre="rechazar" />
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </app-estado>
+        </div>
 
         <form class="c-correos__alta" (ngSubmit)="anadirCorreo()">
           <app-campo

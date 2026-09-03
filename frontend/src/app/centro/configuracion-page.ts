@@ -4,6 +4,7 @@ import { AuthService } from '../auth/auth.service';
 import { MENSAJES_CENTRO, mensajeDeError } from '../auth/mensajes-error';
 import { AlertaComponent } from '../compartido/alerta/alerta';
 import { BotonComponent } from '../compartido/boton/boton';
+import { BuscadorComponent } from '../compartido/buscador/buscador';
 import { CabeceraComponent } from '../compartido/cabecera/cabecera';
 import { CampoComponent } from '../compartido/campo/campo';
 import { EstadoComponent } from '../compartido/estado/estado';
@@ -22,6 +23,7 @@ import { CentroService, CorreoPermitido } from './centro.service';
     ReactiveFormsModule,
     AlertaComponent,
     BotonComponent,
+    BuscadorComponent,
     CabeceraComponent,
     CampoComponent,
     EstadoComponent,
@@ -48,6 +50,12 @@ export class ConfiguracionPage {
   protected readonly correos = signal<CorreoPermitido[]>([]);
   protected readonly cargandoCorreos = signal(true);
   protected readonly errorCorreos = signal<string | null>(null);
+  /** Filtro local: la whitelist entera ya está en memoria, no hace falta ir al servidor. */
+  protected readonly filtroCorreo = signal('');
+  protected readonly correosFiltrados = computed(() => {
+    const texto = this.filtroCorreo().trim().toLowerCase();
+    return texto ? this.correos().filter((c) => c.correo.includes(texto)) : this.correos();
+  });
   protected readonly nuevoCorreo = inject(NonNullableFormBuilder).control('', [
     Validators.required,
     Validators.email,

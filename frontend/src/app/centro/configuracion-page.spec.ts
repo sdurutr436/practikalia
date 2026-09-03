@@ -9,6 +9,8 @@ import { authInterceptor } from '../auth/auth.interceptor';
 import { CentroService } from './centro.service';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
+// El buscador espera a que pare de teclear antes de filtrar.
+const esperarTecleo = () => new Promise((resolve) => setTimeout(resolve, 300));
 
 describe('pantalla de configuración', () => {
   let http: HttpTestingController;
@@ -119,6 +121,27 @@ describe('pantalla de configuración', () => {
     harness.detectChanges();
 
     expect(raiz.textContent).toContain('Ese correo ya está en la whitelist.');
+  });
+
+  it('el buscador filtra la whitelist en el propio navegador, sin ir al servidor', async () => {
+    await entrar(true);
+    const harness = await abrir();
+    responderWhitelist([
+      { id: 1, correo: 'ana@centro.es' },
+      { id: 2, correo: 'beto@centro.es' },
+    ]);
+    await esperarMicrotareas();
+    harness.detectChanges();
+    const raiz = harness.routeNativeElement as Element;
+
+    const entrada = raiz.querySelector('.c-buscador .c-buscador__entrada') as HTMLInputElement;
+    entrada.value = 'ana';
+    entrada.dispatchEvent(new Event('input'));
+    await esperarTecleo();
+    harness.detectChanges();
+
+    expect(raiz.textContent).toContain('ana@centro.es');
+    expect(raiz.textContent).not.toContain('beto@centro.es');
   });
 
   it('borrar un correo pide confirmación antes de llamar al backend', async () => {
