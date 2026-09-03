@@ -24,9 +24,6 @@ const normalizar = (texto: string) =>
     .replace(/\p{Diacritic}/gu, '')
     .toLowerCase();
 
-/** Lo que mide la lista como mucho, en rem; el mismo valor que su max-height. */
-const ALTO_LISTA = 15;
-
 /** Ids únicos por instancia, que puede haber uno por fila de un listado. */
 let contador = 0;
 
@@ -150,18 +147,14 @@ export class DesplegableComponent {
   }
 
   /**
-   * Hacia abajo salvo que no quepa y arriba sí: si no, el último campo de un
-   * modal despliega su lista contra el borde y no se ve nada.
-   *
-   * ponytail: se mide contra la ventana, no contra el contenedor que
-   * desplaza. Cubre los dos casos que se dan —final de página y final de
-   * modal—; para hilar más fino tocaría anchor positioning de CSS, que
-   * todavía no está en todos los navegadores.
+   * Se abre hacia el lado que tenga más sitio. Así no hay que saber aquí
+   * cuánto mide la lista —eso lo dice su hoja de estilos— ni comparar contra
+   * ninguna medida escrita a mano, y el último campo de un modal deja de
+   * desplegarse contra el borde.
    */
   private ubicar(): void {
     const caja = this.raiz().nativeElement.getBoundingClientRect();
-    const alto = ALTO_LISTA * parseFloat(getComputedStyle(document.documentElement).fontSize);
-    this.haciaArriba.set(caja.bottom + alto > window.innerHeight && caja.top > alto);
+    this.haciaArriba.set(window.innerHeight - caja.bottom < caja.top);
   }
 
   protected escribir(valor: string): void {
