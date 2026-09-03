@@ -69,7 +69,8 @@
 }
 
 .c-buscador__lupa,
-.c-buscador__ajustes {
+.c-buscador__ajustes,
+.c-buscador__icono {
   display: grid;
   place-items: center;
   flex: none;
@@ -82,11 +83,12 @@
   cursor: pointer;
 }
 
-// Icono decorativo de la barra fija: aquí la lupa no abre nada, solo dice qué
-// es esto. El botón de la derecha es el de los filtros.
+// Icono decorativo de las barras que no se pliegan: aquí la lupa no abre nada,
+// solo dice qué es esto. Ocupa la misma caja que el botón al que sustituye —si
+// no, la barra queda más baja que la desplegable y se nota al lado.
 .c-buscador__icono {
-  margin-inline-start: s.$espaciado-medio;
   color: s.$color-texto-apagado;
+  cursor: default;
 }
 
 // La barra fija solo existe en pantalla estrecha: ocupa el ancho entero, va
