@@ -13,6 +13,7 @@ import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
 import { PastillasComponent } from '../../compartido/pastillas/pastillas';
+import { ToastService } from '../../compartido/toast/toast.service';
 import { Empresa } from '../../empresas/empresa.model';
 import { EmpresaService } from '../../empresas/empresa.service';
 import { AsignacionService } from '../asignacion.service';
@@ -66,6 +67,7 @@ export class AsignacionesPage {
   private readonly registroService = inject(RegistroService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   protected readonly pastillas = PASTILLAS;
   protected readonly cargando = signal(true);
@@ -75,7 +77,6 @@ export class AsignacionesPage {
   protected readonly grados = signal<GradoOpcion[]>([]);
   protected readonly guardandoId = signal<number | null>(null);
   protected readonly errorFila = signal<{ id: number; mensaje: string } | null>(null);
-  protected readonly aviso = signal<string | null>(null);
 
   /** Empresa elegida en cada fila mientras no se guarda, por id de alumno. */
   private readonly seleccion = signal<Record<number, number>>({});
@@ -116,12 +117,7 @@ export class AsignacionesPage {
     this.cargarCatalogos();
     effect(() => {
       this.parametros();
-      untracked(() => {
-        // Cambiar de pastilla, de filtro o de página se lleva por delante el
-        // aviso del último guardado: ya no habla de lo que hay en pantalla.
-        this.aviso.set(null);
-        void this.cargar();
-      });
+      untracked(() => void this.cargar());
     });
   }
 
@@ -165,10 +161,9 @@ export class AsignacionesPage {
     }
     this.guardandoId.set(alumno.id);
     this.errorFila.set(null);
-    this.aviso.set(null);
     try {
       const asignacion = await this.asignacionService.asignar(alumno.id, empresaId);
-      this.aviso.set(`${this.nombre(alumno)} va a ${asignacion.empresaNombre}.`);
+      this.toast.mostrar(`${this.nombre(alumno)} va a ${asignacion.empresaNombre}.`);
       // La elección ya está guardada: lo que se pinte a partir de ahora sale de
       // la respuesta del servidor, no de lo que quedó elegido en la fila.
       this.seleccion.update(({ [alumno.id]: _, ...resto }) => resto);

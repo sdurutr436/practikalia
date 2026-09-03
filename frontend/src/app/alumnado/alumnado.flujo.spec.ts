@@ -6,6 +6,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../app.routes';
 import { AuthService } from '../auth/auth.service';
 import { authInterceptor } from '../auth/auth.interceptor';
+import { ToastService } from '../compartido/toast/toast.service';
 import { pagina } from '../pruebas';
 import { Alumno } from './alumnado.service';
 
@@ -148,7 +149,8 @@ describe('listado de alumnado', () => {
     http.expectOne((r) => r.url === '/api/alumnos').flush(pagina([{ ...PENDIENTE, activo: true }]));
     await esperarMicrotareas();
     harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).toContain('su DNI sin la letra');
+    // El aviso ya no vive en la pantalla: sale en el toast del marco.
+    expect(TestBed.inject(ToastService).mensaje()).toContain('su DNI sin la letra');
   });
 
   it('editar la ficha manda el PUT con los datos del formulario', async () => {
@@ -260,7 +262,7 @@ describe('listado de alumnado', () => {
     http.expectOne((r) => r.url === '/api/alumnos').flush(pagina([]));
     await esperarMicrotareas();
     harness.detectChanges();
-    expect(harness.routeNativeElement?.textContent).toContain('DNI sin la letra');
+    expect(TestBed.inject(ToastService).mensaje()).toContain('DNI sin la letra');
   });
 
   it('el alta con un DNI ya usado deja el modal abierto con el error', async () => {

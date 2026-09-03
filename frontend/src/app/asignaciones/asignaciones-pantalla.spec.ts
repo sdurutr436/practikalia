@@ -7,6 +7,7 @@ import { Alumno } from '../alumnado/alumnado.service';
 import { routes } from '../app.routes';
 import { authInterceptor } from '../auth/auth.interceptor';
 import { AuthService } from '../auth/auth.service';
+import { ToastService } from '../compartido/toast/toast.service';
 import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
@@ -170,7 +171,7 @@ describe('pantalla de asignaciones', () => {
     expect(opciones(raiz).map((o) => o.textContent!.trim())).toEqual(['Bahía Solar']);
   });
 
-  it('elegir una empresa y guardar manda su id, y el aviso se cierra con la X', async () => {
+  it('elegir una empresa y guardar manda su id, y lo confirma el toast', async () => {
     await entrar();
     const harness = await abrir('/asignaciones', [SIN_ASIGNAR]);
     const raiz = harness.routeNativeElement!;
@@ -199,12 +200,11 @@ describe('pantalla de asignaciones', () => {
 
     expect(entradas(raiz)[0].value).toBe('Acme');
 
-    // El aviso se queda hasta que alguien lo quita: no hay recarga que lo borre.
-    const cerrar = raiz.querySelector<HTMLButtonElement>('.c-alerta__cerrar')!;
-    expect(cerrar).not.toBeNull();
-    cerrar.click();
-    harness.detectChanges();
-    expect(raiz.querySelector('.c-alerta--aviso')).toBeNull();
+    // El aviso sale en el toast del marco, no en la pantalla.
+    const toast = TestBed.inject(ToastService);
+    expect(toast.mensaje()).toContain('Acme');
+    toast.cerrar();
+    expect(toast.mensaje()).toBeNull();
   });
 
   it('no deja guardar la empresa que el alumno ya tiene', async () => {

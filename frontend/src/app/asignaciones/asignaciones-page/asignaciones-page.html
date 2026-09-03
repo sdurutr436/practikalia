@@ -25,10 +25,6 @@
     Solo el alumnado matriculado en el curso elegido, y solo empresas ya confirmadas.
   </p>
 
-  @if (aviso(); as mensaje) {
-    <app-alerta tipo="aviso" [cerrable]="true" (cerrar)="aviso.set(null)">{{ mensaje }}</app-alerta>
-  }
-
   <app-estado
     [cargando]="cargando()"
     [error]="error()"

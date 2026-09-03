@@ -1,5 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
-import { IconoComponent } from '../icono/icono';
+import { Component, computed, input } from '@angular/core';
 
 /**
  * Aviso de una línea, en error o en informativo. Existe porque el par
@@ -9,15 +8,11 @@ import { IconoComponent } from '../icono/icono';
  */
 @Component({
   selector: 'app-alerta',
-  imports: [IconoComponent],
   templateUrl: './alerta.html',
   host: { class: 'u-contenidos' },
 })
 export class AlertaComponent {
   readonly tipo = input<'error' | 'aviso'>('error');
-  /** Añade la X. Para los avisos que no los quita ninguna otra acción de la pantalla. */
-  readonly cerrable = input(false);
-  readonly cerrar = output<void>();
 
   protected readonly rol = computed(() => (this.tipo() === 'error' ? 'alert' : 'status'));
 }

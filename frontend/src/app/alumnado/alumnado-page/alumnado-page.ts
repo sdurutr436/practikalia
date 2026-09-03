@@ -18,6 +18,7 @@ import { BotonComponent } from '../../compartido/boton/boton';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { IconoComponent } from '../../compartido/icono/icono';
+import { ToastService } from '../../compartido/toast/toast.service';
 import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
 import { PastillasComponent } from '../../compartido/pastillas/pastillas';
 import { AlumnoModalComponent } from '../alumno-modal/alumno-modal';
@@ -90,6 +91,7 @@ export class AlumnadoPage {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   protected readonly pastillas = PASTILLAS;
   protected readonly cargando = signal(true);
@@ -102,7 +104,6 @@ export class AlumnadoPage {
   protected readonly guardando = signal(false);
   protected readonly errorFicha = signal<string | null>(null);
   protected readonly confirmandoId = signal<number | null>(null);
-  protected readonly aviso = signal<string | null>(null);
   protected readonly errorImportacion = signal<string | null>(null);
 
   private readonly selector = viewChild.required<ElementRef<HTMLInputElement>>('selector');
@@ -184,7 +185,7 @@ export class AlumnadoPage {
         await this.alumnadoService.editar(alumno.id, ficha);
       } else {
         await this.alumnadoService.crear(ficha);
-        this.aviso.set(
+        this.toast.mostrar(
           `${ficha.nombre} ${ficha.apellido1} ya puede entrar con su DNI sin la letra como contraseña.`,
         );
       }
@@ -202,11 +203,10 @@ export class AlumnadoPage {
       return;
     }
     this.confirmandoId.set(alumno.id);
-    this.aviso.set(null);
     try {
       await this.alumnadoService.confirmar(alumno.id);
       await this.cargar();
-      this.aviso.set(
+      this.toast.mostrar(
         `${this.nombreCompleto(alumno)} ya puede entrar. Su contraseña es su DNI sin la letra, y tendrá que cambiarla al primer acceso.`,
       );
     } catch (e) {
@@ -239,10 +239,9 @@ export class AlumnadoPage {
       return;
     }
     this.errorImportacion.set(null);
-    this.aviso.set(null);
     try {
       const { creados } = await this.alumnadoService.importar(fichero);
-      this.aviso.set(
+      this.toast.mostrar(
         `${creados} ${creados === 1 ? 'alumno importado' : 'alumnos importados'}. Quedan por confirmar.`,
       );
       await this.irAPastilla('por-confirmar');

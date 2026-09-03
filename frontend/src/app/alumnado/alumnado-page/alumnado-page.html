@@ -30,9 +30,6 @@
   @if (errorImportacion(); as mensaje) {
     <app-alerta>{{ mensaje }}</app-alerta>
   }
-  @if (aviso(); as mensaje) {
-    <app-alerta tipo="aviso">{{ mensaje }}</app-alerta>
-  }
 
   <app-estado
     [cargando]="cargando()"
