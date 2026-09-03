@@ -1,0 +1,25 @@
+@if (paginas() > 1) {
+  <nav class="c-paginacion" [attr.aria-label]="'Páginas de ' + seccion()">
+    <app-boton
+      [secundario]="true"
+      icono="volver"
+      [deshabilitado]="pagina() === 0"
+      (click)="ir.emit(pagina() - 1)"
+    >
+      Anterior
+    </app-boton>
+    <span class="c-paginacion__posicion" aria-live="polite">
+      Página {{ pagina() + 1 }} de {{ paginas() }}
+      @if (total() !== null && nombre()) {
+        · {{ total() }} {{ nombre() }}
+      }
+    </span>
+    <app-boton
+      [secundario]="true"
+      [deshabilitado]="pagina() + 1 >= paginas()"
+      (click)="ir.emit(pagina() + 1)"
+    >
+      Siguiente
+    </app-boton>
+  </nav>
+}

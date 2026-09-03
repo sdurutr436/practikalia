@@ -4,20 +4,7 @@
   <!-- Pastillas a la izquierda y los dos botones a la derecha del todo, con
        "Descargar plantilla" como el más a la derecha. -->
   <div class="c-barra-alumnado">
-    <ul class="o-etiquetas">
-      @for (pastilla of pastillas; track pastilla.clave) {
-        <li>
-          <a
-            class="c-filtro"
-            [class.c-filtro--activo]="clave() === pastilla.clave"
-            routerLink="/alumnado"
-            [queryParams]="{ estado: pastilla.clave, pagina: null }"
-          >
-            {{ pastilla.etiqueta }}
-          </a>
-        </li>
-      }
-    </ul>
+    <app-pastillas [opciones]="pastillas" [activa]="clave()" ruta="/alumnado" />
 
     <div class="c-barra-alumnado__acciones">
       <app-boton icono="subir" [secundario]="true" (click)="elegirFichero()">
@@ -117,28 +104,14 @@
     </ul>
   </app-estado>
 
-  @if (paginas() > 1) {
-    <nav class="c-paginacion" aria-label="Páginas de alumnado">
-      <app-boton
-        [secundario]="true"
-        icono="volver"
-        [deshabilitado]="paginaActual() === 0"
-        (click)="irAPagina(paginaActual() - 1)"
-      >
-        Anterior
-      </app-boton>
-      <span class="c-paginacion__posicion" aria-live="polite">
-        Página {{ paginaActual() + 1 }} de {{ paginas() }} · {{ total() }} alumnos
-      </span>
-      <app-boton
-        [secundario]="true"
-        [deshabilitado]="paginaActual() + 1 >= paginas()"
-        (click)="irAPagina(paginaActual() + 1)"
-      >
-        Siguiente
-      </app-boton>
-    </nav>
-  }
+  <app-paginacion
+    [pagina]="paginaActual()"
+    [paginas]="paginas()"
+    seccion="alumnado"
+    [total]="total()"
+    nombre="alumnos"
+    (ir)="irAPagina($event)"
+  />
 </main>
 
 @if (fichaAbierta()) {

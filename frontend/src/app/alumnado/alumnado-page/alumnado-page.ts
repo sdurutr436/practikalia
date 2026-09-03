@@ -18,8 +18,16 @@ import { BotonComponent } from '../../compartido/boton/boton';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { IconoComponent } from '../../compartido/icono/icono';
+import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
+import { PastillasComponent } from '../../compartido/pastillas/pastillas';
 import { AlumnoModalComponent } from '../alumno-modal/alumno-modal';
-import { Alumno, AlumnadoService, FichaAlumnoRequest, PaginaAlumnos } from '../alumnado.service';
+import {
+  Alumno,
+  AlumnadoService,
+  FichaAlumnoRequest,
+  PaginaAlumnos,
+  nombreCompleto,
+} from '../alumnado.service';
 
 /** Tres columnas por tres filas, igual que empresas y reseñas. */
 const POR_PAGINA = 9;
@@ -70,6 +78,8 @@ const MENSAJES_ALUMNADO: Record<string, string> = {
     AlertaComponent,
     BotonComponent,
     IconoComponent,
+    PaginacionComponent,
+    PastillasComponent,
     AlumnoModalComponent,
   ],
   templateUrl: './alumnado-page.html',
@@ -140,10 +150,7 @@ export class AlumnadoPage {
     });
   }
 
-  protected nombreCompleto(alumno: Alumno): string {
-    const partes = [alumno.nombre, alumno.apellido1, alumno.apellido2].filter(Boolean);
-    return partes.length > 0 ? partes.join(' ') : 'Sin nombre';
-  }
+  protected readonly nombreCompleto = nombreCompleto;
 
   protected irAPagina(pagina: number): void {
     void this.router.navigate([], {

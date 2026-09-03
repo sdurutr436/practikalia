@@ -9,7 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { EmpresaService } from '../empresa.service';
@@ -19,6 +19,15 @@ import { TarjetaEmpresaComponent } from '../tarjeta-empresa/tarjeta-empresa';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { IconoComponent } from '../../compartido/icono/icono';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
+import { PastillasComponent } from '../../compartido/pastillas/pastillas';
+
+/** Las pastillas de publicación. La clave vacía es «Todas», que va sin parámetro. */
+const PASTILLAS = [
+  { clave: '', etiqueta: 'Todas' },
+  { clave: 'true', etiqueta: 'Publicadas' },
+  { clave: 'false', etiqueta: 'Sin publicar' },
+] as const;
 
 /** Tres columnas por tres filas: lo que cabe sin desplazarse. */
 const POR_PAGINA = 9;
@@ -29,12 +38,13 @@ const ESPERA_TECLEO = 250;
 @Component({
   selector: 'app-empresas-listado-page',
   imports: [
-    RouterLink,
     EstadoComponent,
     TarjetaEmpresaComponent,
     CabeceraComponent,
     IconoComponent,
     BotonComponent,
+    PaginacionComponent,
+    PastillasComponent,
   ],
   templateUrl: './empresas-listado-page.html',
 })
@@ -46,6 +56,7 @@ export class EmpresasListadoPage {
   private readonly router = inject(Router);
 
   protected readonly esVistaProfesor = esVistaProfesor;
+  protected readonly pastillas = PASTILLAS;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly resultado = signal<PaginaEmpresas | null>(null);
@@ -64,13 +75,12 @@ export class EmpresasListadoPage {
    */
   private readonly parametros = toSignal(this.route.queryParamMap, { requireSync: true });
   protected readonly filtro = computed(() => this.parametros().get('publicada'));
+  /** La pastilla activa; sin parámetro, la de clave vacía. */
+  protected readonly filtroActivo = computed(() => this.filtro() ?? '');
   protected readonly texto = computed(() => this.parametros().get('texto') ?? '');
   protected readonly sectorId = computed(() => this.parametros().get('sectorId') ?? '');
   protected readonly etiquetaIds = computed(() =>
-    (this.parametros().get('etiquetaIds') ?? '')
-      .split(',')
-      .filter(Boolean)
-      .map(Number),
+    (this.parametros().get('etiquetaIds') ?? '').split(',').filter(Boolean).map(Number),
   );
   protected readonly paginaActual = computed(() => Number(this.parametros().get('pagina') ?? 0));
 

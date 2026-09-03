@@ -30,41 +30,12 @@
     </div>
 
     @if (esProfesor()) {
-      <ul class="o-etiquetas">
-        <li>
-          <a
-            class="c-filtro"
-            [class.c-filtro--activo]="filtro() === null"
-            routerLink="/empresas"
-            [queryParams]="{ publicada: null, pagina: null }"
-            queryParamsHandling="merge"
-          >
-            Todas
-          </a>
-        </li>
-        <li>
-          <a
-            class="c-filtro"
-            [class.c-filtro--activo]="filtro() === 'true'"
-            routerLink="/empresas"
-            [queryParams]="{ publicada: true, pagina: null }"
-            queryParamsHandling="merge"
-          >
-            Publicadas
-          </a>
-        </li>
-        <li>
-          <a
-            class="c-filtro"
-            [class.c-filtro--activo]="filtro() === 'false'"
-            routerLink="/empresas"
-            [queryParams]="{ publicada: false, pagina: null }"
-            queryParamsHandling="merge"
-          >
-            Sin publicar
-          </a>
-        </li>
-      </ul>
+      <app-pastillas
+        [opciones]="pastillas"
+        [activa]="filtroActivo()"
+        ruta="/empresas"
+        parametro="publicada"
+      />
     }
 
     <button
@@ -177,26 +148,10 @@
     </ul>
   </app-estado>
 
-  @if (paginas() > 1) {
-    <nav class="c-paginacion" aria-label="Páginas de empresas">
-      <app-boton
-        [secundario]="true"
-        icono="volver"
-        [deshabilitado]="paginaActual() === 0"
-        (click)="irAPagina(paginaActual() - 1)"
-      >
-        Anterior
-      </app-boton>
-      <span class="c-paginacion__posicion" aria-live="polite">
-        Página {{ paginaActual() + 1 }} de {{ paginas() }}
-      </span>
-      <app-boton
-        [secundario]="true"
-        [deshabilitado]="paginaActual() + 1 >= paginas()"
-        (click)="irAPagina(paginaActual() + 1)"
-      >
-        Siguiente
-      </app-boton>
-    </nav>
-  }
+  <app-paginacion
+    [pagina]="paginaActual()"
+    [paginas]="paginas()"
+    seccion="empresas"
+    (ir)="irAPagina($event)"
+  />
 </main>

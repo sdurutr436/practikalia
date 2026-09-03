@@ -7,6 +7,8 @@ import { BotonComponent } from '../../compartido/boton/boton';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { EstadoComponent } from '../../compartido/estado/estado';
 import { EstrellasComponent } from '../../compartido/estrellas/estrellas';
+import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
+import { PastillasComponent } from '../../compartido/pastillas/pastillas';
 import { RechazoModalComponent } from '../rechazo-modal/rechazo-modal';
 import { CalificacionConfig, EstadoReview, PaginaReviews, Review } from '../review.model';
 import { ReviewService } from '../review.service';
@@ -53,6 +55,8 @@ const VACIOS: Record<string, string> = {
     AlertaComponent,
     BotonComponent,
     EstrellasComponent,
+    PaginacionComponent,
+    PastillasComponent,
     RechazoModalComponent,
   ],
   templateUrl: './reviews-page.html',
