@@ -49,13 +49,21 @@
   gap: s.$espaciado-grande;
 }
 
+// El buscador y la lista, apilados; el buscador solo aparece con >0 correos.
+.c-config__lista {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+  align-content: start;
+}
+
 .c-correos {
   display: grid;
   gap: s.$espaciado-pequeno;
-  // Con la whitelist poblada la columna crecería más que la del alta, que se
-  // quedaría flotando sola arriba con un hueco enorme debajo. Mismo tope que
-  // las columnas del catálogo de sectores.
-  max-height: 24rem;
+  // Acotada y con scroll propio: con la whitelist poblada, la lista no puede
+  // marcar el alto de toda la tarjeta ni dejar el alta flotando con un hueco
+  // enorme debajo. Deliberadamente más baja que las columnas del catálogo de
+  // sectores (24rem): aquí ya hay buscador para llegar a un correo concreto.
+  max-height: 14rem;
   overflow-y: auto;
   scrollbar-width: thin;
 }
