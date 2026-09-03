@@ -5,7 +5,7 @@ import { Alumno } from '../../alumnado/alumnado.service';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
 import { AuthService } from '../../auth/auth.service';
 import { GradoOpcion, RegistroService } from '../../auth/registro.service';
-import { mensajeDeError } from '../../auth/mensajes-error';
+import { MENSAJES_CUENTA, mensajeDeError } from '../../auth/mensajes-error';
 import { BotonComponent } from '../../compartido/boton/boton';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { EstadoComponent } from '../../compartido/estado/estado';
@@ -43,12 +43,8 @@ const VACIOS: Record<string, string> = {
 
 /** Mensajes por código del contrato de /api/profesores. */
 const MENSAJES_PROFESORADO: Record<string, string> = {
-  CORREO_YA_EXISTE: 'Ya hay otra cuenta con ese correo.',
-  DNI_INVALIDO: 'El DNI no es válido: revisa el número y la letra.',
-  DNI_YA_REGISTRADO: 'Ya hay una cuenta con ese DNI.',
-  CORREO_DOMINIO_NO_PERMITIDO: 'Ese correo no es de un dominio que admita el centro.',
+  ...MENSAJES_CUENTA,
   USUARIO_NO_ENCONTRADO: 'Ese profesor ya no existe.',
-  GRADO_NO_ENCONTRADO: 'La clase seleccionada ya no existe.',
   ULTIMO_ADMINISTRADOR:
     'Es el único administrador del centro: nombra a otro antes de quitarle el permiso.',
   ASIGNACION_NO_ENCONTRADA: 'Alguno de los alumnos elegidos ya no tiene empresa asignada.',

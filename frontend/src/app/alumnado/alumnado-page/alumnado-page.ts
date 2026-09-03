@@ -12,7 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { GradoOpcion, RegistroService } from '../../auth/registro.service';
-import { mensajeDeError } from '../../auth/mensajes-error';
+import { MENSAJES_CUENTA, mensajeDeError } from '../../auth/mensajes-error';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { BotonComponent } from '../../compartido/boton/boton';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
@@ -51,12 +51,8 @@ const VACIOS: Record<string, string> = {
  * usa tal cual cuando el código no está mapeado aquí.
  */
 const MENSAJES_ALUMNADO: Record<string, string> = {
-  CORREO_YA_EXISTE: 'Ya hay otra cuenta con ese correo.',
-  DNI_INVALIDO: 'El DNI no es válido: revisa el número y la letra.',
-  DNI_YA_REGISTRADO: 'Ya hay una cuenta con ese DNI.',
-  CORREO_DOMINIO_NO_PERMITIDO: 'Ese correo no es de un dominio que admita el centro.',
+  ...MENSAJES_CUENTA,
   USUARIO_NO_ENCONTRADO: 'Ese alumno ya no existe.',
-  GRADO_NO_ENCONTRADO: 'La clase seleccionada ya no existe.',
   ACCESO_DENEGADO: 'Solo un administrador puede confirmar cuentas.',
 };
 

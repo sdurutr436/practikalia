@@ -21,6 +21,19 @@ export const MENSAJES_CAMBIO_CONTRASENA: Record<string, string> = {
     'La contraseña nueva no cumple la política: mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial.',
 };
 
+/**
+ * Códigos que comparten el alta y la edición de cualquier cuenta del centro:
+ * los usan el listado de alumnado y el de profesorado, cada uno con los suyos
+ * propios encima.
+ */
+export const MENSAJES_CUENTA: Record<string, string> = {
+  CORREO_YA_EXISTE: 'Ya hay otra cuenta con ese correo.',
+  DNI_INVALIDO: 'El DNI no es válido: revisa el número y la letra.',
+  DNI_YA_REGISTRADO: 'Ya hay una cuenta con ese DNI.',
+  CORREO_DOMINIO_NO_PERMITIDO: 'Ese correo no es de un dominio que admita el centro.',
+  GRADO_NO_ENCONTRADO: 'La clase seleccionada ya no existe.',
+};
+
 /** Mensajes de UI por código del contrato de /api/empresas (crear/editar/imagen). */
 export const MENSAJES_EMPRESA: Record<string, string> = {
   ETIQUETA_NO_ENCONTRADA: 'El sector o alguna de las etiquetas indicadas no existe.',
