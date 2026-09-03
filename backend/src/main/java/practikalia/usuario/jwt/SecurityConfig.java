@@ -39,6 +39,15 @@ public class SecurityConfig {
                                 .hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/grados/publico").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/grados").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        // El nombre y el logo los pinta el acceso antes de que nadie haya
+                        // entrado; renombrar el centro, subir el logo y la whitelist son de
+                        // admin — son correos de personas, dato personal.
+                        .requestMatchers(HttpMethod.GET, "/api/centro").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/centro").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/centro/logo").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/correos-permitidos").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/correos-permitidos").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/correos-permitidos/*").hasAuthority("ADMIN")
                         // El catálogo plano lo lee cualquiera (formulario de empresa, intereses
                         // del alumnado); montarlo y desmontarlo es solo de admin.
                         .requestMatchers(HttpMethod.GET, "/api/etiquetas/arbol").hasAuthority("ADMIN")
