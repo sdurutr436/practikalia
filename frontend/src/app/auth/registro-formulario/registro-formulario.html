@@ -1,0 +1,120 @@
+@if (enviado()) {
+  <div class="c-formulario">
+    <h1 class="c-formulario__titulo">Solicitud enviada</h1>
+    <app-alerta tipo="aviso">
+      Un administrador revisará tu alta y activará la cuenta cuando confirme la matriculación. Te
+      avisará por el correo indicado.
+    </app-alerta>
+    <app-boton icono="entrar" (click)="volver.emit()">Volver a iniciar sesión</app-boton>
+  </div>
+} @else {
+  <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
+    <h1 class="c-formulario__titulo">Crear cuenta</h1>
+    <p class="c-formulario__descripcion">
+      Los campos marcados con <span class="c-requerido" aria-hidden="true">*</span> son
+      obligatorios.
+    </p>
+
+    @if (error(); as mensaje) {
+      <app-alerta>{{ mensaje }}</app-alerta>
+    }
+
+    <app-campo
+      etiqueta="Nombre completo"
+      icono="persona"
+      para="nombre"
+      [requerido]="true"
+      [control]="form.controls.nombre"
+      error="Introduce tu nombre."
+    >
+      <input class="c-campo__entrada" id="nombre" formControlName="nombre" />
+    </app-campo>
+
+    <app-campo
+      etiqueta="Primer apellido"
+      para="apellido1"
+      [requerido]="true"
+      [control]="form.controls.apellido1"
+      error="Introduce el primer apellido."
+    >
+      <input class="c-campo__entrada" id="apellido1" formControlName="apellido1" />
+    </app-campo>
+
+    <app-campo etiqueta="Segundo apellido" para="apellido2">
+      <input class="c-campo__entrada" id="apellido2" formControlName="apellido2" />
+    </app-campo>
+
+    <app-campo
+      etiqueta="DNI"
+      icono="numero"
+      para="dni"
+      [requerido]="true"
+      ayuda="Se comprueba el formato (número y letra), no la matriculación real: eso lo confirma el centro al aprobar la cuenta."
+      [control]="form.controls.dni"
+      error="El DNI no es válido."
+    >
+      <input
+        class="c-campo__entrada"
+        id="dni"
+        formControlName="dni"
+        placeholder="12345678Z"
+        maxlength="9"
+        aria-describedby="dni-ayuda"
+      />
+    </app-campo>
+
+    <app-campo
+      etiqueta="Clase"
+      icono="grado"
+      para="gradoId"
+      [requerido]="true"
+      [control]="form.controls.gradoId"
+      error="Selecciona tu clase."
+    >
+      <app-desplegable
+        id="gradoId"
+        marcador="Selecciona tu clase"
+        [control]="form.controls.gradoId"
+        [opciones]="opcionesGrado()"
+      />
+      @if (errorGrados(); as mensaje) {
+        <p class="c-campo__error">{{ mensaje }}</p>
+      }
+    </app-campo>
+
+    <app-campo
+      etiqueta="Correo institucional"
+      icono="correo"
+      para="correoRegistro"
+      [requerido]="true"
+      ayuda="El de &#64;g.educaand.es, o el propio del centro si lo tienes."
+      [control]="form.controls.correo"
+      error="Usa tu correo institucional."
+    >
+      <input
+        class="c-campo__entrada"
+        id="correoRegistro"
+        type="email"
+        formControlName="correo"
+        autocomplete="email"
+        spellcheck="false"
+        placeholder="nombre@g.educaand.es"
+        aria-describedby="correoRegistro-ayuda"
+      />
+    </app-campo>
+
+    <div class="u-honeypot" aria-hidden="true">
+      <label for="webRegistro">Web</label>
+      <input id="webRegistro" type="text" formControlName="web" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <app-boton tipo="submit" icono="entrar" [cargando]="enviando()" textoCargando="Enviando…">
+      Crear cuenta
+    </app-boton>
+
+    <p class="c-formulario__pie">
+      ¿Ya tienes cuenta?
+      <button class="c-enlace" type="button" (click)="volver.emit()">Inicia sesión</button>
+    </p>
+  </form>
+}

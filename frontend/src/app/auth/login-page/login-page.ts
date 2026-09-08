@@ -1,17 +1,10 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { FondoComponent } from '../../compartido/fondo/fondo';
 import { IconoComponent } from '../../compartido/icono/icono';
-import { AuthService } from '../auth.service';
 import { CentroService } from '../../centro/centro.service';
-import { MENSAJES_LOGIN, MENSAJES_REGISTRO, mensajeDeError } from '../mensajes-error';
 import { GradoOpcion, RegistroService } from '../registro.service';
-import { correoInstitucional, dniValido } from '../validadores';
-import { AlertaComponent } from '../../compartido/alerta/alerta';
-import { CampoComponent } from '../../compartido/campo/campo';
-import { BotonComponent } from '../../compartido/boton/boton';
-import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
+import { LoginFormularioComponent } from '../login-formulario/login-formulario';
+import { RegistroFormularioComponent } from '../registro-formulario/registro-formulario';
 
 // Catálogo local de frases. Si algún día las sirve la API, esta constante es
 // lo único que cambia: el resto ya trabaja contra una señal.
@@ -53,31 +46,15 @@ function diaDelAno(): number {
 
 @Component({
   selector: 'app-login-page',
-  imports: [
-    ReactiveFormsModule,
-    IconoComponent,
-    FondoComponent,
-    AlertaComponent,
-    CampoComponent,
-    BotonComponent,
-    DesplegableComponent,
-  ],
+  imports: [IconoComponent, FondoComponent, LoginFormularioComponent, RegistroFormularioComponent],
   templateUrl: './login-page.html',
 })
 export class LoginPage {
-  private readonly auth = inject(AuthService);
   protected readonly centroService = inject(CentroService);
   private readonly registro = inject(RegistroService);
-  private readonly router = inject(Router);
 
   protected readonly vista = signal<'login' | 'registro'>('login');
-  protected readonly enviando = signal(false);
-  protected readonly verContrasena = signal(false);
-  protected readonly error = signal<string | null>(null);
 
-  protected readonly enviandoRegistro = signal(false);
-  protected readonly errorRegistro = signal<string | null>(null);
-  protected readonly registroEnviado = signal(false);
   protected readonly grados = signal<GradoOpcion[] | null>(null);
   protected readonly errorGrados = signal<string | null>(null);
   /** El catálogo de clases tal y como lo pide el desplegable. */
@@ -93,23 +70,6 @@ export class LoginPage {
     inject(DestroyRef).onDestroy(() => clearInterval(rotacion));
   }
 
-  protected readonly form = inject(NonNullableFormBuilder).group({
-    correo: ['', [Validators.required, Validators.email]],
-    contrasena: ['', Validators.required],
-    // Honeypot: oculto en la plantilla, el backend exige que llegue vacío.
-    web: [''],
-  });
-
-  protected readonly formRegistro = inject(NonNullableFormBuilder).group({
-    nombre: ['', Validators.required],
-    apellido1: ['', Validators.required],
-    apellido2: [''],
-    dni: ['', [Validators.required, dniValido]],
-    gradoId: ['', Validators.required],
-    correo: ['', [Validators.required, correoInstitucional]],
-    web: [''],
-  });
-
   protected abrirRegistro(): void {
     this.vista.set('registro');
     if (this.grados() === null) {
@@ -119,7 +79,6 @@ export class LoginPage {
 
   protected abrirLogin(): void {
     this.vista.set('login');
-    this.registroEnviado.set(false);
   }
 
   private async cargarGrados(): Promise<void> {
@@ -127,57 +86,6 @@ export class LoginPage {
       this.grados.set(await this.registro.listarGrados());
     } catch {
       this.errorGrados.set('No se pudo cargar el listado de clases. Inténtalo más tarde.');
-    }
-  }
-
-  protected async enviar(): Promise<void> {
-    if (this.enviando()) {
-      return;
-    }
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-    this.enviando.set(true);
-    this.error.set(null);
-    const { correo, contrasena, web } = this.form.getRawValue();
-    try {
-      const sesion = await this.auth.login(correo, contrasena, web);
-      await this.router.navigate([sesion.debeCambiarContrasena ? '/cambiar-contrasena' : '/']);
-    } catch (e) {
-      this.error.set(mensajeDeError(e, MENSAJES_LOGIN));
-    } finally {
-      this.enviando.set(false);
-    }
-  }
-
-  protected async enviarRegistro(): Promise<void> {
-    if (this.enviandoRegistro()) {
-      return;
-    }
-    if (this.formRegistro.invalid) {
-      this.formRegistro.markAllAsTouched();
-      return;
-    }
-    this.enviandoRegistro.set(true);
-    this.errorRegistro.set(null);
-    const { nombre, apellido1, apellido2, dni, gradoId, correo, web } =
-      this.formRegistro.getRawValue();
-    try {
-      await this.registro.registrar({
-        nombre,
-        apellido1,
-        apellido2: apellido2 || null,
-        dni: dni.toUpperCase(),
-        gradoId: Number(gradoId),
-        correo,
-        web,
-      });
-      this.registroEnviado.set(true);
-    } catch (e) {
-      this.errorRegistro.set(mensajeDeError(e, MENSAJES_REGISTRO));
-    } finally {
-      this.enviandoRegistro.set(false);
     }
   }
 }
