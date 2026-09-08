@@ -4,21 +4,13 @@ import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EstadoComponent } from '../../compartido/estado/estado';
-import {
-  MENSAJES_ASIGNACION,
-  MENSAJES_EMPRESA,
-  MENSAJES_INTERES,
-  mensajeDeError,
-} from '../../auth/mensajes-error';
+import { MENSAJES_EMPRESA, MENSAJES_INTERES, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
-import {
-  Asignacion,
-  TasaContratacion,
-  textoContratacion,
-} from '../../asignaciones/asignacion.model';
+import { Asignacion, TasaContratacion } from '../../asignaciones/asignacion.model';
 import { AuthService, Sesion } from '../../auth/auth.service';
 import { ReviewService } from '../../reviews/review.service';
-import { Review } from '../../reviews/review.model';
+import { CalificacionConfig, Review } from '../../reviews/review.model';
+import { ReviewCardComponent } from '../../reviews/review-card/review-card';
 import { InteresService } from '../../intereses/interes.service';
 import { Interesado } from '../../intereses/interes.model';
 import { EmpresaService } from '../empresa.service';
@@ -28,15 +20,7 @@ import { VolverComponent } from '../../compartido/volver/volver';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
-import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 import { IconoComponent } from '../../compartido/icono/icono';
-
-/** Las tres respuestas posibles a «¿acabó contratado?»; `''` es «todavía no se sabe». */
-const CONTRATACION = [
-  { valor: '', etiqueta: 'Sin decidir' },
-  { valor: 'true', etiqueta: 'Contratado' },
-  { valor: 'false', etiqueta: 'No contratado' },
-];
 
 /** Cada bloque de la ficha que se puede editar con su propio lápiz. */
 type Seccion = 'foto' | 'info' | 'etiquetas' | 'descripcion' | 'observaciones' | 'tutores';
@@ -65,8 +49,8 @@ function porNombre(a: Etiqueta, b: Etiqueta): number {
     AlertaComponent,
     CampoComponent,
     BotonComponent,
-    DesplegableComponent,
     IconoComponent,
+    ReviewCardComponent,
   ],
   templateUrl: './empresa-detalle-page.html',
 })
@@ -80,23 +64,17 @@ export class EmpresaDetallePage {
   private readonly fb = inject(NonNullableFormBuilder);
 
   protected readonly esVistaProfesor = esVistaProfesor;
-  protected readonly textoContratacion = textoContratacion;
   protected readonly sesion = this.authService.sesion;
-  protected readonly CONTRATACION = CONTRATACION;
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly empresa = signal<Empresa | null>(null);
-
-  protected readonly asignaciones = signal<Asignacion[]>([]);
-  protected readonly cargandoAsignaciones = signal(false);
-  protected readonly errorAsignaciones = signal<string | null>(null);
-  protected readonly guardandoId = signal<number | null>(null);
-  protected readonly errorCierre = signal<{ id: number; mensaje: string } | null>(null);
 
   protected readonly reviews = signal<Review[]>([]);
   protected readonly cargandoReviews = signal(false);
   protected readonly errorReviews = signal<string | null>(null);
   protected readonly asignacionesSinReview = signal<Asignacion[]>([]);
+  /** El rango lo fija cada instituto; sin él la tarjeta de review no pinta estrellas. */
+  protected readonly calificacion = signal<CalificacionConfig | null>(null);
 
   protected readonly interesado = signal(false);
   protected readonly guardandoInteres = signal(false);
@@ -347,7 +325,6 @@ export class EmpresaDetallePage {
       void this.cargarTasaContratacion(id);
       if (esVistaProfesor(empresa)) {
         this.precargarFormulario(empresa);
-        void this.cargarAsignaciones(id);
         void this.cargarInteresados(id);
       }
       const promesaReviews = this.cargarReviews(id);
@@ -385,12 +362,21 @@ export class EmpresaDetallePage {
 
   private async cargarReviews(empresaId: number): Promise<void> {
     this.cargandoReviews.set(true);
+    void this.cargarCalificacion();
     try {
       this.reviews.set(await this.reviewService.listarPorEmpresa(empresaId));
     } catch {
       this.errorReviews.set('No se pudieron cargar las reviews.');
     } finally {
       this.cargandoReviews.set(false);
+    }
+  }
+
+  private async cargarCalificacion(): Promise<void> {
+    try {
+      this.calificacion.set(await this.reviewService.calificacionConfig());
+    } catch {
+      // ponytail: best-effort — sin el rango, la tarjeta de review simplemente no pinta estrellas.
     }
   }
 
@@ -459,45 +445,4 @@ export class EmpresaDetallePage {
     }
   }
 
-  private async cargarAsignaciones(empresaId: number): Promise<void> {
-    this.cargandoAsignaciones.set(true);
-    try {
-      this.asignaciones.set(await this.asignacionService.listarPorEmpresa(empresaId));
-    } catch {
-      this.errorAsignaciones.set('No se pudieron cargar las asignaciones.');
-    } finally {
-      this.cargandoAsignaciones.set(false);
-    }
-  }
-
-  /** Con qué opción arranca el desplegable de contratación de esa asignación. */
-  protected textoContratado(asignacion: Asignacion): string {
-    return asignacion.contratadoPosterior === null ? '' : `${asignacion.contratadoPosterior}`;
-  }
-
-  protected async cerrarAsignacion(
-    asignacion: Asignacion,
-    fechaFin: string,
-    contratadoTexto: string,
-  ): Promise<void> {
-    if (!fechaFin || this.guardandoId() !== null) {
-      return;
-    }
-    this.guardandoId.set(asignacion.id);
-    this.errorCierre.set(null);
-    const contratadoPosterior = contratadoTexto === '' ? null : contratadoTexto === 'true';
-    try {
-      const actualizada = await this.asignacionService.cerrar(asignacion.id, {
-        fechaFin,
-        contratadoPosterior,
-      });
-      this.asignaciones.update((lista) =>
-        lista.map((a) => (a.id === actualizada.id ? actualizada : a)),
-      );
-    } catch (e) {
-      this.errorCierre.set({ id: asignacion.id, mensaje: mensajeDeError(e, MENSAJES_ASIGNACION) });
-    } finally {
-      this.guardandoId.set(null);
-    }
-  }
 }

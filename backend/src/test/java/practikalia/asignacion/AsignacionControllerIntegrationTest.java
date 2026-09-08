@@ -162,8 +162,24 @@ class AsignacionControllerIntegrationTest {
         mockMvc.perform(get("/api/empresas/" + empresa.getId() + "/asignaciones")
                         .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].empresaNombre").value("Acme"));
+                .andExpect(jsonPath("$.contenido.length()").value(1))
+                .andExpect(jsonPath("$.contenido[0].empresaNombre").value("Acme"));
+    }
+
+    @Test
+    void asignacionesDeUnaEmpresaVanPaginadas() throws Exception {
+        asignacionRepository.save(new Asignacion(alumno, empresa, profesor, grado, 1, LocalDate.of(2026, 1, 15)));
+        asignacionRepository.save(new Asignacion(otroAlumno, empresa, profesor, grado, 1, LocalDate.of(2026, 2, 1)));
+
+        mockMvc.perform(get("/api/empresas/" + empresa.getId() + "/asignaciones")
+                        .param("tamano", "1")
+                        .with(user("prof@iesejemplo.es").authorities(new SimpleGrantedAuthority("ROLE_PROFESOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.length()").value(1))
+                .andExpect(jsonPath("$.total").value(2))
+                .andExpect(jsonPath("$.paginas").value(2))
+                // Orden por fecha de inicio descendente: la más reciente primero.
+                .andExpect(jsonPath("$.contenido[0].alumnoCorreo").value("otro@iesejemplo.es"));
     }
 
     @Test

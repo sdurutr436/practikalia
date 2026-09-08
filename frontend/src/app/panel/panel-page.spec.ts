@@ -23,6 +23,7 @@ const PENDIENTE = {
   id: 3,
   asignacionId: 1,
   empresaId: 7,
+  empresaNombre: 'Grupo Ondara Software',
   alumnoCorreo: 'lucia@centro.es',
   autorCorreo: 'lucia@centro.es',
   contenido: 'Tareas reales desde el primer día.',

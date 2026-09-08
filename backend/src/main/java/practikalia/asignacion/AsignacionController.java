@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import practikalia.common.PaginaDto;
 
 /**
  * Asignación de un alumno a una empresa para un grado/año concreto (snapshot
@@ -49,10 +51,14 @@ public class AsignacionController {
                 asignacionService.listarPorAlumno(alumnoId, esProfesor(authentication), authentication.getName()));
     }
 
-    @Operation(summary = "Listar las asignaciones de una empresa", description = "Cualquier rol autenticado. Incluye el histórico completo (todos los alumnos y años).")
+    @Operation(summary = "Listar las asignaciones de una empresa", description = "Solo profesor/admin. Paginado; "
+            + "incluye el histórico completo (todos los alumnos y años), más reciente primero.")
     @GetMapping("/api/empresas/{empresaId}/asignaciones")
-    public ResponseEntity<?> listarPorEmpresa(@PathVariable Long empresaId) {
-        return ResponseEntity.ok(asignacionService.listarPorEmpresa(empresaId));
+    public ResponseEntity<PaginaDto<AsignacionDto>> listarPorEmpresa(
+            @PathVariable Long empresaId,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamano) {
+        return ResponseEntity.ok(asignacionService.listarPorEmpresa(empresaId, pagina, tamano));
     }
 
     @Operation(summary = "Tasa de contratación posterior de una empresa", description = "Cualquier rol autenticado. Ratio "

@@ -238,6 +238,7 @@ describe('detalle de empresa', () => {
       .expectOne('/api/empresas/1/tasa-contratacion')
       .flush({ empresaId: 1, asignacionesDecididas: 4, contrataciones: 3, tasa: 0.75 });
     http.expectOne('/api/empresas/1/reviews').flush([]);
+    http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
     http
       .expectOne('/api/auth/me')
       .flush({
@@ -270,13 +271,14 @@ describe('detalle de empresa', () => {
     await harness.navigateByUrl('/empresas/2');
     http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
     await esperarMicrotareas();
-    // Vista profesor: dispara además la carga de asignaciones, reviews e interesados
-    // de la empresa, y completa la sesión con /me (post-login no trae id/correo).
+    // Vista profesor: dispara además la carga de reviews e interesados de la
+    // empresa, y completa la sesión con /me (post-login no trae id/correo).
+    // Las asignaciones ya no se cargan aquí: viven en su propia página paginada.
     http
       .expectOne('/api/empresas/2/tasa-contratacion')
       .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
     http.expectOne('/api/empresas/2/interesados').flush([]);
     http
       .expectOne('/api/auth/me')
@@ -321,8 +323,8 @@ describe('detalle de empresa', () => {
     http
       .expectOne('/api/empresas/2/tasa-contratacion')
       .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
     http.expectOne('/api/empresas/2/interesados').flush([]);
     http
       .expectOne('/api/auth/me')
@@ -532,8 +534,8 @@ describe('formulario de empresa', () => {
     http
       .expectOne('/api/empresas/5/tasa-contratacion')
       .flush({ empresaId: 5, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/5/asignaciones').flush([]);
     http.expectOne('/api/empresas/5/reviews').flush([]);
+    http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
     http.expectOne('/api/empresas/5/interesados').flush([]);
     http
       .expectOne('/api/auth/me')
@@ -582,8 +584,8 @@ describe('formulario de empresa', () => {
     http
       .expectOne('/api/empresas/5/tasa-contratacion')
       .flush({ empresaId: 5, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/5/asignaciones').flush([]);
     http.expectOne('/api/empresas/5/reviews').flush([]);
+    http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
     http.expectOne('/api/empresas/5/interesados').flush([]);
     http
       .expectOne('/api/auth/me')

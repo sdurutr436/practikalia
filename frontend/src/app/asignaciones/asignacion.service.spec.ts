@@ -42,12 +42,13 @@ describe('AsignacionService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('listarPorEmpresa consulta GET /api/empresas/{id}/asignaciones', async () => {
-    const promesa = service.listarPorEmpresa(20);
-    const peticion = httpMock.expectOne('/api/empresas/20/asignaciones');
+  it('listarPorEmpresa consulta GET /api/empresas/{id}/asignaciones paginado', async () => {
+    const promesa = service.listarPorEmpresa(20, 0, 10);
+    const peticion = httpMock.expectOne('/api/empresas/20/asignaciones?pagina=0&tamano=10');
     expect(peticion.request.method).toBe('GET');
-    peticion.flush([ASIGNACION]);
-    expect(await promesa).toEqual([ASIGNACION]);
+    const pagina = { contenido: [ASIGNACION], pagina: 0, tamano: 1, total: 1, paginas: 1 };
+    peticion.flush(pagina);
+    expect(await promesa).toEqual(pagina);
   });
 
   it('listarPorAlumno consulta GET /api/alumnos/{id}/asignaciones', async () => {

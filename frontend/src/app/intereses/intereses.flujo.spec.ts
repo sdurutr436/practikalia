@@ -73,6 +73,7 @@ describe('interés en el detalle de empresa (vista alumno)', () => {
       .expectOne('/api/empresas/2/tasa-contratacion')
       .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
     http.expectOne('/api/auth/me').flush({
       id: 10,
       correo: 'alumno@centro.es',
@@ -177,8 +178,8 @@ describe('interesados en el detalle de empresa (vista profesor)', () => {
     http
       .expectOne('/api/empresas/2/tasa-contratacion')
       .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/2/asignaciones').flush([]);
     http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/reviews/calificacion-config').flush({ min: 1, max: 5 });
     http.expectOne('/api/empresas/2/interesados').flush([
       {
         alumnoId: 10,

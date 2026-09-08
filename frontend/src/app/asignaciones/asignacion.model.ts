@@ -29,6 +29,15 @@ export interface Asignacion {
   contratadoPosterior: boolean | null;
 }
 
+/** Página de asignaciones de una empresa (`GET /api/empresas/{id}/asignaciones`). */
+export interface PaginaAsignaciones {
+  contenido: Asignacion[];
+  pagina: number;
+  tamano: number;
+  total: number;
+  paginas: number;
+}
+
 /**
  * Texto de la contratación posterior. Vive aquí porque la ficha de empresa y
  * el histórico del alumno pintaban el mismo ternario de tres ramas en plantilla.

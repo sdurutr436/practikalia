@@ -1,0 +1,75 @@
+<main class="o-pagina">
+  <app-volver [a]="['/empresas', empresaId]" texto="Volver a la ficha" />
+
+  <app-cabecera titulo="Asignaciones">
+    <app-boton icono="anadir" [enlace]="['/empresas', empresaId, 'asignaciones', 'nueva']">
+      Crear asignación
+    </app-boton>
+  </app-cabecera>
+
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="asignaciones().length === 0"
+    mensajeCargando="Cargando asignaciones…"
+    mensajeVacio="Todavía no hay asignaciones para esta empresa."
+  >
+    <ul class="o-lista">
+      @for (asignacion of asignaciones(); track asignacion.id) {
+        <li class="c-fila">
+          <p>
+            {{ asignacion.alumnoCorreo }} · {{ asignacion.grado.nombre }} ({{ asignacion.anio }}) ·
+            tutor {{ asignacion.tutorCentroCorreo }}
+          </p>
+          <p>
+            Inicio {{ asignacion.fechaInicio }} · Fin {{ asignacion.fechaFin || 'abierta' }} ·
+            Contratación {{ textoContratacion(asignacion) }}
+          </p>
+          <a [routerLink]="['/alumnos', asignacion.alumnoId, 'asignaciones']">
+            Ver histórico completo de este alumno
+          </a>
+
+          @if (errorCierre()?.id === asignacion.id) {
+            <app-alerta>{{ errorCierre()?.mensaje }}</app-alerta>
+          }
+          <div class="c-acciones">
+            <app-campo etiqueta="Fecha fin" icono="fecha" [para]="'fecha-fin-' + asignacion.id">
+              <input
+                class="c-campo__entrada"
+                type="date"
+                [id]="'fecha-fin-' + asignacion.id"
+                [value]="asignacion.fechaFin ?? ''"
+                #fechaFin
+                required
+              />
+            </app-campo>
+            <app-campo etiqueta="Contratación" icono="aprobar" [para]="'contratado-' + asignacion.id">
+              <app-desplegable
+                #contratado
+                [id]="'contratado-' + asignacion.id"
+                [valor]="textoContratado(asignacion)"
+                [opciones]="CONTRATACION"
+              />
+            </app-campo>
+            <app-boton
+              icono="guardar"
+              [cargando]="guardandoId() === asignacion.id"
+              (click)="cerrarAsignacion(asignacion, fechaFin.value, contratado.elegido())"
+            >
+              Guardar
+            </app-boton>
+          </div>
+        </li>
+      }
+    </ul>
+  </app-estado>
+
+  <app-paginacion
+    [pagina]="paginaActual()"
+    [paginas]="paginas()"
+    seccion="asignaciones"
+    [total]="total()"
+    nombre="asignaciones"
+    (ir)="irAPagina($event)"
+  />
+</main>

@@ -12,9 +12,14 @@ import practikalia.usuario.Usuario;
 import practikalia.usuario.UsuarioException;
 import practikalia.usuario.UsuarioRepository;
 
+import practikalia.common.PaginaDto;
+
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,8 +136,9 @@ public class AsignacionService {
     }
 
     @Transactional(readOnly = true)
-    public List<AsignacionDto> listarPorEmpresa(Long empresaId) {
-        return asignacionRepository.findByEmpresaId(empresaId).stream().map(AsignacionDto::de).toList();
+    public PaginaDto<AsignacionDto> listarPorEmpresa(Long empresaId, int pagina, int tamano) {
+        Pageable pageable = PageRequest.of(pagina, tamano, Sort.by(Sort.Direction.DESC, "fechaInicio"));
+        return PaginaDto.de(asignacionRepository.findByEmpresaId(empresaId, pageable), AsignacionDto::de);
     }
 
     @Transactional(readOnly = true)

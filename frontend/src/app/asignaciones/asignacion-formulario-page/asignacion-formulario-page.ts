@@ -94,7 +94,7 @@ export class AsignacionFormularioPage {
         anio: valores.anio,
         fechaInicio: valores.fechaInicio,
       });
-      await this.router.navigate(['/empresas', this.empresaId]);
+      await this.router.navigate(['/empresas', this.empresaId, 'asignaciones']);
     } catch (e) {
       this.error.set(mensajeDeError(e, MENSAJES_ASIGNACION));
     } finally {

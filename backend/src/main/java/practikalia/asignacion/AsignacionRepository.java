@@ -3,6 +3,8 @@ package practikalia.asignacion;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AsignacionRepository extends JpaRepository<Asignacion, Long> {
@@ -21,7 +23,7 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, Long> {
     /** Las asignaciones de unos tutores de empresa: al borrarlos de la ficha se quedan sin él. */
     List<Asignacion> findByTutorEmpresaIdIn(List<Long> tutorEmpresaIds);
 
-    List<Asignacion> findByEmpresaId(Long empresaId);
+    Page<Asignacion> findByEmpresaId(Long empresaId, Pageable pageable);
 
     boolean existsByAlumnoIdAndEmpresaIdAndGradoIdAndAnio(Long alumnoId, Long empresaId, Long gradoId, int anio);
 

@@ -27,6 +27,7 @@ import {
   Asignacion,
   CrearAsignacionRequest,
   Grado,
+  PaginaAsignaciones,
   TasaContratacion,
   UsuarioGrado,
   UsuarioResumen,
@@ -36,8 +37,11 @@ import {
 export class AsignacionService {
   private readonly http = inject(HttpClient);
 
-  listarPorEmpresa(empresaId: number): Promise<Asignacion[]> {
-    return firstValueFrom(this.http.get<Asignacion[]>(`/api/empresas/${empresaId}/asignaciones`));
+  listarPorEmpresa(empresaId: number, pagina: number, tamano: number): Promise<PaginaAsignaciones> {
+    const params = new HttpParams().set('pagina', pagina).set('tamano', tamano);
+    return firstValueFrom(
+      this.http.get<PaginaAsignaciones>(`/api/empresas/${empresaId}/asignaciones`, { params }),
+    );
   }
 
   listarPorAlumno(alumnoId: number): Promise<Asignacion[]> {
