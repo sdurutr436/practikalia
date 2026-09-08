@@ -74,12 +74,6 @@ export const routes: Routes = [
     canActivate: [profesorGuard],
   },
   {
-    path: 'empresas/:id/editar',
-    title: 'Editar empresa',
-    component: EmpresaFormularioPage,
-    canActivate: [profesorGuard],
-  },
-  {
     path: 'empresas/:empresaId/asignaciones/nueva',
     title: 'Nueva asignación',
     component: AsignacionFormularioPage,

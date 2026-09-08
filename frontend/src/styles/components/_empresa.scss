@@ -75,13 +75,18 @@
   align-items: flex-start;
 }
 
+// Ancla del lápiz que flota sobre la esquina de la foto.
+.c-ficha-empresa__foto {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .c-ficha-empresa__imagen {
   width: 10rem;
   height: 10rem;
   object-fit: cover;
   border-radius: s.$radio;
   background: s.$color-apagado;
-  flex-shrink: 0;
 }
 
 .c-ficha-empresa__imagen--vacia {
@@ -101,6 +106,40 @@
 .c-ficha-empresa__linea {
   margin: 0;
   color: s.$color-texto-apagado;
+}
+
+// Fila de un campo editable: el contenido (vista o edición) a la izquierda,
+// su lápiz a la derecha, sin que el lápiz salte de sitio al abrir/cerrar.
+.c-ficha-empresa__fila {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-ficha-empresa__lineas {
+  display: grid;
+  gap: s.$espaciado-diminuto;
+}
+
+.c-ficha-empresa__edicion {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+  flex: 1 1 auto;
+}
+
+.c-ficha-empresa__lapiz {
+  @include t.boton-icono;
+  flex-shrink: 0;
+}
+
+// Superpuesto en la esquina de la foto, como un editor de avatar.
+.c-ficha-empresa__lapiz--foto {
+  position: absolute;
+  inset-block-end: s.$espaciado-diminuto;
+  inset-inline-end: s.$espaciado-diminuto;
+  background: s.$color-superficie;
+  box-shadow: s.$sombra;
 }
 
 // Superficie apagada, sin borde ni sombra: no es el panel de t.panel.

@@ -296,7 +296,7 @@ describe('detalle de empresa', () => {
     expect(texto).toContain('Datos de gestión');
     expect(texto).toContain('No publicada');
     // Sin ninguna asignación decidida: texto alternativo, nunca "0%" (induciría a error).
-    expect(texto).toContain('Sin datos de contratación todavía');
+    expect(texto).toContain('sin datos todavía');
     expect(texto).not.toContain('0%');
   });
 
@@ -311,6 +311,156 @@ describe('detalle de empresa', () => {
     harness.detectChanges();
 
     expect(harness.routeNativeElement?.textContent).toContain('no existe');
+  });
+
+  /** Deja la ficha de EMPRESA_NO_PUBLICADA cargada y lista, como haría un profesor. */
+  async function cargarFichaComoProfesor(harness: RouterTestingHarness): Promise<void> {
+    await harness.navigateByUrl('/empresas/2');
+    http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
+    await esperarMicrotareas();
+    http
+      .expectOne('/api/empresas/2/tasa-contratacion')
+      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http.expectOne('/api/empresas/2/asignaciones').flush([]);
+    http.expectOne('/api/empresas/2/reviews').flush([]);
+    http.expectOne('/api/empresas/2/interesados').flush([]);
+    http
+      .expectOne('/api/auth/me')
+      .flush({
+        id: 5,
+        correo: 'profesor@centro.es',
+        rol: 'PROFESOR',
+        esAdmin: false,
+        debeCambiarContrasena: false,
+        etiquetas: [],
+      });
+    await esperarMicrotareas();
+    harness.detectChanges();
+  }
+
+  function lapiz(harness: RouterTestingHarness, etiqueta: string): HTMLButtonElement {
+    const boton = [
+      ...harness.routeNativeElement!.querySelectorAll('.c-ficha-empresa__lapiz'),
+    ].find((b) => b.getAttribute('aria-label') === etiqueta);
+    if (!boton) {
+      throw new Error(`No se encontró el lápiz "${etiqueta}"`);
+    }
+    return boton as HTMLButtonElement;
+  }
+
+  it('el lápiz pequeño de información edita y guarda solo ese bloque', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await cargarFichaComoProfesor(harness);
+
+    lapiz(harness, 'Editar la información').click();
+    harness.detectChanges();
+
+    const nombre: HTMLInputElement = harness.routeNativeElement!.querySelector('#nombre')!;
+    nombre.value = 'Beta renombrada';
+    nombre.dispatchEvent(new Event('input'));
+    harness.detectChanges();
+
+    // El mismo botón, ya en modo edición, pasa a guardar solo esta sección.
+    lapiz(harness, 'Guardar la información').click();
+
+    const peticion = http.expectOne('/api/empresas/2');
+    expect(peticion.request.method).toBe('PUT');
+    expect(peticion.request.body).toMatchObject({ nombre: 'Beta renombrada' });
+    peticion.flush({ ...EMPRESA_NO_PUBLICADA, nombre: 'Beta renombrada' });
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    expect(harness.routeNativeElement?.textContent).toContain('Beta renombrada');
+    // Vuelve a modo lectura: el lápiz vuelve a decir "editar", no "guardar".
+    expect(() => lapiz(harness, 'Guardar la información')).toThrow();
+  });
+
+  it('el lápiz grande abre todas las secciones y las guarda de una vez', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await cargarFichaComoProfesor(harness);
+
+    const grande = [...harness.routeNativeElement!.querySelectorAll('button')].find((b) =>
+      b.textContent?.includes('Editar'),
+    ) as HTMLButtonElement;
+    grande.click();
+    // Abrir "todo" carga antes el catálogo de sectores/etiquetas para el desplegable.
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    // Con todo abierto, el campo de nombre y el de observaciones están editables a la vez.
+    const nombre: HTMLInputElement = harness.routeNativeElement!.querySelector('#nombre')!;
+    expect(nombre).not.toBeNull();
+    nombre.value = 'Beta SA';
+    nombre.dispatchEvent(new Event('input'));
+    harness.detectChanges();
+
+    const guardarTodo = [...harness.routeNativeElement!.querySelectorAll('button')].find((b) =>
+      b.textContent?.includes('Guardar todo'),
+    ) as HTMLButtonElement;
+    guardarTodo.click();
+
+    const peticion = http.expectOne('/api/empresas/2');
+    expect(peticion.request.method).toBe('PUT');
+    expect(peticion.request.body).toMatchObject({ nombre: 'Beta SA' });
+    peticion.flush({ ...EMPRESA_NO_PUBLICADA, nombre: 'Beta SA' });
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    expect(harness.routeNativeElement?.textContent).toContain('Beta SA');
+  });
+
+  it('el lápiz de la foto sube una imagen nueva', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await cargarFichaComoProfesor(harness);
+
+    lapiz(harness, 'Cambiar la foto').click();
+    harness.detectChanges();
+
+    const fichero = new File(['contenido'], 'foto.jpg', { type: 'image/jpeg' });
+    const entrada: HTMLInputElement = harness.routeNativeElement!.querySelector('#imagen-empresa')!;
+    Object.defineProperty(entrada, 'files', { value: [fichero], configurable: true });
+    entrada.dispatchEvent(new Event('change'));
+
+    const peticion = http.expectOne('/api/empresas/2/imagen');
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body instanceof FormData).toBe(true);
+    peticion.flush({ ...EMPRESA_NO_PUBLICADA, imagen: '/uploads/empresas/foto.jpg' });
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    const imagen: HTMLImageElement = harness.routeNativeElement!.querySelector(
+      '.c-ficha-empresa__imagen',
+    )!;
+    expect(imagen.src).toContain('/uploads/empresas/foto.jpg');
+  });
+
+  it('un fichero de foto inválido deja un mensaje de error legible', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    await cargarFichaComoProfesor(harness);
+
+    lapiz(harness, 'Cambiar la foto').click();
+    harness.detectChanges();
+
+    const fichero = new File(['no-es-una-imagen'], 'foto.txt', { type: 'text/plain' });
+    const entrada: HTMLInputElement = harness.routeNativeElement!.querySelector('#imagen-empresa')!;
+    Object.defineProperty(entrada, 'files', { value: [fichero], configurable: true });
+    entrada.dispatchEvent(new Event('change'));
+
+    http
+      .expectOne('/api/empresas/2/imagen')
+      .flush(
+        { codigo: 'IMAGEN_INVALIDA', mensaje: 'El fichero no es una imagen válida' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    await esperarMicrotareas();
+    harness.detectChanges();
+
+    expect(harness.routeNativeElement?.textContent).toContain('El fichero no es una imagen válida');
   });
 });
 
@@ -376,14 +526,28 @@ describe('formulario de empresa', () => {
     creacion.flush({ ...EMPRESA_NO_PUBLICADA, id: 5, nombre: 'Nueva SL' });
     await envio;
 
-    // La navegación a /empresas/5/editar monta una nueva instancia de la
-    // página, que vuelve a pedir su propio catálogo y la empresa recién creada.
-    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
-    await esperarMicrotareas();
+    // La navegación a /empresas/5 monta la ficha, que pide sus propios datos.
     http.expectOne('/api/empresas/5').flush({ ...EMPRESA_NO_PUBLICADA, id: 5, nombre: 'Nueva SL' });
     await esperarMicrotareas();
+    http
+      .expectOne('/api/empresas/5/tasa-contratacion')
+      .flush({ empresaId: 5, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http.expectOne('/api/empresas/5/asignaciones').flush([]);
+    http.expectOne('/api/empresas/5/reviews').flush([]);
+    http.expectOne('/api/empresas/5/interesados').flush([]);
+    http
+      .expectOne('/api/auth/me')
+      .flush({
+        id: 5,
+        correo: 'profesor@centro.es',
+        rol: 'PROFESOR',
+        esAdmin: false,
+        debeCambiarContrasena: false,
+        etiquetas: [],
+      });
+    await esperarMicrotareas();
 
-    expect(router.url).toBe('/empresas/5/editar');
+    expect(router.url).toBe('/empresas/5');
   });
 
   it('la ficha añade tutores de empresa y nunca se queda sin ninguno', async () => {
@@ -413,43 +577,14 @@ describe('formulario de empresa', () => {
     creacion.flush({ ...EMPRESA_NO_PUBLICADA, id: 5, nombre: 'Nueva SL' });
     await envio;
 
-    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
-    await esperarMicrotareas();
     http.expectOne('/api/empresas/5').flush({ ...EMPRESA_NO_PUBLICADA, id: 5 });
     await esperarMicrotareas();
-  });
-
-  it('profesor edita una empresa existente y vuelve al detalle', async () => {
-    await loginComo('PROFESOR');
-    const harness = await RouterTestingHarness.create();
-    const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
-    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
-    await esperarMicrotareas();
-    http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
-    await esperarMicrotareas();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const c = componente as any;
-    expect(c.form.value.nombre).toBe('Beta');
-
-    c.form.patchValue({ nombre: 'Beta renombrada', publicada: true });
-    const envio = c.enviar() as Promise<void>;
-
-    const edicion = http.expectOne('/api/empresas/2');
-    expect(edicion.request.method).toBe('PUT');
-    expect(edicion.request.body).toMatchObject({ nombre: 'Beta renombrada', publicada: true });
-    edicion.flush({ ...EMPRESA_NO_PUBLICADA, nombre: 'Beta renombrada', publicada: true });
-    await envio;
-
-    // La navegación al detalle monta EmpresaDetallePage, que pide la empresa de nuevo.
-    http.expectOne('/api/empresas/2').flush({ ...EMPRESA_NO_PUBLICADA, nombre: 'Beta renombrada' });
-    await esperarMicrotareas();
     http
-      .expectOne('/api/empresas/2/tasa-contratacion')
-      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/2/asignaciones').flush([]);
-    http.expectOne('/api/empresas/2/reviews').flush([]);
-    http.expectOne('/api/empresas/2/interesados').flush([]);
+      .expectOne('/api/empresas/5/tasa-contratacion')
+      .flush({ empresaId: 5, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
+    http.expectOne('/api/empresas/5/asignaciones').flush([]);
+    http.expectOne('/api/empresas/5/reviews').flush([]);
+    http.expectOne('/api/empresas/5/interesados').flush([]);
     http
       .expectOne('/api/auth/me')
       .flush({
@@ -461,58 +596,5 @@ describe('formulario de empresa', () => {
         etiquetas: [],
       });
     await esperarMicrotareas();
-
-    expect(router.url).toBe('/empresas/2');
-  });
-
-  it('profesor sube una imagen en la pantalla de editar', async () => {
-    await loginComo('PROFESOR');
-    const harness = await RouterTestingHarness.create();
-    const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
-    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
-    await esperarMicrotareas();
-    http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
-    await esperarMicrotareas();
-
-    const fichero = new File(['contenido'], 'foto.jpg', { type: 'image/jpeg' });
-    const evento = { target: { files: [fichero] } } as unknown as Event;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const c = componente as any;
-    const subida = c.onArchivoSeleccionado(evento) as Promise<void>;
-
-    const peticion = http.expectOne('/api/empresas/2/imagen');
-    expect(peticion.request.method).toBe('POST');
-    expect(peticion.request.body instanceof FormData).toBe(true);
-    peticion.flush({ ...EMPRESA_NO_PUBLICADA, imagen: '/uploads/empresas/foto.jpg' });
-    await subida;
-
-    expect(c.imagenActual()).toBe('/uploads/empresas/foto.jpg');
-  });
-
-  it('un fichero inválido deja un mensaje de error sin tocar la imagen actual', async () => {
-    await loginComo('PROFESOR');
-    const harness = await RouterTestingHarness.create();
-    const componente = await harness.navigateByUrl('/empresas/2/editar', EmpresaFormularioPage);
-    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
-    await esperarMicrotareas();
-    http.expectOne('/api/empresas/2').flush(EMPRESA_NO_PUBLICADA);
-    await esperarMicrotareas();
-
-    const fichero = new File(['no-es-una-imagen'], 'foto.txt', { type: 'text/plain' });
-    const evento = { target: { files: [fichero] } } as unknown as Event;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const c = componente as any;
-    const subida = c.onArchivoSeleccionado(evento) as Promise<void>;
-
-    http
-      .expectOne('/api/empresas/2/imagen')
-      .flush(
-        { codigo: 'IMAGEN_INVALIDA', mensaje: 'El fichero no es una imagen válida' },
-        { status: 400, statusText: 'Bad Request' },
-      );
-    await subida;
-
-    expect(c.errorImagen()).toBe('El fichero no es una imagen válida');
-    expect(c.imagenActual()).toBeNull();
   });
 });

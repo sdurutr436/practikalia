@@ -1,9 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { PercentPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EstadoComponent } from '../../compartido/estado/estado';
-import { MENSAJES_ASIGNACION, MENSAJES_INTERES, mensajeDeError } from '../../auth/mensajes-error';
+import {
+  MENSAJES_ASIGNACION,
+  MENSAJES_EMPRESA,
+  MENSAJES_INTERES,
+  mensajeDeError,
+} from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
 import {
   Asignacion,
@@ -16,7 +22,7 @@ import { Review } from '../../reviews/review.model';
 import { InteresService } from '../../intereses/interes.service';
 import { Interesado } from '../../intereses/interes.model';
 import { EmpresaService } from '../empresa.service';
-import { Empresa, esVistaProfesor } from '../empresa.model';
+import { Empresa, EmpresaRequest, Etiqueta, TutorEmpresa, esVistaProfesor } from '../empresa.model';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { VolverComponent } from '../../compartido/volver/volver';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
@@ -32,11 +38,27 @@ const CONTRATACION = [
   { valor: 'false', etiqueta: 'No contratado' },
 ];
 
+/** Cada bloque de la ficha que se puede editar con su propio lápiz. */
+type Seccion = 'foto' | 'info' | 'etiquetas' | 'descripcion' | 'observaciones' | 'tutores';
+
+/** IDs sueltos separados por coma → números válidos (>0), sin duplicados. */
+function parseIds(texto: string): number[] {
+  return texto
+    .split(',')
+    .map((valor) => Number(valor.trim()))
+    .filter((n) => Number.isInteger(n) && n > 0);
+}
+
+function porNombre(a: Etiqueta, b: Etiqueta): number {
+  return a.nombre.localeCompare(b.nombre);
+}
+
 @Component({
   selector: 'app-empresa-detalle-page',
   imports: [
     RouterLink,
     PercentPipe,
+    ReactiveFormsModule,
     EstadoComponent,
     CabeceraComponent,
     VolverComponent,
@@ -55,6 +77,7 @@ export class EmpresaDetallePage {
   private readonly reviewService = inject(ReviewService);
   private readonly interesService = inject(InteresService);
   private readonly authService = inject(AuthService);
+  private readonly fb = inject(NonNullableFormBuilder);
 
   protected readonly esVistaProfesor = esVistaProfesor;
   protected readonly textoContratacion = textoContratacion;
@@ -85,6 +108,233 @@ export class EmpresaDetallePage {
 
   protected readonly tasaContratacion = signal<TasaContratacion | null>(null);
 
+  // --- Edición inline: lápiz pequeño por sección, lápiz grande abre/guarda todas a la vez.
+
+  protected readonly editandoTodo = signal(false);
+  protected readonly seccionesAbiertas = signal<ReadonlySet<Seccion>>(new Set());
+  protected readonly guardandoSeccion = signal<Seccion | 'todo' | null>(null);
+  protected readonly errorGuardado = signal<string | null>(null);
+
+  protected readonly catalogosCargados = signal(false);
+  protected readonly sectores = signal<Etiqueta[]>([]);
+  protected readonly etiquetasDisponibles = signal<Etiqueta[]>([]);
+  protected readonly etiquetasSeleccionadas = signal<Set<number>>(new Set());
+
+  protected readonly subiendoImagen = signal(false);
+  protected readonly errorImagen = signal<string | null>(null);
+
+  /** Siempre al menos una fila: el backend exige un tutor por empresa. */
+  protected readonly tutores = this.fb.array([this.filaTutor()]);
+
+  protected readonly form = this.fb.group({
+    nombre: ['', Validators.required],
+    descripcion: [''],
+    direccion: [''],
+    sectorId: [0, [Validators.required, Validators.min(1)]],
+    etiquetasManual: [''],
+    observaciones: [''],
+    contactoNombre: [''],
+    contactoTelefono: [''],
+    contactoEmail: [''],
+    publicada: [false],
+    tutores: this.tutores,
+  });
+
+  private filaTutor(tutor?: TutorEmpresa) {
+    return this.fb.group({
+      id: this.fb.control<number | null>(tutor?.id ?? null),
+      nombre: [tutor?.nombre ?? '', Validators.required],
+      cargo: [tutor?.cargo ?? ''],
+      telefono: [tutor?.telefono ?? ''],
+      correo: [tutor?.correo ?? ''],
+    });
+  }
+
+  protected anadirTutor(): void {
+    this.tutores.push(this.filaTutor());
+  }
+
+  /** La última no se puede quitar: toda empresa necesita un tutor. */
+  protected quitarTutor(indice: number): void {
+    if (this.tutores.length > 1) {
+      this.tutores.removeAt(indice);
+    }
+  }
+
+  protected toggleEtiqueta(id: number, marcada: boolean): void {
+    const seleccion = new Set(this.etiquetasSeleccionadas());
+    if (marcada) {
+      seleccion.add(id);
+    } else {
+      seleccion.delete(id);
+    }
+    this.etiquetasSeleccionadas.set(seleccion);
+  }
+
+  protected estaEditando(seccion: Seccion): boolean {
+    return this.editandoTodo() || this.seccionesAbiertas().has(seccion);
+  }
+
+  /**
+   * El lápiz pequeño abre su sección; si ya está abierta, pasa a guardar solo
+   * esa. La foto es la excepción: se sube sola al elegir el fichero, así que
+   * su lápiz solo abre/cierra el selector, nunca dispara el guardado general.
+   */
+  protected async alternarSeccion(seccion: Seccion): Promise<void> {
+    if (this.editandoTodo()) {
+      return;
+    }
+    if (this.seccionesAbiertas().has(seccion)) {
+      if (seccion === 'foto') {
+        this.cerrarSeccion(seccion);
+      } else {
+        await this.guardar(seccion);
+      }
+      return;
+    }
+    if (seccion === 'etiquetas') {
+      await this.asegurarCatalogos();
+    }
+    this.seccionesAbiertas.update((abiertas) => new Set(abiertas).add(seccion));
+  }
+
+  /** El lápiz grande abre todas las secciones a la vez; si ya estaban abiertas, lo guarda todo. */
+  protected async alternarTodo(): Promise<void> {
+    if (this.editandoTodo()) {
+      await this.guardar('todo');
+      return;
+    }
+    await this.asegurarCatalogos();
+    this.editandoTodo.set(true);
+    this.seccionesAbiertas.set(new Set());
+  }
+
+  private cerrarSeccion(seccion: Seccion): void {
+    this.seccionesAbiertas.update((abiertas) => {
+      const copia = new Set(abiertas);
+      copia.delete(seccion);
+      return copia;
+    });
+  }
+
+  private async asegurarCatalogos(): Promise<void> {
+    if (this.catalogosCargados()) {
+      return;
+    }
+    try {
+      const empresas = (await this.empresaService.listar()).contenido;
+      const sectores = new Map<number, Etiqueta>();
+      const etiquetas = new Map<number, Etiqueta>();
+      for (const empresa of empresas) {
+        sectores.set(empresa.sector.id, empresa.sector);
+        for (const etiqueta of empresa.etiquetas) {
+          etiquetas.set(etiqueta.id, etiqueta);
+        }
+      }
+      this.sectores.set([...sectores.values()].sort(porNombre));
+      this.etiquetasDisponibles.set([...etiquetas.values()].sort(porNombre));
+      this.catalogosCargados.set(true);
+    } catch {
+      // ponytail: best-effort — si falla, los desplegables de sector/etiquetas
+      // quedan vacíos y se reintenta la próxima vez que se abra una sección.
+    }
+  }
+
+  private precargarFormulario(empresa: Empresa): void {
+    this.form.patchValue({
+      nombre: empresa.nombre,
+      descripcion: empresa.descripcion ?? '',
+      direccion: empresa.direccion ?? '',
+      sectorId: empresa.sector.id,
+      observaciones: empresa.observaciones ?? '',
+      contactoNombre: empresa.contactoNombre ?? '',
+      contactoTelefono: empresa.contactoTelefono ?? '',
+      contactoEmail: empresa.contactoEmail ?? '',
+      publicada: empresa.publicada ?? false,
+    });
+    this.etiquetasSeleccionadas.set(new Set(empresa.etiquetas.map((e) => e.id)));
+    this.tutores.clear();
+    for (const tutor of empresa.tutores ?? []) {
+      this.tutores.push(this.filaTutor(tutor));
+    }
+    if (this.tutores.length === 0) {
+      // Empresas de antes de que hubiera tutores: se rellena al guardarla.
+      this.tutores.push(this.filaTutor());
+    }
+  }
+
+  private async guardar(seccion: Seccion | 'todo'): Promise<void> {
+    const empresaActual = this.empresa();
+    if (!empresaActual || this.guardandoSeccion() !== null) {
+      return;
+    }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.guardandoSeccion.set(seccion);
+    this.errorGuardado.set(null);
+    const valores = this.form.getRawValue();
+    const etiquetaIds = [
+      ...new Set([...this.etiquetasSeleccionadas(), ...parseIds(valores.etiquetasManual)]),
+    ];
+    const request: EmpresaRequest = {
+      nombre: valores.nombre,
+      descripcion: valores.descripcion,
+      direccion: valores.direccion,
+      sectorId: valores.sectorId,
+      etiquetaIds,
+      observaciones: valores.observaciones,
+      tutores: valores.tutores.map((tutor) => ({
+        id: tutor.id,
+        nombre: tutor.nombre.trim(),
+        cargo: tutor.cargo.trim() || null,
+        telefono: tutor.telefono.trim() || null,
+        correo: tutor.correo.trim() || null,
+      })),
+      contactoNombre: valores.contactoNombre,
+      contactoTelefono: valores.contactoTelefono,
+      contactoEmail: valores.contactoEmail,
+      publicada: valores.publicada,
+    };
+    try {
+      const actualizada = await this.empresaService.actualizar(empresaActual.id, request);
+      this.empresa.set(actualizada);
+      if (seccion === 'todo') {
+        this.editandoTodo.set(false);
+        this.seccionesAbiertas.set(new Set());
+      } else {
+        this.cerrarSeccion(seccion);
+      }
+    } catch (e) {
+      this.errorGuardado.set(mensajeDeError(e, MENSAJES_EMPRESA));
+    } finally {
+      this.guardandoSeccion.set(null);
+    }
+  }
+
+  protected async onArchivoSeleccionado(evento: Event): Promise<void> {
+    const input = evento.target as HTMLInputElement;
+    const fichero = input.files?.[0];
+    const empresaActual = this.empresa();
+    if (!fichero || !empresaActual) {
+      return;
+    }
+    this.subiendoImagen.set(true);
+    this.errorImagen.set(null);
+    try {
+      const actualizada = await this.empresaService.subirImagen(empresaActual.id, fichero);
+      this.empresa.set(actualizada);
+    } catch (e) {
+      this.errorImagen.set(mensajeDeError(e, MENSAJES_EMPRESA));
+    } finally {
+      this.subiendoImagen.set(false);
+      input.value = '';
+    }
+  }
+
+  // --- Carga inicial de la ficha (lectura).
+
   constructor() {
     void this.cargar();
   }
@@ -96,6 +346,7 @@ export class EmpresaDetallePage {
       this.empresa.set(empresa);
       void this.cargarTasaContratacion(id);
       if (esVistaProfesor(empresa)) {
+        this.precargarFormulario(empresa);
         void this.cargarAsignaciones(id);
         void this.cargarInteresados(id);
       }
