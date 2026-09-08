@@ -112,6 +112,16 @@
   padding: s.$espaciado-base;
 }
 
+// Debajo de la cabecera: solo layout, sin cosmética — eso lo pone cada
+// pantalla que proyecta aquí su contenido.
+.o-marco__contenido {
+  display: grid;
+  align-content: start;
+  gap: s.$espaciado-grande;
+  // Sin esto los listados anchos desbordan la columna en vez de encogerla.
+  min-width: 0;
+}
+
 // Columnas de igual ancho que se apilan en pantalla estrecha (catálogo de
 // sectores). Solo el reparto: lo de dentro se pinta con .c-catalogo.
 .o-columnas {

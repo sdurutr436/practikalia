@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { NonNullableFormBuilder } from '@angular/forms';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../app.routes';
@@ -8,6 +9,7 @@ import { AuthService } from '../auth/auth.service';
 import { authInterceptor } from '../auth/auth.interceptor';
 import { Empresa } from './empresa.model';
 import { EmpresaFormularioPage } from './empresa-formulario-page/empresa-formulario-page';
+import { filaTutor } from './tutores-empresa/tutores-empresa';
 import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
@@ -552,7 +554,7 @@ describe('formulario de empresa', () => {
     expect(router.url).toBe('/empresas/5');
   });
 
-  it('la ficha añade tutores de empresa y nunca se queda sin ninguno', async () => {
+  it('la ficha añade y quita tutores de empresa antes de enviar el alta', async () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
     const componente = await harness.navigateByUrl('/empresas/nueva', EmpresaFormularioPage);
@@ -563,12 +565,14 @@ describe('formulario de empresa', () => {
     const c = componente as any;
     c.form.patchValue({ nombre: 'Nueva SL', sectorId: 10 });
     c.tutores.at(0).patchValue({ nombre: 'Rosa', cargo: 'Jefa de taller' });
-    c.anadirTutor();
-    c.tutores.at(1).patchValue({ nombre: 'Luis' });
+    const filaLuis = filaTutor(TestBed.inject(NonNullableFormBuilder));
+    filaLuis.patchValue({ nombre: 'Luis' });
+    c.tutores.push(filaLuis);
 
-    // La última fila no se puede quitar: el backend exige al menos un tutor.
-    c.quitarTutor(1);
-    c.quitarTutor(0);
+    // El botón de añadir/quitar filas y el guardián de "nunca menos de una"
+    // ahora viven en TutoresEmpresaComponent (tutores-empresa.spec.ts); aquí
+    // solo importa que lo que quede en el FormArray sea lo que se envía.
+    c.tutores.removeAt(1);
     expect(c.tutores.length).toBe(1);
 
     const envio = c.enviar() as Promise<void>;

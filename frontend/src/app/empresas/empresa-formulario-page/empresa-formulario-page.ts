@@ -3,12 +3,13 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { MENSAJES_EMPRESA, mensajeDeError } from '../../auth/mensajes-error';
 import { EmpresaService } from '../empresa.service';
-import { Empresa, EmpresaRequest, Etiqueta, TutorEmpresa } from '../empresa.model';
+import { Empresa, EmpresaRequest, Etiqueta } from '../empresa.model';
 import { VolverComponent } from '../../compartido/volver/volver';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
-import { IconoComponent } from '../../compartido/icono/icono';
+import { filaTutor, TutoresEmpresaComponent } from '../tutores-empresa/tutores-empresa';
 
 /** IDs sueltos separados por coma → números válidos (>0), sin duplicados. */
 function parseIds(texto: string): number[] {
@@ -31,10 +32,11 @@ function porNombre(a: Etiqueta, b: Etiqueta): number {
   imports: [
     ReactiveFormsModule,
     VolverComponent,
+    EstadoComponent,
     AlertaComponent,
     CampoComponent,
     BotonComponent,
-    IconoComponent,
+    TutoresEmpresaComponent,
   ],
   templateUrl: './empresa-formulario-page.html',
 })
@@ -52,7 +54,7 @@ export class EmpresaFormularioPage {
   private readonly fb = inject(NonNullableFormBuilder);
 
   /** Los tutores de empresa: siempre al menos una fila, que el backend exige uno. */
-  protected readonly tutores = this.fb.array([this.filaTutor()]);
+  protected readonly tutores = this.fb.array([filaTutor(this.fb)]);
 
   protected readonly form = this.fb.group({
     nombre: ['', Validators.required],
@@ -66,27 +68,6 @@ export class EmpresaFormularioPage {
     contactoEmail: [''],
     tutores: this.tutores,
   });
-
-  private filaTutor(tutor?: TutorEmpresa) {
-    return this.fb.group({
-      id: this.fb.control<number | null>(tutor?.id ?? null),
-      nombre: [tutor?.nombre ?? '', Validators.required],
-      cargo: [tutor?.cargo ?? ''],
-      telefono: [tutor?.telefono ?? ''],
-      correo: [tutor?.correo ?? ''],
-    });
-  }
-
-  protected anadirTutor(): void {
-    this.tutores.push(this.filaTutor());
-  }
-
-  /** La última no se puede quitar: toda empresa necesita un tutor. */
-  protected quitarTutor(indice: number): void {
-    if (this.tutores.length > 1) {
-      this.tutores.removeAt(indice);
-    }
-  }
 
   constructor() {
     void this.cargar();

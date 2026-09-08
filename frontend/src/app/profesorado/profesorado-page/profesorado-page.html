@@ -21,23 +21,11 @@
     <ul class="o-rejilla">
       @for (profesor of profesores(); track profesor.id) {
         <li class="c-fila c-persona">
-          <div class="c-persona__cabecera">
-            <p class="c-persona__nombre">{{ nombreCompleto(profesor) }}</p>
-
-            @if (esAdmin()) {
-              <!-- En estrecho el lápiz se queda solo con su icono para no saturar
-                   la tarjeta; el rótulo sigue existiendo para el lector de pantalla. -->
-              <button
-                class="c-persona__editar"
-                type="button"
-                [attr.aria-label]="'Editar la ficha de ' + nombreCompleto(profesor)"
-                (click)="abrirFicha(profesor)"
-              >
-                <app-icono nombre="editar" />
-                <span class="c-persona__editar-texto">Editar</span>
-              </button>
-            }
-          </div>
+          <app-persona-cabecera
+            [nombre]="nombreCompleto(profesor)"
+            [mostrarEditar]="esAdmin()"
+            (editar)="abrirFicha(profesor)"
+          />
 
           <p class="c-persona__correo">{{ profesor.correo }}</p>
           <p class="c-persona__clase">

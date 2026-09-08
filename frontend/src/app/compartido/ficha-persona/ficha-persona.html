@@ -101,12 +101,9 @@
 </app-modal>
 
 @if (confirmandoSalida()) {
-  <app-modal titulo="¿Seguro que quieres salir?" (salir)="seguirEditando()">
-    <p>Se perderá lo que has escrito en la ficha.</p>
-
-    <div acciones class="c-acciones">
-      <app-boton icono="salir" (click)="cerrar.emit()">Salir sin guardar</app-boton>
-      <app-boton [secundario]="true" (click)="seguirEditando()">Seguir editando</app-boton>
-    </div>
-  </app-modal>
+  <app-confirmar-salida
+    mensaje="Se perderá lo que has escrito en la ficha."
+    (salir)="cerrar.emit()"
+    (seguir)="seguirEditando()"
+  />
 }

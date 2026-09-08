@@ -1,5 +1,5 @@
 import { FormControl } from '@angular/forms';
-import { correoInstitucional, dniValido } from './login-page';
+import { correoInstitucional, dniValido } from './validadores';
 
 describe('dniValido', () => {
   const validar = (valor: string) => dniValido(new FormControl(valor, { nonNullable: true }));

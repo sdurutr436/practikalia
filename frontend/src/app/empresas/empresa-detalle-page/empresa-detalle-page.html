@@ -1,11 +1,8 @@
 <main class="o-pagina">
   <app-volver a="/empresas" />
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <app-alerta>{{ mensaje }}</app-alerta>
-  } @else if (empresa(); as empresa) {
+  <app-estado [cargando]="cargando()" [error]="error()">
+    @if (empresa(); as empresa) {
     <article class="c-ficha-empresa" [formGroup]="form">
       @if (errorGuardado(); as mensaje) {
         <app-alerta>{{ mensaje }}</app-alerta>
@@ -323,17 +320,12 @@
       @if (!esVistaProfesor(empresa)) {
         <section class="c-ficha-empresa__gestion">
           <h2 class="c-ficha-empresa__titulo">Interés</h2>
-          @if (errorInteres(); as mensaje) {
-            <app-alerta>{{ mensaje }}</app-alerta>
-          }
-          <app-boton
-            [icono]="interesado() ? 'interesActivo' : 'interes'"
-            [secundario]="interesado()"
-            [deshabilitado]="guardandoInteres()"
-            (click)="alternarInteres(empresa.id)"
-          >
-            {{ interesado() ? 'Quitar interés' : 'Marcar interés' }}
-          </app-boton>
+          <app-interes-boton
+            [interesado]="interesado()"
+            [guardando]="guardandoInteres()"
+            [error]="errorInteres()"
+            (alternar)="alternarInteres(empresa.id)"
+          />
         </section>
       }
 
@@ -363,52 +355,7 @@
               }
             </ul>
           } @else {
-            <div class="c-tutores" formArrayName="tutores">
-              @for (fila of tutores.controls; track fila; let i = $index) {
-                <div class="c-tutores__fila" [formGroupName]="i">
-                  <input
-                    class="c-campo__entrada"
-                    type="text"
-                    placeholder="Nombre"
-                    aria-label="Nombre del tutor"
-                    formControlName="nombre"
-                  />
-                  <input
-                    class="c-campo__entrada"
-                    type="text"
-                    placeholder="Cargo"
-                    aria-label="Cargo del tutor"
-                    formControlName="cargo"
-                  />
-                  <input
-                    class="c-campo__entrada"
-                    type="text"
-                    placeholder="Teléfono"
-                    aria-label="Teléfono del tutor"
-                    formControlName="telefono"
-                  />
-                  <input
-                    class="c-campo__entrada"
-                    type="email"
-                    placeholder="Correo"
-                    aria-label="Correo del tutor"
-                    formControlName="correo"
-                  />
-                  <button
-                    class="c-tutores__quitar"
-                    type="button"
-                    aria-label="Quitar este tutor"
-                    [disabled]="tutores.length === 1"
-                    (click)="quitarTutor(i)"
-                  >
-                    <app-icono nombre="rechazar" />
-                  </button>
-                </div>
-              }
-            </div>
-            <app-boton icono="anadir" [secundario]="true" (click)="anadirTutor()">
-              Añadir tutor
-            </app-boton>
+            <app-tutores-empresa [tutores]="tutores" />
           }
         </section>
 
@@ -442,26 +389,11 @@
 
         <section class="c-ficha-empresa__gestion">
           <h2 class="c-ficha-empresa__titulo">Interesados</h2>
-          <app-estado
+          <app-interesados-empresa
+            [interesados]="interesados()"
             [cargando]="cargandoInteresados()"
             [error]="errorInteresados()"
-            [vacio]="interesados().length === 0"
-            mensajeCargando="Cargando interesados…"
-            mensajeVacio="Todavía no hay alumnos interesados en esta empresa."
-          >
-            <ul class="o-lista">
-              @for (
-                interesado of interesados();
-                track interesado.alumnoId + '-' + interesado.anio
-              ) {
-                <li class="c-fila">
-                  {{ interesado.alumnoCorreo }} · {{ interesado.gradoNombre }} ({{
-                    interesado.anio
-                  }})
-                </li>
-              }
-            </ul>
-          </app-estado>
+          />
         </section>
 
         <section class="c-ficha-empresa__gestion">
@@ -474,5 +406,6 @@
         </section>
       }
     </article>
-  }
+    }
+  </app-estado>
 </main>

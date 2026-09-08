@@ -98,4 +98,18 @@ export class AuthService {
     this.sesion.set(null);
     this.rehidratada = true;
   }
+
+  /**
+   * Tras un login sin recargar la página, la sesión en memoria no trae
+   * id/correo (asimetría documentada de LoginResponse) — la completa bajo
+   * demanda con GET /me. Si ya trae correo, o no hay sesión, la devuelve
+   * tal cual.
+   */
+  async completarSesionSiHaceFalta(): Promise<Sesion | null> {
+    const sesion = this.sesion();
+    if (sesion && sesion.correo === null) {
+      return this.me();
+    }
+    return sesion;
+  }
 }

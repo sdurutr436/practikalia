@@ -1,0 +1,17 @@
+<div class="c-persona__cabecera">
+  <p class="c-persona__nombre">{{ nombre() }}</p>
+
+  @if (mostrarEditar()) {
+    <!-- En estrecho el lápiz se queda solo con su icono para no saturar
+         la tarjeta; el rótulo sigue existiendo para el lector de pantalla. -->
+    <button
+      class="c-persona__editar"
+      type="button"
+      [attr.aria-label]="'Editar la ficha de ' + nombre()"
+      (click)="editar.emit()"
+    >
+      <app-icono nombre="editar" />
+      <span class="c-persona__editar-texto">Editar</span>
+    </button>
+  }
+</div>

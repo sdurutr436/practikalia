@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, input, output, signal } from '@angular/core';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { BotonComponent } from '../../compartido/boton/boton';
+import { ConfirmarSalidaComponent } from '../../compartido/confirmar-salida/confirmar-salida';
 import { EstrellasComponent } from '../../compartido/estrellas/estrellas';
 import { ModalComponent } from '../../compartido/modal/modal';
 import { Review } from '../review.model';
@@ -21,7 +22,14 @@ export const MINIMO_MOTIVO = 20;
  */
 @Component({
   selector: 'app-rechazo-modal',
-  imports: [NgTemplateOutlet, ModalComponent, BotonComponent, EstrellasComponent, AlertaComponent],
+  imports: [
+    NgTemplateOutlet,
+    ModalComponent,
+    BotonComponent,
+    EstrellasComponent,
+    AlertaComponent,
+    ConfirmarSalidaComponent,
+  ],
   templateUrl: './rechazo-modal.html',
 })
 export class RechazoModalComponent {

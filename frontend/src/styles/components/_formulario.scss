@@ -219,7 +219,7 @@
   &--aviso {
     color: s.$color-texto-apagado;
     background: s.$color-apagado;
-    border: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+    border: 1px solid s.$color-borde-suave;
   }
 }
 
@@ -233,6 +233,6 @@
   list-style: none;
   // Superficie propia: por detrás pasan las figuras del fondo.
   background: s.$color-superficie;
-  border: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+  border: 1px solid s.$color-borde-suave;
   border-radius: s.$radio-m;
 }

@@ -1,9 +1,7 @@
 <main class="o-pagina">
   <app-volver [a]="['/empresas', empresaId]" texto="Volver a la empresa" />
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else {
+  <app-estado [cargando]="cargando()">
     <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
       <h1 class="c-formulario__titulo">{{ esEdicion ? 'Editar review' : 'Nueva review' }}</h1>
 
@@ -42,5 +40,5 @@
         {{ esEdicion ? 'Guardar cambios' : 'Crear review' }}
       </app-boton>
     </form>
-  }
+  </app-estado>
 </main>
