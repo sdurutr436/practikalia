@@ -30,13 +30,25 @@
                   <span class="c-panel__rotulo">Empresas sin publicar</span>
                 </a>
               </li>
-              <li class="c-panel__contador">
-                <span class="c-panel__cifra">{{ contadores.alumnadoActivo }}</span>
-                <span class="c-panel__rotulo">Alumnado activo</span>
+              <li>
+                <a
+                  class="c-panel__contador c-panel__contador--enlace"
+                  routerLink="/alumnado"
+                  [queryParams]="{ estado: 'confirmados' }"
+                >
+                  <span class="c-panel__cifra">{{ contadores.alumnadoActivo }}</span>
+                  <span class="c-panel__rotulo">Alumnado activo</span>
+                </a>
               </li>
-              <li class="c-panel__contador">
-                <span class="c-panel__cifra">{{ contadores.alumnadoSinAsignar }}</span>
-                <span class="c-panel__rotulo">Alumnado sin asignar</span>
+              <li>
+                <a
+                  class="c-panel__contador c-panel__contador--enlace"
+                  routerLink="/asignaciones"
+                  [queryParams]="{ estado: 'sin-asignar' }"
+                >
+                  <span class="c-panel__cifra">{{ contadores.alumnadoSinAsignar }}</span>
+                  <span class="c-panel__rotulo">Alumnado sin asignar</span>
+                </a>
               </li>
             </ul>
           } @else {
