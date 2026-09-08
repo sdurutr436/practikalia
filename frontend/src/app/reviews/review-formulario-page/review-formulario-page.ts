@@ -5,13 +5,21 @@ import { MENSAJES_REVIEW, mensajeDeError } from '../../auth/mensajes-error';
 import { ReviewService } from '../review.service';
 import { CalificacionConfig } from '../review.model';
 import { VolverComponent } from '../../compartido/volver/volver';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
 
 @Component({
   selector: 'app-review-formulario-page',
-  imports: [ReactiveFormsModule, VolverComponent, AlertaComponent, CampoComponent, BotonComponent],
+  imports: [
+    ReactiveFormsModule,
+    VolverComponent,
+    EstadoComponent,
+    AlertaComponent,
+    CampoComponent,
+    BotonComponent,
+  ],
   templateUrl: './review-formulario-page.html',
 })
 export class ReviewFormularioPage {

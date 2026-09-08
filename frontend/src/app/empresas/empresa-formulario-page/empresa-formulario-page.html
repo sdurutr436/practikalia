@@ -1,9 +1,7 @@
 <main class="o-pagina">
   <app-volver a="/empresas" />
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else {
+  <app-estado [cargando]="cargando()">
     <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
       <h1 class="c-formulario__titulo">Nueva empresa</h1>
 
@@ -172,5 +170,5 @@
 
       <app-boton tipo="submit" icono="anadir" [cargando]="guardando()">Guardar</app-boton>
     </form>
-  }
+  </app-estado>
 </main>

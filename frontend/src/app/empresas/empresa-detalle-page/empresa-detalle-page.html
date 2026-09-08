@@ -1,11 +1,8 @@
 <main class="o-pagina">
   <app-volver a="/empresas" />
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <app-alerta>{{ mensaje }}</app-alerta>
-  } @else if (empresa(); as empresa) {
+  <app-estado [cargando]="cargando()" [error]="error()">
+    @if (empresa(); as empresa) {
     <article class="c-ficha-empresa" [formGroup]="form">
       @if (errorGuardado(); as mensaje) {
         <app-alerta>{{ mensaje }}</app-alerta>
@@ -474,5 +471,6 @@
         </section>
       }
     </article>
-  }
+    }
+  </app-estado>
 </main>

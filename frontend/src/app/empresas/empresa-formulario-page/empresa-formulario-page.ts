@@ -5,6 +5,7 @@ import { MENSAJES_EMPRESA, mensajeDeError } from '../../auth/mensajes-error';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, EmpresaRequest, Etiqueta, TutorEmpresa } from '../empresa.model';
 import { VolverComponent } from '../../compartido/volver/volver';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
@@ -31,6 +32,7 @@ function porNombre(a: Etiqueta, b: Etiqueta): number {
   imports: [
     ReactiveFormsModule,
     VolverComponent,
+    EstadoComponent,
     AlertaComponent,
     CampoComponent,
     BotonComponent,
