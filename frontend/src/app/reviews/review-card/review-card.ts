@@ -15,7 +15,10 @@ import { Review } from '../review.model';
   selector: 'app-review-card',
   imports: [RouterLink, EstrellasComponent],
   templateUrl: './review-card.html',
-  host: { class: 'u-contenidos' },
+  // c-resena no tiene reglas propias (solo sus elementos y el modificador
+  // --modal), pero el bloque tiene que existir en el marcado para que sus
+  // __elementos no queden huérfanos de una clase BEM base.
+  host: { class: 'u-contenidos c-resena' },
 })
 export class ReviewCardComponent {
   readonly review = input.required<Review>();

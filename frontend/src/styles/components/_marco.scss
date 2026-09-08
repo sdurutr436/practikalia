@@ -3,14 +3,6 @@
 @use '../settings' as s;
 @use '../tools' as t;
 
-.c-marco__contenido {
-  display: grid;
-  align-content: start;
-  gap: s.$espaciado-grande;
-  // Sin esto los listados anchos desbordan la columna en vez de encogerla.
-  min-width: 0;
-}
-
 // Cabecera completa: la barra horizontal de la Γ. Ocupa todo el ancho y pasa
 // por encima de todo lo que se mueva por debajo. Es `sticky`, así que ya hace
 // de contexto de posicionamiento para el menú, que cuelga de ella.
