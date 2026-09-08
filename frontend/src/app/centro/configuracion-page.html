@@ -1,0 +1,177 @@
+<main class="o-pagina">
+  <app-cabecera titulo="Configuración" />
+
+  @if (!esAdmin()) {
+    <app-alerta tipo="aviso">Solo un administrador puede configurar el centro.</app-alerta>
+  } @else {
+    <!-- Logo y nombre son la identidad del centro: van lado a lado en vez de
+         apilados, así la pantalla usa el ancho de la página en vez de dejarlo
+         vacío a los lados de una columna estrecha. -->
+    <div class="c-config__fila">
+      <section class="c-config__tarjeta">
+        <h2 class="c-formulario__titulo">Logo</h2>
+
+        @if (centro().logo; as logo) {
+          <img class="c-centro__logo" [src]="logo" alt="Logo actual del centro" />
+        } @else {
+          <div class="c-centro__logo c-centro__logo--vacio">
+            <app-icono nombre="grado" />
+          </div>
+        }
+
+        @if (errorLogo(); as mensaje) {
+          <app-alerta>{{ mensaje }}</app-alerta>
+        }
+
+        <app-campo etiqueta="Subir logo" icono="subir" para="centro-logo">
+          <input
+            id="centro-logo"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            [disabled]="subiendoLogo()"
+            (change)="onLogoSeleccionado($event)"
+          />
+        </app-campo>
+      </section>
+
+      <form class="c-config__tarjeta" [formGroup]="form" (ngSubmit)="guardarNombre()">
+        <h2 class="c-formulario__titulo">Nombre del centro</h2>
+
+        @if (errorNombre(); as mensaje) {
+          <app-alerta>{{ mensaje }}</app-alerta>
+        }
+
+        <app-campo
+          etiqueta="Nombre"
+          icono="grado"
+          para="centro-nombre"
+          [requerido]="true"
+          [control]="form.controls.nombre"
+          error="Este campo no puede estar vacío."
+        >
+          <input class="c-campo__entrada" id="centro-nombre" type="text" formControlName="nombre" />
+        </app-campo>
+
+        <app-boton
+          tipo="submit"
+          icono="guardar"
+          [cargando]="guardandoNombre()"
+          [deshabilitado]="form.invalid"
+          (click)="guardarNombre()"
+        >
+          Guardar
+        </app-boton>
+      </form>
+    </div>
+
+    <section class="c-config__tarjeta">
+      <h2 class="c-formulario__titulo">Correos permitidos</h2>
+      <p class="c-formulario__descripcion">
+        Además de esta lista, entra cualquier correo cuyo dominio esté permitido en la
+        configuración del servidor.
+      </p>
+
+      @if (errorCorreos(); as mensaje) {
+        <app-alerta>{{ mensaje }}</app-alerta>
+      }
+
+      <!-- La lista a la izquierda, el alta a la derecha: ya no una debajo de
+           otra, que en una tarjeta ancha dejaba el alta lejos de lo que acaba
+           de escribirse. -->
+      <div class="c-config__correos-cuerpo">
+        <div class="c-config__lista">
+          @if (correos().length > 0) {
+            <app-buscador
+              etiqueta="Buscar correo"
+              marcador="Buscar correo…"
+              modo="ancho"
+              (buscar)="filtroCorreo.set($event)"
+            />
+          }
+
+          <app-estado
+            [cargando]="cargandoCorreos()"
+            [vacio]="correosFiltrados().length === 0"
+            [mensajeVacio]="
+              correos().length === 0
+                ? 'Todavía no hay ningún correo añadido a mano.'
+                : 'Ningún correo coincide con la búsqueda.'
+            "
+          >
+            <ul class="o-lista c-correos">
+              @for (correo of correosFiltrados(); track correo.id) {
+                <li
+                  class="c-correos__fila"
+                  [class.c-correos__fila--confirmando]="confirmandoBorrado() === correo.id"
+                >
+                  @if (confirmandoBorrado() === correo.id) {
+                    <p class="c-nota">
+                      Al quitar «{{ correo.correo }}», esa persona no podrá volver a entrar.
+                    </p>
+                    <div class="c-acciones">
+                      <app-boton
+                        icono="rechazar"
+                        [cargando]="borrandoId() === correo.id"
+                        (click)="borrar(correo)"
+                      >
+                        Sí, quitar
+                      </app-boton>
+                      <app-boton
+                        [secundario]="true"
+                        [deshabilitado]="borrandoId() !== null"
+                        (click)="confirmandoBorrado.set(null)"
+                      >
+                        Cancelar
+                      </app-boton>
+                    </div>
+                  } @else {
+                    <span class="c-correos__texto">{{ correo.correo }}</span>
+                    <button
+                      class="c-correos__quitar"
+                      type="button"
+                      [attr.aria-label]="'Quitar ' + correo.correo"
+                      (click)="confirmandoBorrado.set(correo.id)"
+                    >
+                      <app-icono nombre="rechazar" />
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </app-estado>
+        </div>
+
+        <form class="c-correos__alta" (ngSubmit)="anadirCorreo()">
+          <app-campo
+            etiqueta="Añadir correo"
+            icono="correo"
+            para="centro-correo"
+            [control]="nuevoCorreo"
+            error="Escribe un correo válido."
+          >
+            <input
+              class="c-campo__entrada"
+              id="centro-correo"
+              type="email"
+              [formControl]="nuevoCorreo"
+            />
+          </app-campo>
+
+          @if (errorAlta(); as mensaje) {
+            <app-alerta>{{ mensaje }}</app-alerta>
+          }
+
+          <app-boton
+            tipo="submit"
+            icono="anadir"
+            [cargando]="anadiendoCorreo()"
+            [deshabilitado]="nuevoCorreo.invalid"
+            (click)="anadirCorreo()"
+          >
+            Añadir
+          </app-boton>
+        </form>
+      </div>
+    </section>
+  }
+</main>

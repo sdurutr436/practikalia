@@ -1,6 +1,7 @@
 package practikalia.empresa;
 
 import practikalia.asignacion.AsignacionRepository;
+import practikalia.common.ImagenSubidaService;
 import practikalia.empresa.tutor.TutorEmpresaDto;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.etiqueta.EtiquetaRepository;
@@ -36,7 +37,7 @@ class EmpresaServiceTest {
         etiquetaRepository = mock(EtiquetaRepository.class);
         usuarioRepository = mock(UsuarioRepository.class);
         empresaService = new EmpresaService(
-                empresaRepository, etiquetaRepository, usuarioRepository, mock(ImagenEmpresaService.class),
+                empresaRepository, etiquetaRepository, usuarioRepository, mock(ImagenSubidaService.class),
                 mock(AsignacionRepository.class));
     }
 

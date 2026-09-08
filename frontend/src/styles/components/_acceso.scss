@@ -45,6 +45,13 @@
   background: s.$color-primario;
   color: s.$color-primario-texto;
   font-size: 2.25rem; // .c-icono mide 1.1em: escala el icono, no el cuadro
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 .c-acceso__titulos {

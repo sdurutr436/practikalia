@@ -34,8 +34,4 @@ public class EmpresaException extends ApiException {
                 "El tutor de empresa indicado no existe en esa empresa");
     }
 
-    /** El fichero subido no pasa la validación de imagen (firma de bytes JPEG/PNG/WebP o límite de 5 MB); el mensaje detalla el motivo concreto. */
-    public static EmpresaException imagenInvalida(String mensaje) {
-        return new EmpresaException(HttpStatus.BAD_REQUEST, "IMAGEN_INVALIDA", mensaje);
-    }
 }
