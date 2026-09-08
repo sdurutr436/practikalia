@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { EstadoComponent } from '../../compartido/estado/estado';
-import { AuthService, Sesion } from '../../auth/auth.service';
+import { AuthService } from '../../auth/auth.service';
 import { MENSAJES_PERFIL, mensajeDeError } from '../../auth/mensajes-error';
 import { PerfilService } from '../perfil.service';
 import { Etiqueta } from '../../empresas/empresa.model';
@@ -42,7 +42,7 @@ export class MisEtiquetasPage {
 
   private async cargar(): Promise<void> {
     try {
-      const sesion = await this.completarSesionSiHaceFalta();
+      const sesion = await this.authService.completarSesionSiHaceFalta();
       if (sesion === null || sesion.id === null) {
         throw new Error('Sesión sin id');
       }
@@ -58,19 +58,6 @@ export class MisEtiquetasPage {
     } finally {
       this.cargando.set(false);
     }
-  }
-
-  /**
-   * Tras un login sin recargar la página, la sesión en memoria no trae
-   * id/correo (asimetría documentada de LoginResponse) — mismo patrón
-   * puntual que mis-intereses-page.ts, sin extraerlo todavía.
-   */
-  private async completarSesionSiHaceFalta(): Promise<Sesion | null> {
-    const sesion = this.authService.sesion();
-    if (sesion && sesion.correo === null) {
-      return this.authService.me();
-    }
-    return sesion;
   }
 
   protected toggle(id: number, marcada: boolean): void {

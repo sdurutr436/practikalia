@@ -7,7 +7,7 @@ import { EstadoComponent } from '../../compartido/estado/estado';
 import { MENSAJES_EMPRESA, MENSAJES_INTERES, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../../asignaciones/asignacion.service';
 import { Asignacion, TasaContratacion } from '../../asignaciones/asignacion.model';
-import { AuthService, Sesion } from '../../auth/auth.service';
+import { AuthService } from '../../auth/auth.service';
 import { ReviewService } from '../../reviews/review.service';
 import { CalificacionConfig, Review } from '../../reviews/review.model';
 import { ReviewCardComponent } from '../../reviews/review-card/review-card';
@@ -328,7 +328,7 @@ export class EmpresaDetallePage {
         void this.cargarInteresados(id);
       }
       const promesaReviews = this.cargarReviews(id);
-      const sesion = await this.completarSesionSiHaceFalta();
+      const sesion = await this.authService.completarSesionSiHaceFalta();
 
       if (!esVistaProfesor(empresa) && sesion?.rol === 'ALUMNO' && sesion.id !== null) {
         const alumnoId = sesion.id;
@@ -344,20 +344,6 @@ export class EmpresaDetallePage {
     } finally {
       this.cargando.set(false);
     }
-  }
-
-  /**
-   * Tras un login sin recargar la página, la sesión en memoria no trae
-   * id/correo (asimetría documentada de LoginResponse) — se completan aquí
-   * bajo demanda, una sola vez por sesión de app, para poder comparar
-   * autoría de reviews y cruzar asignaciones propias.
-   */
-  private async completarSesionSiHaceFalta(): Promise<Sesion | null> {
-    const sesion = this.authService.sesion();
-    if (sesion && sesion.correo === null) {
-      return this.authService.me();
-    }
-    return sesion;
   }
 
   private async cargarReviews(empresaId: number): Promise<void> {
@@ -444,5 +430,4 @@ export class EmpresaDetallePage {
       this.guardandoInteres.set(false);
     }
   }
-
 }
