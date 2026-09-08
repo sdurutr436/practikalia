@@ -1,0 +1,8 @@
+<app-modal titulo="¿Seguro que quieres salir?" (salir)="seguir.emit()">
+  <p>{{ mensaje() }}</p>
+
+  <div acciones class="c-acciones">
+    <app-boton icono="salir" (click)="salir.emit()">Salir sin guardar</app-boton>
+    <app-boton [secundario]="true" (click)="seguir.emit()">{{ textoSeguir() }}</app-boton>
+  </div>
+</app-modal>

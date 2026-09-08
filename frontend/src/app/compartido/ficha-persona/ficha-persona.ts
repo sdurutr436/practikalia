@@ -3,6 +3,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AlertaComponent } from '../alerta/alerta';
 import { BotonComponent } from '../boton/boton';
 import { CampoComponent } from '../campo/campo';
+import { ConfirmarSalidaComponent } from '../confirmar-salida/confirmar-salida';
 import { ModalComponent } from '../modal/modal';
 
 /**
@@ -23,7 +24,14 @@ import { ModalComponent } from '../modal/modal';
  */
 @Component({
   selector: 'app-ficha-persona',
-  imports: [ReactiveFormsModule, ModalComponent, CampoComponent, BotonComponent, AlertaComponent],
+  imports: [
+    ReactiveFormsModule,
+    ModalComponent,
+    CampoComponent,
+    BotonComponent,
+    AlertaComponent,
+    ConfirmarSalidaComponent,
+  ],
   templateUrl: './ficha-persona.html',
 })
 export class FichaPersonaComponent {

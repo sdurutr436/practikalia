@@ -75,13 +75,11 @@
 
   <!-- Segundo modal por encima del primero: lo apila el propio <dialog>. -->
   @if (confirmandoSalida()) {
-    <app-modal titulo="¿Seguro que quieres salir?" (salir)="seguirEscribiendo()">
-      <p>Se perderá el motivo que llevas escrito y la reseña seguirá pendiente de moderar.</p>
-
-      <div acciones class="c-acciones">
-        <app-boton icono="salir" (click)="cerrar.emit()">Salir sin guardar</app-boton>
-        <app-boton [secundario]="true" (click)="seguirEscribiendo()">Seguir escribiendo</app-boton>
-      </div>
-    </app-modal>
+    <app-confirmar-salida
+      mensaje="Se perderá el motivo que llevas escrito y la reseña seguirá pendiente de moderar."
+      textoSeguir="Seguir escribiendo"
+      (salir)="cerrar.emit()"
+      (seguir)="seguirEscribiendo()"
+    />
   }
 }
