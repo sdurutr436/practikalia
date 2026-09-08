@@ -14,13 +14,14 @@ import { ReviewCardComponent } from '../../reviews/review-card/review-card';
 import { InteresService } from '../../intereses/interes.service';
 import { Interesado } from '../../intereses/interes.model';
 import { EmpresaService } from '../empresa.service';
-import { Empresa, EmpresaRequest, Etiqueta, TutorEmpresa, esVistaProfesor } from '../empresa.model';
+import { Empresa, EmpresaRequest, Etiqueta, esVistaProfesor } from '../empresa.model';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { VolverComponent } from '../../compartido/volver/volver';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
 import { IconoComponent } from '../../compartido/icono/icono';
+import { filaTutor, TutoresEmpresaComponent } from '../tutores-empresa/tutores-empresa';
 
 /** Cada bloque de la ficha que se puede editar con su propio lápiz. */
 type Seccion = 'foto' | 'info' | 'etiquetas' | 'descripcion' | 'observaciones' | 'tutores';
@@ -51,6 +52,7 @@ function porNombre(a: Etiqueta, b: Etiqueta): number {
     BotonComponent,
     IconoComponent,
     ReviewCardComponent,
+    TutoresEmpresaComponent,
   ],
   templateUrl: './empresa-detalle-page.html',
 })
@@ -102,7 +104,7 @@ export class EmpresaDetallePage {
   protected readonly errorImagen = signal<string | null>(null);
 
   /** Siempre al menos una fila: el backend exige un tutor por empresa. */
-  protected readonly tutores = this.fb.array([this.filaTutor()]);
+  protected readonly tutores = this.fb.array([filaTutor(this.fb)]);
 
   protected readonly form = this.fb.group({
     nombre: ['', Validators.required],
@@ -117,27 +119,6 @@ export class EmpresaDetallePage {
     publicada: [false],
     tutores: this.tutores,
   });
-
-  private filaTutor(tutor?: TutorEmpresa) {
-    return this.fb.group({
-      id: this.fb.control<number | null>(tutor?.id ?? null),
-      nombre: [tutor?.nombre ?? '', Validators.required],
-      cargo: [tutor?.cargo ?? ''],
-      telefono: [tutor?.telefono ?? ''],
-      correo: [tutor?.correo ?? ''],
-    });
-  }
-
-  protected anadirTutor(): void {
-    this.tutores.push(this.filaTutor());
-  }
-
-  /** La última no se puede quitar: toda empresa necesita un tutor. */
-  protected quitarTutor(indice: number): void {
-    if (this.tutores.length > 1) {
-      this.tutores.removeAt(indice);
-    }
-  }
 
   protected toggleEtiqueta(id: number, marcada: boolean): void {
     const seleccion = new Set(this.etiquetasSeleccionadas());
@@ -233,11 +214,11 @@ export class EmpresaDetallePage {
     this.etiquetasSeleccionadas.set(new Set(empresa.etiquetas.map((e) => e.id)));
     this.tutores.clear();
     for (const tutor of empresa.tutores ?? []) {
-      this.tutores.push(this.filaTutor(tutor));
+      this.tutores.push(filaTutor(this.fb, tutor));
     }
     if (this.tutores.length === 0) {
       // Empresas de antes de que hubiera tutores: se rellena al guardarla.
-      this.tutores.push(this.filaTutor());
+      this.tutores.push(filaTutor(this.fb));
     }
   }
 
