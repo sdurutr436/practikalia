@@ -7,45 +7,77 @@
     <app-alerta>{{ mensaje }}</app-alerta>
   } @else if (empresa(); as empresa) {
     <article class="c-ficha-empresa">
-      @if (empresa.imagen) {
-        <img class="c-ficha-empresa__imagen" [src]="empresa.imagen" [alt]="empresa.nombre" />
-      }
-
-      <app-cabecera [titulo]="empresa.nombre">
-        @if (esVistaProfesor(empresa)) {
-          <app-boton icono="editar" [enlace]="['/empresas', empresa.id, 'editar']"
-            >Editar</app-boton
-          >
+      <div class="c-ficha-empresa__cabecera">
+        @if (empresa.imagen) {
+          <img class="c-ficha-empresa__imagen" [src]="empresa.imagen" [alt]="empresa.nombre" />
+        } @else {
+          <div class="c-ficha-empresa__imagen c-ficha-empresa__imagen--vacia">
+            <app-icono nombre="empresa" />
+          </div>
         }
-      </app-cabecera>
 
-      @if (esVistaProfesor(empresa) && !empresa.publicada) {
-        <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
-      }
+        <div class="c-ficha-empresa__info">
+          <app-cabecera [titulo]="empresa.nombre">
+            @if (esVistaProfesor(empresa)) {
+              <app-boton icono="editar" [enlace]="['/empresas', empresa.id, 'editar']"
+                >Editar</app-boton
+              >
+            }
+          </app-cabecera>
 
-      <p>{{ empresa.descripcion }}</p>
-      <p>{{ empresa.direccion }}</p>
+          @if (esVistaProfesor(empresa) && !empresa.publicada) {
+            <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
+          }
 
-      <ul class="o-etiquetas">
-        <li class="c-etiqueta">{{ empresa.sector.nombre }}</li>
-        @for (etiqueta of empresa.etiquetas; track etiqueta.id) {
-          <li class="c-etiqueta">{{ etiqueta.nombre }}</li>
-        }
-      </ul>
+          @if (empresa.direccion) {
+            <p class="c-ficha-empresa__linea">{{ empresa.direccion }}</p>
+          }
 
-      @if (tasaContratacion(); as tasa) {
-        <section class="c-ficha-empresa__gestion">
-          <h2 class="c-ficha-empresa__titulo">Tasa de contratación</h2>
-          @if (tasa.asignacionesDecididas === 0) {
-            <p>Sin datos de contratación todavía.</p>
-          } @else {
-            <p>
-              {{ tasa.tasa | percent }} ({{ tasa.contrataciones }} de
-              {{ tasa.asignacionesDecididas }})
+          @if (esVistaProfesor(empresa)) {
+            <p class="c-ficha-empresa__linea">
+              {{ empresa.contactoNombre || '—' }} · {{ empresa.contactoTelefono || '—' }} ·
+              {{ empresa.contactoEmail || '—' }}
             </p>
           }
-        </section>
-      }
+
+          <ul class="o-etiquetas">
+            <li>
+              <a
+                class="c-etiqueta c-etiqueta--enlace"
+                routerLink="/empresas"
+                [queryParams]="{ sectorId: empresa.sector.id }"
+              >
+                {{ empresa.sector.nombre }}
+              </a>
+            </li>
+            @for (etiqueta of empresa.etiquetas; track etiqueta.id) {
+              <li>
+                <a
+                  class="c-etiqueta c-etiqueta--enlace"
+                  routerLink="/empresas"
+                  [queryParams]="{ etiquetaIds: etiqueta.id }"
+                >
+                  {{ etiqueta.nombre }}
+                </a>
+              </li>
+            }
+          </ul>
+
+          @if (tasaContratacion(); as tasa) {
+            <p class="c-ficha-empresa__linea">
+              Tasa de contratación:
+              @if (tasa.asignacionesDecididas === 0) {
+                sin datos todavía.
+              } @else {
+                {{ tasa.tasa | percent }} ({{ tasa.contrataciones }} de
+                {{ tasa.asignacionesDecididas }})
+              }
+            </p>
+          }
+        </div>
+      </div>
+
+      <p>{{ empresa.descripcion }}</p>
 
       <section class="c-ficha-empresa__gestion">
         <h2 class="c-ficha-empresa__titulo">Reviews</h2>

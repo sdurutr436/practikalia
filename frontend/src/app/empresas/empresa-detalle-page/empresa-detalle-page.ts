@@ -23,6 +23,7 @@ import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
 import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
+import { IconoComponent } from '../../compartido/icono/icono';
 
 /** Las tres respuestas posibles a «¿acabó contratado?»; `''` es «todavía no se sabe». */
 const CONTRATACION = [
@@ -43,6 +44,7 @@ const CONTRATACION = [
     CampoComponent,
     BotonComponent,
     DesplegableComponent,
+    IconoComponent,
   ],
   templateUrl: './empresa-detalle-page.html',
 })

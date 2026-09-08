@@ -66,12 +66,41 @@
   gap: s.$espaciado-base;
 }
 
+// Foto a la izquierda, datos de la empresa a la derecha; en estrecho, la
+// segunda se baja debajo de la primera vía flex-wrap, sin media query.
+.c-ficha-empresa__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: s.$espaciado-grande;
+  align-items: flex-start;
+}
+
 .c-ficha-empresa__imagen {
-  width: 100%;
-  max-height: 20rem; // recorte propio de esta pantalla, no un token del tema
+  width: 10rem;
+  height: 10rem;
   object-fit: cover;
   border-radius: s.$radio;
   background: s.$color-apagado;
+  flex-shrink: 0;
+}
+
+.c-ficha-empresa__imagen--vacia {
+  display: grid;
+  place-items: center;
+  color: s.$color-texto-apagado;
+  font-size: 2.5rem; // .c-icono mide 1.1em: escala el icono, no el cuadro
+}
+
+.c-ficha-empresa__info {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+  flex: 1 1 18rem;
+  align-content: start;
+}
+
+.c-ficha-empresa__linea {
+  margin: 0;
+  color: s.$color-texto-apagado;
 }
 
 // Superficie apagada, sin borde ni sombra: no es el panel de t.panel.

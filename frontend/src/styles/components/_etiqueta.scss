@@ -37,4 +37,22 @@
     background: color-mix(in srgb, s.$color-acento 22%, transparent);
     color: s.$color-superficie-texto;
   }
+
+  // Sector o etiqueta de la ficha de empresa: enlaza al listado de empresas
+  // con ese filtro ya aplicado. Mismo tratamiento que --empresa, con nombre
+  // genérico porque aquí el destino no es siempre una ficha de empresa.
+  &--enlace {
+    background: color-mix(in srgb, s.$color-primario 12%, transparent);
+    color: s.$color-primario;
+    text-decoration: none;
+
+    &:hover {
+      background: color-mix(in srgb, s.$color-primario 20%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid s.$color-anillo;
+      outline-offset: 2px;
+    }
+  }
 }
