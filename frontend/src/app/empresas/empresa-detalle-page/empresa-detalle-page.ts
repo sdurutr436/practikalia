@@ -12,6 +12,8 @@ import { ReviewService } from '../../reviews/review.service';
 import { CalificacionConfig, Review } from '../../reviews/review.model';
 import { ReviewCardComponent } from '../../reviews/review-card/review-card';
 import { InteresService } from '../../intereses/interes.service';
+import { InteresadosEmpresaComponent } from '../../intereses/interesados-empresa/interesados-empresa';
+import { InteresBotonComponent } from '../../intereses/interes-boton/interes-boton';
 import { Interesado } from '../../intereses/interes.model';
 import { EmpresaService } from '../empresa.service';
 import { Empresa, EmpresaRequest, Etiqueta, esVistaProfesor } from '../empresa.model';
@@ -53,6 +55,8 @@ function porNombre(a: Etiqueta, b: Etiqueta): number {
     IconoComponent,
     ReviewCardComponent,
     TutoresEmpresaComponent,
+    InteresadosEmpresaComponent,
+    InteresBotonComponent,
   ],
   templateUrl: './empresa-detalle-page.html',
 })

@@ -320,17 +320,12 @@
       @if (!esVistaProfesor(empresa)) {
         <section class="c-ficha-empresa__gestion">
           <h2 class="c-ficha-empresa__titulo">Interés</h2>
-          @if (errorInteres(); as mensaje) {
-            <app-alerta>{{ mensaje }}</app-alerta>
-          }
-          <app-boton
-            [icono]="interesado() ? 'interesActivo' : 'interes'"
-            [secundario]="interesado()"
-            [deshabilitado]="guardandoInteres()"
-            (click)="alternarInteres(empresa.id)"
-          >
-            {{ interesado() ? 'Quitar interés' : 'Marcar interés' }}
-          </app-boton>
+          <app-interes-boton
+            [interesado]="interesado()"
+            [guardando]="guardandoInteres()"
+            [error]="errorInteres()"
+            (alternar)="alternarInteres(empresa.id)"
+          />
         </section>
       }
 
@@ -394,26 +389,11 @@
 
         <section class="c-ficha-empresa__gestion">
           <h2 class="c-ficha-empresa__titulo">Interesados</h2>
-          <app-estado
+          <app-interesados-empresa
+            [interesados]="interesados()"
             [cargando]="cargandoInteresados()"
             [error]="errorInteresados()"
-            [vacio]="interesados().length === 0"
-            mensajeCargando="Cargando interesados…"
-            mensajeVacio="Todavía no hay alumnos interesados en esta empresa."
-          >
-            <ul class="o-lista">
-              @for (
-                interesado of interesados();
-                track interesado.alumnoId + '-' + interesado.anio
-              ) {
-                <li class="c-fila">
-                  {{ interesado.alumnoCorreo }} · {{ interesado.gradoNombre }} ({{
-                    interesado.anio
-                  }})
-                </li>
-              }
-            </ul>
-          </app-estado>
+          />
         </section>
 
         <section class="c-ficha-empresa__gestion">
