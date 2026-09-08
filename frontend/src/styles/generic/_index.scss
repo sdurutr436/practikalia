@@ -23,22 +23,3 @@ fieldset {
 legend {
   padding: 0;
 }
-
-// Despliegue de arriba abajo, para lo que aparece colgando de su disparador
-// (menú de la barra, panel de filtros). Solo de entrada: al cerrarse, esos
-// bloques se van del DOM y no hay nada que animar.
-@keyframes desplegar {
-  from {
-    transform: scaleY(0);
-    opacity: 0;
-  }
-}
-
-// Entrada del aviso de la esquina: se asoma desde fuera del borde.
-@keyframes asomar {
-  from {
-    transform: translateY(25%);
-    opacity: 0;
-  }
-}
-
