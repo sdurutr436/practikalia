@@ -1,0 +1,57 @@
+// Carrusel de frases del día, en la mitad de marca de la pantalla de acceso.
+// Las sirve una constante del componente; si algún día vienen de la API, el
+// bloque no se entera.
+@use '../settings' as s;
+
+.c-frase {
+  display: grid;
+  gap: s.$espaciado-base;
+  margin: 0;
+}
+
+.c-frase__rotulo {
+  font-size: s.$texto-pequeno;
+  font-weight: s.$peso-medio;
+  letter-spacing: s.$tracking-amplio;
+  text-transform: uppercase;
+  color: s.$color-primario;
+}
+
+.c-frase__texto {
+  margin: 0;
+  // Reserva cuatro líneas para que el carrusel no dé saltos al pasar de una
+  // frase corta a una larga.
+  min-height: 4lh;
+  font-size: s.$texto-display;
+  font-weight: s.$peso-medio;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+.c-frase__autor {
+  font-size: s.$texto-base;
+  color: s.$color-texto-apagado;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c-frase__texto,
+  .c-frase__autor {
+    animation: c-frase-entrada 0.5s ease-out;
+  }
+}
+
+@keyframes c-frase-entrada {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+}
+
+// AL FINAL a propósito: misma especificidad que la regla base de arriba, así
+// que si este bloque fuera antes en el archivo, la base (declarada después)
+// ganaría la cascada y el carrusel se quedaría visible pese al media query.
+@media (width < 64rem) {
+  .c-frase {
+    display: none;
+  }
+}

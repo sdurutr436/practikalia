@@ -70,56 +70,10 @@
   color: s.$color-texto-apagado;
 }
 
-// Carrusel de frases del día. Las sirve una constante del componente; si algún
-// día vienen de la API, el bloque no se entera.
-.c-frase {
-  display: grid;
-  gap: s.$espaciado-base;
-  margin: 0;
-}
-
-.c-frase__rotulo {
-  font-size: s.$texto-pequeno;
-  font-weight: s.$peso-medio;
-  letter-spacing: s.$tracking-amplio;
-  text-transform: uppercase;
-  color: s.$color-primario;
-}
-
-.c-frase__texto {
-  margin: 0;
-  // Reserva cuatro líneas para que el carrusel no dé saltos al pasar de una
-  // frase corta a una larga.
-  min-height: 4lh;
-  font-size: s.$texto-display;
-  font-weight: s.$peso-medio;
-  line-height: 1.2;
-  text-wrap: pretty;
-}
-
-.c-frase__autor {
-  font-size: s.$texto-base;
-  color: s.$color-texto-apagado;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c-frase__texto,
-  .c-frase__autor {
-    animation: c-frase-entrada 0.5s ease-out;
-  }
-}
-
-@keyframes c-frase-entrada {
-  from {
-    opacity: 0;
-    translate: 0 0.5rem;
-  }
-}
-
-// Anulaciones de móvil AL FINAL a propósito: .c-frase con display:none aquí
+// Anulaciones de móvil AL FINAL a propósito: por ejemplo .c-acceso__marca
 // tiene la misma especificidad que su regla base de arriba, así que si este
 // bloque va antes en el archivo, la base (que se declara después) gana la
-// cascada y el carrusel se queda visible pese al media query.
+// cascada y la anulación no se aplicaría.
 @media (width < 64rem) {
   // Sin las dos mitades ni separador: marca y formulario comparten una sola
   // columna sobre el mismo fondo de figuras.
@@ -129,10 +83,6 @@
 
   .c-acceso__mitad--entrada {
     background: transparent;
-  }
-
-  .c-frase {
-    display: none;
   }
 
   // Logo + nombre + lema centrados como bloque, no alineados a la izquierda
