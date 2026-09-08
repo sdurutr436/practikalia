@@ -152,7 +152,7 @@
   align-items: center;
   gap: s.$espaciado-pequeno;
   padding-top: s.$espaciado-base;
-  border-top: 1px solid color-mix(in srgb, s.$color-borde 15%, transparent);
+  border-top: 1px solid s.$color-borde-suave;
 }
 
 .c-menu__avatar {

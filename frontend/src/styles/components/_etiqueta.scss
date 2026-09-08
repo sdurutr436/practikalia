@@ -1,6 +1,7 @@
 // Píldora de estado. Vivía dentro de _empresa.scss cuando solo la usaba la
 // ficha de empresa; al pintarla también las tarjetas de alumnado se saca aquí.
 @use '../settings' as s;
+@use '../tools' as t;
 
 .c-etiqueta {
   display: inline-block;
@@ -27,7 +28,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid s.$color-anillo;
+      @include t.anillo-foco;
       outline-offset: 2px;
     }
   }
@@ -51,7 +52,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid s.$color-anillo;
+      @include t.anillo-foco;
       outline-offset: 2px;
     }
   }
