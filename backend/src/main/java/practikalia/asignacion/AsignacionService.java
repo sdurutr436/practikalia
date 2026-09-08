@@ -1,6 +1,7 @@
 package practikalia.asignacion;
 
 import practikalia.empresa.Empresa;
+import practikalia.empresa.tutor.TutorEmpresa;
 import practikalia.empresa.EmpresaException;
 import practikalia.empresa.EmpresaRepository;
 import practikalia.grado.Grado;
@@ -59,20 +60,28 @@ public class AsignacionService {
      * del alumno y el curso en marcha.
      */
     @Transactional
-    public AsignacionDto asignar(Long alumnoId, Long empresaId, String correoProfesor) {
+    public AsignacionDto asignar(Long alumnoId, AsignarEmpresaRequest request, String correoProfesor) {
+        Long empresaId = request.empresaId();
         Usuario alumno = buscarAlumno(alumnoId);
         Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(EmpresaException::noEncontrada);
         if (!empresa.isPublicada()) {
             throw AsignacionException.empresaNoPublicada();
         }
 
+        Usuario tutorCentro = request.tutorCentroId() == null
+                ? tutorPorDefecto(alumno, correoProfesor)
+                : buscarTutor(request.tutorCentroId());
+        TutorEmpresa tutorEmpresa = buscarTutorEmpresa(empresa, request.tutorEmpresaId());
+
         Asignacion abierta = asignacionRepository.findFirstByAlumnoIdAndFechaFinIsNull(alumnoId).orElse(null);
         if (abierta != null) {
             if (!abierta.getEmpresa().getId().equals(empresaId)) {
                 exigirNoRepetida(alumnoId, empresaId, abierta.getGrado().getId(), abierta.getAnio());
                 abierta.setEmpresa(empresa);
-                asignacionRepository.save(abierta);
             }
+            abierta.setTutorCentro(tutorCentro);
+            abierta.setTutorEmpresa(tutorEmpresa);
+            asignacionRepository.save(abierta);
             return AsignacionDto.de(abierta);
         }
 
@@ -85,9 +94,29 @@ public class AsignacionService {
         exigirNoRepetida(alumnoId, empresaId, alumno.getGrado().getId(), curso);
 
         Asignacion asignacion = new Asignacion(
-                alumno, empresa, buscarTutor(correoProfesor), alumno.getGrado(), curso, LocalDate.now());
+                alumno, empresa, tutorCentro, alumno.getGrado(), curso, LocalDate.now());
+        asignacion.setTutorEmpresa(tutorEmpresa);
         asignacionRepository.save(asignacion);
         return AsignacionDto.de(asignacion);
+    }
+
+    /** Sin tutor elegido manda el de su clase; si su clase no tiene, quien está guardando. */
+    private Usuario tutorPorDefecto(Usuario alumno, String correoProfesor) {
+        if (alumno.getGrado() != null && alumno.getGrado().getTutor() != null) {
+            return alumno.getGrado().getTutor();
+        }
+        return buscarTutor(correoProfesor);
+    }
+
+    /** Tiene que ser uno de los tutores de esa empresa: si no, la ficha y la asignación no cuadran. */
+    private TutorEmpresa buscarTutorEmpresa(Empresa empresa, Long tutorEmpresaId) {
+        if (tutorEmpresaId == null) {
+            return null;
+        }
+        return empresa.getTutores().stream()
+                .filter(tutor -> tutor.getId().equals(tutorEmpresaId))
+                .findFirst()
+                .orElseThrow(EmpresaException::tutorEmpresaNoEncontrado);
     }
 
     @Transactional(readOnly = true)

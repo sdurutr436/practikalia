@@ -1,0 +1,11 @@
+// Nota al pie de la cabecera: la regla de la pantalla en una línea. Vivía como
+// elemento de .c-asignacion aunque se pintaba fuera de ese bloque, y la de
+// sectores habría sido la segunda copia.
+@use '../settings' as s;
+
+.c-nota {
+  margin: 0;
+  font-size: s.$texto-pequeno;
+  color: s.$color-texto-apagado;
+  text-wrap: pretty;
+}

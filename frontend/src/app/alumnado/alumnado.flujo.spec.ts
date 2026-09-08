@@ -24,6 +24,10 @@ const PENDIENTE: Alumno = {
   activo: false,
   empresaId: null,
   empresaNombre: null,
+  tutorId: null,
+  tutorNombre: null,
+  tutorEmpresaId: null,
+  tutorEmpresaNombre: null,
 };
 
 const ASIGNADO: Alumno = {
@@ -36,6 +40,10 @@ const ASIGNADO: Alumno = {
   activo: true,
   empresaId: 3,
   empresaNombre: 'Bahía Solar',
+  tutorId: 4,
+  tutorNombre: 'Marta Núñez',
+  tutorEmpresaId: 6,
+  tutorEmpresaNombre: 'Rosa Vidal',
 };
 
 describe('listado de alumnado', () => {

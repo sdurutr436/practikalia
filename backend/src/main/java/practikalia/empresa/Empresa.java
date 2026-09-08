@@ -1,5 +1,6 @@
 package practikalia.empresa;
 
+import practikalia.empresa.tutor.TutorEmpresa;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.usuario.Usuario;
 
@@ -7,6 +8,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -48,6 +51,14 @@ public class Empresa {
             joinColumns = @JoinColumn(name = "empresa_id"),
             inverseJoinColumns = @JoinColumn(name = "etiqueta_id"))
     private List<Etiqueta> etiquetas = new ArrayList<>();
+
+    /**
+     * El personal de la empresa que puede tutorizar a un alumno en prácticas.
+     * Se edita entero desde la ficha de la empresa, de ahí el {@code cascade} y
+     * el {@code orphanRemoval}: lo que no venga en la lista deja de existir.
+     */
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TutorEmpresa> tutores = new ArrayList<>();
 
     @Column(length = 2000)
     private String observaciones;

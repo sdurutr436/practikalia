@@ -39,6 +39,21 @@ public class SecurityConfig {
                                 .hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/grados/publico").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/grados").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        // El nombre y el logo los pinta el acceso antes de que nadie haya
+                        // entrado; renombrar el centro, subir el logo y la whitelist son de
+                        // admin — son correos de personas, dato personal.
+                        .requestMatchers(HttpMethod.GET, "/api/centro").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/centro").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/centro/logo").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/correos-permitidos").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/correos-permitidos").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/correos-permitidos/*").hasAuthority("ADMIN")
+                        // El catálogo plano lo lee cualquiera (formulario de empresa, intereses
+                        // del alumnado); montarlo y desmontarlo es solo de admin.
+                        .requestMatchers(HttpMethod.GET, "/api/etiquetas/arbol").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/etiquetas").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/etiquetas/*").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/etiquetas/*").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/etiquetas").hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/usuarios/*/etiquetas").hasAnyAuthority("ROLE_ALUMNO", "ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/activar").hasAuthority("ADMIN")
@@ -57,6 +72,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/alumnos/importar").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/alumnos").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/alumnos/*").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        // El profesorado se lee entre sí, pero no se edita entre sí: dar de
+                        // alta y editar una ficha es solo del admin.
+                        .requestMatchers(HttpMethod.GET, "/api/profesores").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/profesores").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/profesores/*").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/empresas/**").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/empresas/*/asignaciones").hasAnyAuthority("ROLE_PROFESOR", "ADMIN")

@@ -38,12 +38,6 @@
   flex: 1;
 }
 
-.c-asignacion__nota {
-  margin: 0;
-  font-size: s.$texto-pequeno;
-  color: s.$color-texto-apagado;
-}
-
 // Estrecho: el desplegable no cabe al lado del nombre y se va debajo.
 @media (width < 37.5rem) {
   .c-asignacion {

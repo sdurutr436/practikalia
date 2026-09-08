@@ -1,5 +1,6 @@
 // Átomos/moléculas del dominio Empresa: tarjeta de listado, ficha de
-// detalle, y el chip de etiqueta que comparten ambas pantallas.
+// detalle, la lista de tutores de su formulario, y el chip de etiqueta que
+// comparten ambas pantallas.
 @use '../settings' as s;
 @use '../tools' as t;
 
@@ -95,4 +96,26 @@
 
 .c-ficha-empresa__valor {
   margin: 0 0 s.$espaciado-pequeno;
+}
+
+// Lista de tutores de empresa del formulario: una fila por tutor y el botón de
+// quitar al final. Los campos se reparten el ancho y se apilan en estrecho.
+.c-tutores {
+  display: grid;
+  gap: s.$espaciado-pequeno;
+}
+
+.c-tutores__fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: s.$espaciado-pequeno;
+
+  .c-campo__entrada {
+    flex: 1 1 s.$ancho-campo-min;
+  }
+}
+
+.c-tutores__quitar {
+  @include t.boton-icono;
 }

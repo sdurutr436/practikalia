@@ -21,6 +21,19 @@ export const MENSAJES_CAMBIO_CONTRASENA: Record<string, string> = {
     'La contraseña nueva no cumple la política: mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial.',
 };
 
+/**
+ * Códigos que comparten el alta y la edición de cualquier cuenta del centro:
+ * los usan el listado de alumnado y el de profesorado, cada uno con los suyos
+ * propios encima.
+ */
+export const MENSAJES_CUENTA: Record<string, string> = {
+  CORREO_YA_EXISTE: 'Ya hay otra cuenta con ese correo.',
+  DNI_INVALIDO: 'El DNI no es válido: revisa el número y la letra.',
+  DNI_YA_REGISTRADO: 'Ya hay una cuenta con ese DNI.',
+  CORREO_DOMINIO_NO_PERMITIDO: 'Ese correo no es de un dominio que admita el centro.',
+  GRADO_NO_ENCONTRADO: 'La clase seleccionada ya no existe.',
+};
+
 /** Mensajes de UI por código del contrato de /api/empresas (crear/editar/imagen). */
 export const MENSAJES_EMPRESA: Record<string, string> = {
   ETIQUETA_NO_ENCONTRADA: 'El sector o alguna de las etiquetas indicadas no existe.',
@@ -40,6 +53,16 @@ export const MENSAJES_ASIGNACION: Record<string, string> = {
   GRADO_NO_ENCONTRADO: 'El grado seleccionado no existe.',
   EMPRESA_NO_PUBLICADA: 'Esa empresa todavía no está confirmada.',
   ALUMNO_SIN_CLASE: 'Ponle clase al alumno en Alumnado antes de asignarle empresa.',
+};
+
+/** Mensajes de UI por código del contrato de mantenimiento de /api/etiquetas. */
+export const MENSAJES_CATALOGO: Record<string, string> = {
+  ETIQUETA_REPETIDA: 'Ya hay un sector o una etiqueta con ese nombre.',
+  ETIQUETA_CON_HIJAS: 'Todavía cuelgan actividades o etiquetas de aquí; vacíalo antes de borrarlo.',
+  ETIQUETA_EN_USO: 'No se puede borrar: alguna empresa o algún alumno la está usando.',
+  ETIQUETA_NO_ENCONTRADA: 'Ese sector o esa etiqueta ya no existe.',
+  NIVEL_MAXIMO: 'El catálogo llega hasta la etiqueta: sector, actividad y etiqueta.',
+  CAMPO_INVALIDO: 'Escribe un nombre.',
 };
 
 /** Mensajes de UI por código del contrato de PUT /api/usuarios/{id}/grado. */
@@ -83,6 +106,13 @@ export const MENSAJES_ALTA_ALUMNO: Record<string, string> = {
   CORREO_NO_PERMITIDO: 'Ese correo no está permitido en este centro.',
   CORREO_YA_REGISTRADO: 'Ya hay una cuenta con ese correo.',
   ACCESO_DENEGADO: 'No tienes permiso para dar de alta cuentas.',
+};
+
+/** Mensajes de UI por código del contrato de /api/centro y /api/correos-permitidos. */
+export const MENSAJES_CENTRO: Record<string, string> = {
+  CORREO_PERMITIDO_YA_EXISTE: 'Ese correo ya está en la whitelist.',
+  CORREO_PERMITIDO_NO_ENCONTRADO: 'Ese correo ya no está en la whitelist.',
+  IMAGEN_INVALIDA: 'La imagen no es válida: usa JPEG, PNG o WebP de menos de 5 MB.',
 };
 
 /** Código conocido → su mensaje; si no, el mensaje del backend; si no, genérico. */

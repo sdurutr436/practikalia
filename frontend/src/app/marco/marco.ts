@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { CentroService } from '../centro/centro.service';
 import { FondoComponent } from '../compartido/fondo/fondo';
 import { IconoComponent, NombreIcono } from '../compartido/icono/icono';
 import { BotonComponent } from '../compartido/boton/boton';
@@ -10,13 +11,16 @@ interface Seccion {
   etiqueta: string;
   icono: NombreIcono;
   ruta: string;
+  /** Solo para quien tenga `esAdmin`; el resto del profesorado ni la ve. */
+  soloAdmin?: boolean;
 }
 
 /**
- * Menú del profesorado. Alumnado y Sectores, Actividad, Profesorado y
- * Configuración todavía no tienen pantalla: sus rutas existen y apuntan a la
- * página de "en construcción", así que el menú no cambia de forma cuando se
- * vayan creando.
+ * Menú del profesorado. Configuración es la misma pantalla para todo el
+ * mundo; solo el propio formulario se restringe a `esAdmin`, con un aviso para
+ * el resto. Sectores y etiquetas sí sale solo con `esAdmin` en el menú.
+ * Actividad no sale: la sección no tiene sentido en esta aplicación, aunque su
+ * ruta siga respondiendo si se escribe a mano.
  */
 const SECCIONES_PROFESOR: Seccion[] = [
   { etiqueta: 'Panel', icono: 'panel', ruta: '/panel' },
@@ -24,8 +28,7 @@ const SECCIONES_PROFESOR: Seccion[] = [
   { etiqueta: 'Reseñas', icono: 'moderacion', ruta: '/reviews' },
   { etiqueta: 'Alumnado', icono: 'persona', ruta: '/alumnado' },
   { etiqueta: 'Asignaciones', icono: 'asignaciones', ruta: '/asignaciones' },
-  { etiqueta: 'Sectores y etiquetas', icono: 'etiqueta', ruta: '/sectores' },
-  { etiqueta: 'Actividad', icono: 'actividad', ruta: '/actividad' },
+  { etiqueta: 'Sectores y etiquetas', icono: 'etiqueta', ruta: '/sectores', soloAdmin: true },
   { etiqueta: 'Profesorado', icono: 'grado', ruta: '/profesorado' },
   { etiqueta: 'Configuración', icono: 'configuracion', ruta: '/configuracion' },
 ];
@@ -71,15 +74,21 @@ const SECCIONES_ALUMNO: Seccion[] = [
 export class MarcoComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly centroService = inject(CentroService);
 
   protected readonly sesion = this.auth.sesion;
   // Cerrado al entrar: el menú flota sobre la página, y abierto por defecto
   // taparía el contenido nada más cargar.
   protected readonly abierto = signal(false);
 
-  protected readonly secciones = computed(() =>
-    this.sesion()?.rol === 'ALUMNO' ? SECCIONES_ALUMNO : SECCIONES_PROFESOR,
-  );
+  protected readonly secciones = computed(() => {
+    const sesion = this.sesion();
+    if (sesion?.rol === 'ALUMNO') {
+      return SECCIONES_ALUMNO;
+    }
+    // Enseñar una sección que el guard va a rebotar es peor que no enseñarla.
+    return SECCIONES_PROFESOR.filter((seccion) => !seccion.soloAdmin || sesion?.esAdmin);
+  });
 
   protected readonly rolLegible = computed(() =>
     this.sesion()?.rol === 'ALUMNO' ? 'Alumnado' : 'Profesorado',

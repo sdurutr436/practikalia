@@ -19,5 +19,11 @@ public record AlumnoDto(
         boolean activo,
         @Schema(description = "Empresa de su asignación abierta, o `null` si no tiene ninguna en curso")
         Long empresaId,
-        String empresaNombre) {
+        String empresaNombre,
+        @Schema(description = "Tutor de prácticas de su asignación abierta, o `null` si no tiene ninguna en curso")
+        Long tutorId,
+        String tutorNombre,
+        @Schema(description = "Quién le tutoriza en la empresa; `null` si no se ha elegido a nadie")
+        Long tutorEmpresaId,
+        String tutorEmpresaNombre) {
 }

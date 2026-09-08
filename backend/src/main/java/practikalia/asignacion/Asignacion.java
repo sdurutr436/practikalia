@@ -1,6 +1,7 @@
 package practikalia.asignacion;
 
 import practikalia.empresa.Empresa;
+import practikalia.empresa.tutor.TutorEmpresa;
 import practikalia.grado.Grado;
 import practikalia.usuario.Usuario;
 
@@ -35,6 +36,10 @@ public class Asignacion {
 
     @ManyToOne(optional = false)
     private Usuario tutorCentro;
+
+    /** Quién le tutoriza en la empresa. Nulo mientras no se elija, o si se borró de la ficha. */
+    @ManyToOne
+    private TutorEmpresa tutorEmpresa;
 
     @ManyToOne(optional = false)
     private Grado grado;

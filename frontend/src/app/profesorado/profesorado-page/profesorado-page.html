@@ -1,0 +1,90 @@
+<main class="o-pagina">
+  <app-cabecera titulo="Profesorado" />
+
+  <!-- Pastillas a la izquierda y el alta a la derecha del todo, como en alumnado. -->
+  <div class="c-barra-listado">
+    <app-pastillas [opciones]="pastillas" [activa]="clave()" ruta="/profesorado" />
+
+    @if (esAdmin()) {
+      <div class="c-barra-listado__acciones">
+        <app-boton icono="anadir" (click)="abrirFicha(null)">Nuevo profesor</app-boton>
+      </div>
+    }
+  </div>
+
+  <app-estado
+    [cargando]="cargando()"
+    [error]="error()"
+    [vacio]="profesores().length === 0"
+    [mensajeVacio]="mensajeVacio()"
+  >
+    <ul class="o-rejilla">
+      @for (profesor of profesores(); track profesor.id) {
+        <li class="c-fila c-persona">
+          <div class="c-persona__cabecera">
+            <p class="c-persona__nombre">{{ nombreCompleto(profesor) }}</p>
+
+            @if (esAdmin()) {
+              <!-- En estrecho el lápiz se queda solo con su icono para no saturar
+                   la tarjeta; el rótulo sigue existiendo para el lector de pantalla. -->
+              <button
+                class="c-persona__editar"
+                type="button"
+                [attr.aria-label]="'Editar la ficha de ' + nombreCompleto(profesor)"
+                (click)="abrirFicha(profesor)"
+              >
+                <app-icono nombre="editar" />
+                <span class="c-persona__editar-texto">Editar</span>
+              </button>
+            }
+          </div>
+
+          <p class="c-persona__correo">{{ profesor.correo }}</p>
+          <p class="c-persona__clase">
+            @if (profesor.clase; as clase) {
+              Tutor de {{ clase.nombre }}
+            } @else {
+              Sin clase asignada
+            }
+          </p>
+
+          <div class="c-persona__pies">
+            @if (profesor.esAdmin) {
+              <span class="c-etiqueta c-etiqueta--empresa">Administrador</span>
+            } @else {
+              <span class="c-etiqueta">Profesor</span>
+            }
+
+            @if (profesor.alumnosPractica > 0) {
+              <span class="c-etiqueta">
+                {{ profesor.alumnosPractica }}
+                {{ profesor.alumnosPractica === 1 ? 'alumno' : 'alumnos' }} de prácticas
+              </span>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  </app-estado>
+
+  <app-paginacion
+    [pagina]="paginaActual()"
+    [paginas]="paginas()"
+    seccion="profesorado"
+    [total]="total()"
+    nombre="profesores"
+    (ir)="irAPagina($event)"
+  />
+</main>
+
+@if (fichaAbierta()) {
+  <app-profesor-modal
+    [profesor]="editando()"
+    [grados]="grados()"
+    [alumnos]="alumnos()"
+    [guardando]="guardando()"
+    [error]="errorFicha()"
+    (guardar)="guardarFicha($event)"
+    (cerrar)="cerrarFicha()"
+  />
+}

@@ -90,6 +90,61 @@
         ></textarea>
       </app-campo>
 
+      <app-campo
+        etiqueta="Tutores de empresa"
+        icono="persona"
+        [grupo]="true"
+        ayuda="Quien tutoriza al alumnado dentro de la empresa. Hace falta al menos uno."
+      >
+        <div class="c-tutores" formArrayName="tutores">
+          @for (fila of tutores.controls; track fila; let i = $index) {
+            <div class="c-tutores__fila" [formGroupName]="i">
+              <input
+                class="c-campo__entrada"
+                type="text"
+                placeholder="Nombre"
+                aria-label="Nombre del tutor"
+                formControlName="nombre"
+              />
+              <input
+                class="c-campo__entrada"
+                type="text"
+                placeholder="Cargo"
+                aria-label="Cargo del tutor"
+                formControlName="cargo"
+              />
+              <input
+                class="c-campo__entrada"
+                type="text"
+                placeholder="Teléfono"
+                aria-label="Teléfono del tutor"
+                formControlName="telefono"
+              />
+              <input
+                class="c-campo__entrada"
+                type="email"
+                placeholder="Correo"
+                aria-label="Correo del tutor"
+                formControlName="correo"
+              />
+              <button
+                class="c-tutores__quitar"
+                type="button"
+                aria-label="Quitar este tutor"
+                [disabled]="tutores.length === 1"
+                (click)="quitarTutor(i)"
+              >
+                <app-icono nombre="rechazar" />
+              </button>
+            </div>
+          }
+        </div>
+
+        <app-boton icono="anadir" [secundario]="true" (click)="anadirTutor()">
+          Añadir tutor
+        </app-boton>
+      </app-campo>
+
       <app-campo etiqueta="Contacto: nombre" icono="persona" para="contacto-nombre">
         <input
           class="c-campo__entrada"

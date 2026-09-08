@@ -8,15 +8,23 @@ Visión funcional completa, roles y roadmap: [docs/briefing.md](docs/briefing.md
 
 ## Estado actual
 
-Proyecto en desarrollo activo, pre-MVP. Ya funciona (con margen de mejora):
+Primera beta (`0.1.0-beta`), pensada para usarse desde la vista de administrador o de
+profesor con permisos de administrador. La vista de un profesor sin esos permisos, la
+de alumnado y el flujo completo de alta/primer acceso de una cuenta nueva ya existen,
+pero todavía no se han verificado en uso real.
 
-- Alta y autenticación de usuarios: login con JWT en cookie, cambio de contraseña obligatorio, auto-registro de alumnado por correo institucional, alta de alumnado desde la cabecera por parte del profesorado.
-- Directorio de empresas: listado paginado, detalle y alta/edición, con buscador por nombre/sector/etiquetas, filtros avanzados y filtro por estado de publicación desde el panel.
-- Reviews de profesorado (publicación directa) y de alumnado (con moderación docente), enlazadas a su empresa y con cola de moderación para las rechazadas.
+Ya funciona (con margen de mejora):
+
+- Alta y autenticación de usuarios: login con JWT en cookie, cambio de contraseña obligatorio, auto-registro de alumnado por correo institucional (nace pendiente de aprobación), alta y edición de alumnado y de profesorado desde la interfaz.
+- Directorio de empresas: listado paginado, detalle y alta/edición, con buscador por nombre/sector/etiquetas, filtros avanzados, imagen y filtro por estado de publicación desde el panel.
+- Sectores y etiquetas: catálogo en árbol de tres niveles (sector → actividad → etiqueta) editable por un administrador sin tocar la base de datos.
+- Asignación de prácticas: empresa, profesor de empresa y tutor de empresa por alumno, con histórico y grado/año.
+- Reviews de profesorado (publicación directa) y de alumnado (con moderación docente), moderación por estado (pendientes/aprobadas/rechazadas) con reversión de una decisión ya tomada.
 - Intereses del alumnado por empresa y afinidad básica.
+- Configuración del centro: nombre, logo y whitelist de correos permitidos, desde la interfaz.
 - Panel diferenciado por rol (alumno/profesor), con navegación propia y contadores del centro (empresas, alumnado).
 
-Lo marcado como "a futuro" o "más adelante" en el [briefing](docs/briefing.md#roadmap) (OTP, 2FA, métricas de contratación, motor de afinidad avanzado, federación entre instancias...) sigue siendo **WIP**.
+Lo marcado como "a futuro" o "más adelante" en el [briefing](docs/briefing.md#roadmap) (OTP, 2FA, métricas de contratación, motor de afinidad avanzado, federación entre instancias...) sigue siendo **WIP**. Tampoco hay todavía imágenes publicadas en Docker Hub ni CI/CD configurado: cada instalación construye sus propias imágenes con `docker compose up --build`.
 
 ## Stack
 

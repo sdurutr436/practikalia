@@ -34,22 +34,6 @@
 }
 
 .c-toast__cerrar {
-  display: grid;
-  place-items: center;
+  @include t.boton-icono;
   flex: none;
-  padding: 0;
-  border: 0;
-  border-radius: s.$radio-m;
-  background: none;
-  color: s.$color-texto-apagado;
-  font: inherit;
-  cursor: pointer;
-
-  &:hover {
-    color: s.$color-superficie-texto;
-  }
-
-  &:focus-visible {
-    @include t.anillo-foco;
-  }
 }

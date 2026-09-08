@@ -1,6 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
-import { alumnoGuard, autenticadoGuard, cambioContrasenaPendienteGuard, profesorGuard } from './auth.guards';
+import {
+  ActivatedRouteSnapshot,
+  CanActivateFn,
+  RouterStateSnapshot,
+  UrlTree,
+  provideRouter,
+} from '@angular/router';
+import {
+  adminGuard,
+  alumnoGuard,
+  autenticadoGuard,
+  cambioContrasenaPendienteGuard,
+  profesorGuard,
+} from './auth.guards';
 import { AuthService, Sesion } from './auth.service';
 
 function configurar(sesion: Sesion | null): void {
@@ -79,6 +91,23 @@ describe('profesorGuard', () => {
   it('profesor pasa', async () => {
     configurar({ ...sesionNormal, rol: 'PROFESOR' });
     expect(await ejecutar(profesorGuard)).toBe(true);
+  });
+});
+
+describe('adminGuard', () => {
+  it('sin sesión redirige a login', async () => {
+    configurar(null);
+    expect(String(await ejecutar(adminGuard))).toBe('/login');
+  });
+
+  it('profesor sin esAdmin no pasa, vuelve a la ruta por defecto', async () => {
+    configurar({ ...sesionNormal, rol: 'PROFESOR' });
+    expect(String(await ejecutar(adminGuard))).toBe('/');
+  });
+
+  it('admin pasa', async () => {
+    configurar({ ...sesionNormal, rol: 'PROFESOR', esAdmin: true });
+    expect(await ejecutar(adminGuard)).toBe(true);
   });
 });
 

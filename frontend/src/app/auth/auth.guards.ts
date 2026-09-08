@@ -57,6 +57,27 @@ export const profesorGuard: CanActivateFn = async () => {
   return true;
 };
 
+/**
+ * Rutas de administración del centro (catálogo de sectores y etiquetas): hace
+ * falta `esAdmin`, que viaja sobre `rol=PROFESOR` y no es un rol aparte.
+ * Chequeo de UI — la barrera real la pone el backend.
+ */
+export const adminGuard: CanActivateFn = async () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const sesion = await auth.asegurarSesion();
+  if (!sesion) {
+    return router.createUrlTree(['/login']);
+  }
+  if (sesion.debeCambiarContrasena) {
+    return router.createUrlTree(['/cambiar-contrasena']);
+  }
+  if (!sesion.esAdmin) {
+    return router.createUrlTree(['/']);
+  }
+  return true;
+};
+
 /** Ruta de "mis intereses": solo alumno, simétrico a profesorGuard. */
 export const alumnoGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);

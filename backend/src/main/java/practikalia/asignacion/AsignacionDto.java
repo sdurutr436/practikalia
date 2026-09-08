@@ -13,8 +13,12 @@ public record AsignacionDto(
         String alumnoCorreo,
         Long empresaId,
         String empresaNombre,
+        @Schema(description = "El profesor que le tutoriza las prácticas desde el centro")
         Long tutorCentroId,
         String tutorCentroCorreo,
+        @Schema(description = "Quién le tutoriza en la empresa; `null` si no se ha elegido a nadie")
+        Long tutorEmpresaId,
+        String tutorEmpresaNombre,
         GradoDto grado,
         Integer anio,
         LocalDate fechaInicio,
@@ -32,6 +36,8 @@ public record AsignacionDto(
                 asignacion.getEmpresa().getNombre(),
                 asignacion.getTutorCentro().getId(),
                 asignacion.getTutorCentro().getCorreo(),
+                asignacion.getTutorEmpresa() == null ? null : asignacion.getTutorEmpresa().getId(),
+                asignacion.getTutorEmpresa() == null ? null : asignacion.getTutorEmpresa().getNombre(),
                 GradoDto.de(asignacion.getGrado()),
                 asignacion.getAnio(),
                 asignacion.getFechaInicio(),

@@ -29,6 +29,7 @@ const EMPRESA_NO_PUBLICADA: Empresa = {
   nombre: 'Beta',
   publicada: false,
   observaciones: '',
+  tutores: [{ id: 7, nombre: 'Rosa', cargo: null, telefono: null, correo: null }],
   contactoNombre: '',
   contactoTelefono: '',
   contactoEmail: '',
@@ -359,6 +360,8 @@ describe('formulario de empresa', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const c = componente as any;
     c.form.patchValue({ nombre: 'Nueva SL', sectorId: 10, etiquetasManual: '20, 30, 20' });
+    // Toda empresa necesita al menos un tutor de empresa para poder guardarse.
+    c.tutores.at(0).patchValue({ nombre: 'Rosa' });
     c.toggleEtiqueta(20, true);
     const envio = c.enviar() as Promise<void>;
 
@@ -381,6 +384,39 @@ describe('formulario de empresa', () => {
     await esperarMicrotareas();
 
     expect(router.url).toBe('/empresas/5/editar');
+  });
+
+  it('la ficha añade tutores de empresa y nunca se queda sin ninguno', async () => {
+    await loginComo('PROFESOR');
+    const harness = await RouterTestingHarness.create();
+    const componente = await harness.navigateByUrl('/empresas/nueva', EmpresaFormularioPage);
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_PUBLICADA]));
+    await esperarMicrotareas();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = componente as any;
+    c.form.patchValue({ nombre: 'Nueva SL', sectorId: 10 });
+    c.tutores.at(0).patchValue({ nombre: 'Rosa', cargo: 'Jefa de taller' });
+    c.anadirTutor();
+    c.tutores.at(1).patchValue({ nombre: 'Luis' });
+
+    // La última fila no se puede quitar: el backend exige al menos un tutor.
+    c.quitarTutor(1);
+    c.quitarTutor(0);
+    expect(c.tutores.length).toBe(1);
+
+    const envio = c.enviar() as Promise<void>;
+    const creacion = http.expectOne((r) => r.url === '/api/empresas');
+    expect(creacion.request.body.tutores).toEqual([
+      { id: null, nombre: 'Rosa', cargo: 'Jefa de taller', telefono: null, correo: null },
+    ]);
+    creacion.flush({ ...EMPRESA_NO_PUBLICADA, id: 5, nombre: 'Nueva SL' });
+    await envio;
+
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([EMPRESA_NO_PUBLICADA]));
+    await esperarMicrotareas();
+    http.expectOne('/api/empresas/5').flush({ ...EMPRESA_NO_PUBLICADA, id: 5 });
+    await esperarMicrotareas();
   });
 
   it('profesor edita una empresa existente y vuelve al detalle', async () => {

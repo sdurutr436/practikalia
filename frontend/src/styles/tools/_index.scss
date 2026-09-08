@@ -35,3 +35,34 @@
     border-color: s.$color-anillo;
   }
 }
+
+// Botón que es solo su icono: la X del modal, la del aviso y las acciones de
+// cada fila del catálogo. Las tres eran el mismo bloque copiado.
+@mixin boton-icono {
+  display: grid;
+  place-items: center;
+  padding: s.$espaciado-diminuto;
+  border: 0;
+  border-radius: s.$radio-m;
+  background: none;
+  color: s.$color-texto-apagado;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background s.$transicion,
+    color s.$transicion;
+
+  &:hover:not(:disabled) {
+    background: s.$color-apagado;
+    color: s.$color-superficie-texto;
+  }
+
+  &:focus-visible {
+    @include anillo-foco;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

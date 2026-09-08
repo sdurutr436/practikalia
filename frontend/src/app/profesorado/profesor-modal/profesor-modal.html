@@ -1,0 +1,41 @@
+<app-ficha-persona
+  [form]="form"
+  [titulo]="titulo()"
+  prefijo="profesor"
+  [textoGuardar]="esAlta() ? 'Crear profesor' : 'Guardar cambios'"
+  [guardando]="guardando()"
+  [error]="error()"
+  [extraSucio]="anadidos().length > 0"
+  (guardar)="enviar()"
+  (cerrar)="cerrar.emit()"
+>
+  <app-campo campoExtra etiqueta="Clase de la que es tutor" icono="grado" para="profesor-grado">
+    <app-desplegable id="profesor-grado" [control]="form.controls.gradoId" [opciones]="clases()" />
+  </app-campo>
+
+  <app-campo etiqueta="Permisos" icono="configuracion" [grupo]="true">
+    <label class="c-checkbox">
+      <input type="checkbox" [formControl]="form.controls.esAdmin" />
+      Es administrador
+    </label>
+  </app-campo>
+
+  <app-campo etiqueta="Alumnos de prácticas asociados" icono="asignaciones" [grupo]="true">
+    <app-desplegable
+      id="profesor-practicas"
+      [control]="aAnadir"
+      [opciones]="opcionesAlumno()"
+      marcador="Añadir alumno…"
+      vacio="No queda alumnado con empresa por repartir."
+      (cambia)="anadir($event)"
+    />
+
+    @if (tutorizados().length > 0) {
+      <ul class="o-etiquetas">
+        @for (alumno of tutorizados(); track alumno.id) {
+          <li class="c-etiqueta">{{ nombre(alumno) }}</li>
+        }
+      </ul>
+    }
+  </app-campo>
+</app-ficha-persona>

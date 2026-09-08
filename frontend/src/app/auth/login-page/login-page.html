@@ -4,9 +4,15 @@
   <section class="o-acceso__mitad c-acceso__mitad--marca">
     <div class="c-acceso__marca">
       <div class="c-acceso__identidad">
-        <span class="c-acceso__logo"><app-icono nombre="grado" /></span>
+        <span class="c-acceso__logo">
+          @if (centroService.centro().logo; as logo) {
+            <img [src]="logo" alt="" />
+          } @else {
+            <app-icono nombre="grado" />
+          }
+        </span>
         <span class="c-acceso__titulos">
-          <span class="c-acceso__nombre">Practikalia</span>
+          <span class="c-acceso__nombre">{{ centroService.centro().nombre }}</span>
           <span class="c-acceso__lema">Prácticas de FP · IES Mi Dominio</span>
         </span>
       </div>

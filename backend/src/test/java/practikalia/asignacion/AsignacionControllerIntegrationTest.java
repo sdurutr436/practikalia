@@ -1,6 +1,7 @@
 package practikalia.asignacion;
 
 import practikalia.empresa.Empresa;
+import practikalia.empresa.tutor.TutorEmpresa;
 import practikalia.empresa.EmpresaRepository;
 import practikalia.etiqueta.Etiqueta;
 import practikalia.etiqueta.EtiquetaRepository;
@@ -253,11 +254,24 @@ class AsignacionControllerIntegrationTest {
     }
 
     private org.springframework.test.web.servlet.ResultActions asignar(Long alumnoId, Long empresaId) throws Exception {
+        return asignar(alumnoId, new AsignarEmpresaRequest(empresaId, null, null));
+    }
+
+    private org.springframework.test.web.servlet.ResultActions asignar(
+            Long alumnoId, AsignarEmpresaRequest request) throws Exception {
         return mockMvc.perform(put("/api/alumnos/" + alumnoId + "/asignacion")
                 .with(csrf())
                 .with(comoProfesor())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new AsignarEmpresaRequest(empresaId))));
+                .content(objectMapper.writeValueAsString(request)));
+    }
+
+    /** Deja la empresa publicada y con un tutor, y devuelve el id de ese tutor. */
+    private Long conTutorDeEmpresa(Empresa deQuien) {
+        deQuien.setPublicada(true);
+        deQuien.getTutores().add(new TutorEmpresa(deQuien, "Rosa"));
+        empresaRepository.save(deQuien);
+        return deQuien.getTutores().get(0).getId();
     }
 
     @Test
@@ -331,5 +345,48 @@ class AsignacionControllerIntegrationTest {
         mockMvc.perform(get("/api/alumnos/curso").with(comoProfesor()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.total").value(2));
+    }
+
+    @Test
+    void sinTutorElegidoMandaElTutorDeLaClaseDelAlumno() throws Exception {
+        Usuario tutorDeClase = usuarioRepository.save(
+                new Usuario("tutora@iesejemplo.es", passwordEncoder.encode("Password123!"), Rol.PROFESOR));
+        grado.setTutor(tutorDeClase);
+        gradoRepository.save(grado);
+        alumno.setGrado(grado);
+        usuarioRepository.save(alumno);
+        empresa.setPublicada(true);
+        empresaRepository.save(empresa);
+
+        asignar(alumno.getId(), empresa.getId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tutorCentroCorreo").value("tutora@iesejemplo.es"));
+    }
+
+    @Test
+    void asignarGuardaElTutorDeEmpresaElegido() throws Exception {
+        alumno.setGrado(grado);
+        usuarioRepository.save(alumno);
+        Long tutorEmpresaId = conTutorDeEmpresa(empresa);
+
+        asignar(alumno.getId(), new AsignarEmpresaRequest(empresa.getId(), profesor.getId(), tutorEmpresaId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tutorEmpresaNombre").value("Rosa"))
+                .andExpect(jsonPath("$.tutorCentroCorreo").value("prof@iesejemplo.es"));
+    }
+
+    @Test
+    void unTutorDeOtraEmpresaNoVale() throws Exception {
+        alumno.setGrado(grado);
+        usuarioRepository.save(alumno);
+        empresa.setPublicada(true);
+        empresaRepository.save(empresa);
+        Empresa otra = empresaRepository.save(
+                new Empresa("Bahía Solar", "d", "dir", empresa.getSector(), "obs", "c", "t", "e", profesor));
+        Long tutorDeOtra = conTutorDeEmpresa(otra);
+
+        asignar(alumno.getId(), new AsignarEmpresaRequest(empresa.getId(), null, tutorDeOtra))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.codigo").value("TUTOR_EMPRESA_NO_ENCONTRADO"));
     }
 }
