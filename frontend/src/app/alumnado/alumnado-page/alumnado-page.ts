@@ -17,7 +17,7 @@ import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { BotonComponent } from '../../compartido/boton/boton';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { EstadoComponent } from '../../compartido/estado/estado';
-import { IconoComponent } from '../../compartido/icono/icono';
+import { PersonaCabeceraComponent } from '../../compartido/persona-cabecera/persona-cabecera';
 import { ToastService } from '../../compartido/toast/toast.service';
 import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
 import { PastillasComponent } from '../../compartido/pastillas/pastillas';
@@ -69,7 +69,7 @@ const MENSAJES_ALUMNADO: Record<string, string> = {
     CabeceraComponent,
     AlertaComponent,
     BotonComponent,
-    IconoComponent,
+    PersonaCabeceraComponent,
     PaginacionComponent,
     PastillasComponent,
     AlumnoModalComponent,

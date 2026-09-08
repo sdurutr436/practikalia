@@ -9,8 +9,8 @@ import { MENSAJES_CUENTA, mensajeDeError } from '../../auth/mensajes-error';
 import { BotonComponent } from '../../compartido/boton/boton';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
 import { EstadoComponent } from '../../compartido/estado/estado';
-import { IconoComponent } from '../../compartido/icono/icono';
 import { nombreCompleto } from '../../compartido/nombre';
+import { PersonaCabeceraComponent } from '../../compartido/persona-cabecera/persona-cabecera';
 import { PaginacionComponent } from '../../compartido/paginacion/paginacion';
 import { PastillasComponent } from '../../compartido/pastillas/pastillas';
 import { ToastService } from '../../compartido/toast/toast.service';
@@ -63,7 +63,7 @@ const MENSAJES_PROFESORADO: Record<string, string> = {
     EstadoComponent,
     CabeceraComponent,
     BotonComponent,
-    IconoComponent,
+    PersonaCabeceraComponent,
     PaginacionComponent,
     PastillasComponent,
     ProfesorModalComponent,

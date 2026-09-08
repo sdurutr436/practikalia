@@ -40,21 +40,7 @@
     <ul class="o-rejilla">
       @for (alumno of alumnos(); track alumno.id) {
         <li class="c-fila c-persona">
-          <div class="c-persona__cabecera">
-            <p class="c-persona__nombre">{{ nombreCompleto(alumno) }}</p>
-
-            <!-- En estrecho el lápiz se queda solo con su icono para no saturar
-                 la tarjeta; el rótulo sigue existiendo para el lector de pantalla. -->
-            <button
-              class="c-persona__editar"
-              type="button"
-              [attr.aria-label]="'Editar la ficha de ' + nombreCompleto(alumno)"
-              (click)="abrirFicha(alumno)"
-            >
-              <app-icono nombre="editar" />
-              <span class="c-persona__editar-texto">Editar</span>
-            </button>
-          </div>
+          <app-persona-cabecera [nombre]="nombreCompleto(alumno)" (editar)="abrirFicha(alumno)" />
 
           <p class="c-persona__correo">{{ alumno.correo }}</p>
           <p class="c-persona__clase">
@@ -69,9 +55,7 @@
           </p>
 
           @if (alumno.empresaId) {
-            <p class="c-persona__tutor">
-              Prácticas: {{ alumno.tutorNombre ?? 'sin tutor' }}
-            </p>
+            <p class="c-persona__tutor">Prácticas: {{ alumno.tutorNombre ?? 'sin tutor' }}</p>
             <p class="c-persona__tutor">
               En la empresa: {{ alumno.tutorEmpresaNombre ?? 'sin tutor' }}
             </p>
