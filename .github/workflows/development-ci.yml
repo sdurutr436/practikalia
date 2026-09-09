@@ -73,8 +73,8 @@ jobs:
         working-directory: frontend
         run: pnpm build
 
-  trivy:
-    name: Seguridad (Trivy)
+  trivy-fs:
+    name: "Trivy: dependencias y configuración"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -83,14 +83,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Construir imagen backend (validación, no se publica)
-        run: docker build -t practikalia-backend:ci ./backend
-
       # Dependencias del repo (pom.xml, pnpm-lock.yaml) y configuración de
-      # Dockerfiles/compose. Cada scan corre dos veces: una con todas las
-      # severidades para dejar constancia en GitHub Security (no bloquea el
-      # pipeline), y otra filtrada a CRITICAL/HIGH que sí lo bloquea si
-      # encuentra algo — así MEDIUM/LOW quedan visibles pero no frenan un PR.
+      # Dockerfiles/compose. Corre dos veces: una con todas las severidades
+      # para dejar constancia en GitHub Security (no bloquea el pipeline), y
+      # otra filtrada a CRITICAL/HIGH que sí lo bloquea si encuentra algo —
+      # así MEDIUM/LOW quedan visibles pero no frenan un PR.
       - name: "Trivy (repo): informe completo"
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -119,11 +116,28 @@ jobs:
           severity: CRITICAL,HIGH
           exit-code: '1'
 
-      - name: "Trivy (imagen backend): informe completo"
+  trivy-image:
+    name: "Trivy: imagen ${{ matrix.image }}"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [backend, frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Construir imagen (validación, no se publica)
+        run: docker build -t practikalia-${{ matrix.image }}:ci ./${{ matrix.image }}
+
+      - name: "Trivy: informe completo"
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
-          image-ref: practikalia-backend:ci
+          image-ref: practikalia-${{ matrix.image }}:ci
           format: sarif
           output: trivy-image.sarif
           exit-code: '0'
@@ -132,13 +146,13 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-image.sarif
-          category: trivy-image
+          category: trivy-image-${{ matrix.image }}
 
-      - name: "Trivy (imagen backend): bloqueo CRITICAL/HIGH"
+      - name: "Trivy: bloqueo CRITICAL/HIGH"
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
-          image-ref: practikalia-backend:ci
+          image-ref: practikalia-${{ matrix.image }}:ci
           format: table
           severity: CRITICAL,HIGH
           exit-code: '1'
