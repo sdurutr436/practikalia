@@ -222,7 +222,7 @@ export class DesplegableComponent {
     queueMicrotask(() =>
       document
         .getElementById(this.opcionId(this.resaltada()))
-        ?.scrollIntoView({ block: 'nearest' }),
+        ?.scrollIntoView?.({ block: 'nearest' }),
     );
   }
 }
