@@ -1,0 +1,130 @@
+name: Development CI
+
+on:
+  pull_request:
+    branches: [desarrollo]
+  push:
+    branches: [desarrollo]
+
+concurrency:
+  group: development-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    name: Tests backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configurar JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Ejecutar tests
+        working-directory: backend
+        run: ./mvnw -B test
+
+  frontend-tests:
+    name: Tests frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Ejecutar tests
+        working-directory: frontend
+        run: pnpm test
+
+      - name: Build de producción
+        working-directory: frontend
+        run: pnpm build
+
+  trivy:
+    name: Seguridad (Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Construir imagen backend (validación, no se publica)
+        run: docker build -t practikalia-backend:ci ./backend
+
+      # Dependencias del repo (pom.xml, pnpm-lock.yaml) y configuración de
+      # Dockerfiles/compose. Cada scan corre dos veces: una con todas las
+      # severidades para dejar constancia en GitHub Security (no bloquea el
+      # pipeline), y otra filtrada a CRITICAL/HIGH que sí lo bloquea si
+      # encuentra algo — así MEDIUM/LOW quedan visibles pero no frenan un PR.
+      - name: "Trivy (repo): informe completo"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,misconfig
+          format: sarif
+          output: trivy-fs.sarif
+          exit-code: '0'
+
+      - name: Subir informe de dependencias/configuración a GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs
+
+      - name: "Trivy (repo): bloqueo CRITICAL/HIGH"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,misconfig
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+
+      - name: "Trivy (imagen backend): informe completo"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: practikalia-backend:ci
+          format: sarif
+          output: trivy-image.sarif
+          exit-code: '0'
+
+      - name: Subir informe de la imagen a GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-image.sarif
+          category: trivy-image
+
+      - name: "Trivy (imagen backend): bloqueo CRITICAL/HIGH"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: practikalia-backend:ci
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: '1'
