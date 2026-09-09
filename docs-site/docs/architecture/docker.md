@@ -4,4 +4,4 @@ sidebar_position: 4
 
 # Docker
 
-**WIP** — pendiente de desarrollar en detalle: por qué `backend/Dockerfile` es multi-stage y `frontend/Dockerfile` hoy no produce una imagen desplegable por sí sola (el frontend compilado se sirve vía `nginx` a partir de un volumen compartido).
+**WIP** — pendiente de desarrollar en detalle: ambos Dockerfiles son multi-stage (`backend/Dockerfile`: JDK para compilar, JRE para ejecutar; `frontend/Dockerfile`: Node para compilar con pnpm, Nginx para servir los estáticos y hacer de proxy a `/api/`), y por qué eso permite publicar imágenes standalone que un centro puede descargar y orquestar sin construir desde el código fuente.

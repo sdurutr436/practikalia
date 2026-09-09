@@ -67,9 +67,8 @@ Pantalla de acceso y panel general, en desktop y en móvil. Son las únicas capt
 ```text
 practikalia/
 ├── backend/          # API Spring Boot
-├── frontend/          # Aplicación Angular
+├── frontend/          # Aplicación Angular (imagen final: Nginx + estáticos)
 ├── docs/              # Documentación funcional y técnica
-├── nginx/             # Configuración de nginx para despliegue
 └── docker-compose.yml
 ```
 
@@ -101,19 +100,19 @@ cp .env.example .env   # ajusta DB_NAME, DB_USER, DB_PASSWORD
 docker compose up --build -d
 ```
 
-Esto levanta cuatro servicios (`postgres`, `backend`, `frontend`, `nginx`), pero el único que necesita ser alcanzable desde otros equipos es `nginx`, que escucha en el puerto 80 del servidor y actúa como único punto de entrada:
+Esto levanta tres servicios (`postgres`, `backend`, `frontend`), pero el único que necesita ser alcanzable desde otros equipos es `frontend`, que escucha en el puerto 80 del servidor y actúa como único punto de entrada: es una imagen de Nginx con los estáticos ya compilados dentro (ver [frontend/Dockerfile](frontend/Dockerfile)).
 
 - Sirve el frontend compilado en `/`.
-- Reenvía todo lo que llega a `/api/` hacia el backend interno (ver [nginx/nginx.conf](nginx/nginx.conf)).
+- Reenvía todo lo que llega a `/api/` hacia el backend interno (ver [frontend/nginx.conf](frontend/nginx.conf)).
 
-Así el navegador de cualquier PC solo habla con `nginx`; nunca ve el host ni el puerto reales del backend. Esa es la ruta enmascarada que pide el briefing: da igual desde qué equipo del centro se acceda, todas las peticiones van al mismo origen y no hace falta configurar cada cliente para que sepa dónde está la API.
+Así el navegador de cualquier PC solo habla con `frontend`; nunca ve el host ni el puerto reales del backend. Esa es la ruta enmascarada que pide el briefing: da igual desde qué equipo del centro se acceda, todas las peticiones van al mismo origen y no hace falta configurar cada cliente para que sepa dónde está la API.
 
 ### Para que cualquier PC del centro lo alcance
 
 - El servidor necesita una IP fija (o reservada por DHCP) dentro de la red del centro, con el puerto 80 abierto en su firewall.
 - Cada PC accede simplemente con `http://<ip-del-servidor>/`.
 - Si se prefiere un nombre en vez de una IP (`http://practikalia.local/` o el que decida el centro), hay que resolverlo fuera de la app: entrada en el DNS/router del centro o en el archivo hosts de cada equipo. Practikalia no incluye ni automatiza esa parte — **queda pendiente (WIP)**, depende de la infraestructura de cada centro.
-- `docker-compose.yml` también publica el puerto 8080 del backend para depurar en directo. En un despliegue real conviene cerrarlo en el firewall (o quitar ese mapeo), ya que todo el tráfico de la app pasa por `nginx` en el puerto 80.
+- `docker-compose.yml` también publica el puerto 8080 del backend para depurar en directo. En un despliegue real conviene cerrarlo en el firewall (o quitar ese mapeo), ya que todo el tráfico de la app pasa por `frontend` en el puerto 80.
 
 ## Licencia
 
