@@ -1,0 +1,10 @@
+allowBuilds:
+  '@swc/core': true
+  core-js: true
+onlyBuiltDependencies:
+  - '@swc/core'
+  - core-js
+overrides:
+  # GHSA-5c6j-r48x-rmvq: RCE en serialize-javascript, arreglada en 7.0.3.
+  # Dependencia transitiva de plugins de webpack usados por Docusaurus.
+  serialize-javascript: ^7.0.3

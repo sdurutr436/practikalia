@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { CarruselComponent } from '../compartido/carrusel/carrusel';
 import { EstadoComponent } from '../compartido/estado/estado';
-import { EstrellasComponent } from '../compartido/estrellas/estrellas';
 import { IconoComponent } from '../compartido/icono/icono';
 import { AsignacionService } from '../asignaciones/asignacion.service';
 import { Asignacion } from '../asignaciones/asignacion.model';
@@ -12,6 +11,7 @@ import { Empresa, esVistaProfesor } from '../empresas/empresa.model';
 import { TarjetaEmpresaComponent } from '../empresas/tarjeta-empresa/tarjeta-empresa';
 import { ReviewService } from '../reviews/review.service';
 import { CalificacionConfig, Review } from '../reviews/review.model';
+import { ReviewCardComponent } from '../reviews/review-card/review-card';
 import { MENSAJES_REVIEW, mensajeDeError } from '../auth/mensajes-error';
 import { CabeceraComponent } from '../compartido/cabecera/cabecera';
 import { AlertaComponent } from '../compartido/alerta/alerta';
@@ -29,10 +29,10 @@ const RESUMEN = 4;
     EstadoComponent,
     TarjetaEmpresaComponent,
     CarruselComponent,
-    EstrellasComponent,
     CabeceraComponent,
     AlertaComponent,
     BotonComponent,
+    ReviewCardComponent,
   ],
   templateUrl: './panel-page.html',
 })
@@ -78,11 +78,6 @@ export class PanelPage {
 
   constructor() {
     void this.cargar();
-  }
-
-  /** El nombre de la empresa de una reseña sale del listado que ya está cargado. */
-  protected nombreEmpresa(review: Review): string {
-    return this.empresas().find((empresa) => empresa.id === review.empresaId)?.nombre ?? 'Empresa';
   }
 
   /**

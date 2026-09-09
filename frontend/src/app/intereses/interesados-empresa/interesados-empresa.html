@@ -1,0 +1,15 @@
+<app-estado
+  [cargando]="cargando()"
+  [error]="error()"
+  [vacio]="interesados().length === 0"
+  mensajeCargando="Cargando interesados…"
+  mensajeVacio="Todavía no hay alumnos interesados en esta empresa."
+>
+  <ul class="o-lista">
+    @for (interesado of interesados(); track interesado.alumnoId + '-' + interesado.anio) {
+      <li class="c-fila">
+        {{ interesado.alumnoCorreo }} · {{ interesado.gradoNombre }} ({{ interesado.anio }})
+      </li>
+    }
+  </ul>
+</app-estado>

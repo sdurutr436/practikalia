@@ -1,4 +1,4 @@
-<main class="o-pagina">
+<main class="o-pagina c-config">
   <app-cabecera titulo="Configuración" />
 
   @if (!esAdmin()) {
@@ -67,8 +67,8 @@
     <section class="c-config__tarjeta">
       <h2 class="c-formulario__titulo">Correos permitidos</h2>
       <p class="c-formulario__descripcion">
-        Además de esta lista, entra cualquier correo cuyo dominio esté permitido en la
-        configuración del servidor.
+        Además de esta lista, entra cualquier correo cuyo dominio esté permitido en la configuración
+        del servidor.
       </p>
 
       @if (errorCorreos(); as mensaje) {

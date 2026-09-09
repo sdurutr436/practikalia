@@ -1,5 +1,27 @@
-// Capa tools (ITCSS): mixins y funciones compartidas. No emite CSS por sí sola.
+// Capa tools (ITCSS): mixins y funciones compartidas. No emite CSS por sí
+// sola, salvo esta excepción: las @keyframes son nombres globales sin
+// selector, no encajan como "reset"/etiqueta pelada en generic/, y como
+// @keyframes no depende del orden en cascada, da igual desde qué partial de
+// components/ se cargue primero este módulo.
 @use '../settings' as s;
+
+// Despliegue de arriba abajo, para lo que aparece colgando de su disparador
+// (menú de la barra, panel de filtros). Solo de entrada: al cerrarse, esos
+// bloques se van del DOM y no hay nada que animar.
+@keyframes desplegar {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+
+// Entrada del aviso de la esquina: se asoma desde fuera del borde.
+@keyframes asomar {
+  from {
+    transform: translateY(25%);
+    opacity: 0;
+  }
+}
 
 // Anillo de foco del tema. Repetido ya en entrada, botón y tarjeta, así que
 // deja de ser un valor suelto por componente.

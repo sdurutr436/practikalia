@@ -6,7 +6,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { dniValido } from '../../auth/login-page/login-page';
+import { dniValido } from '../../auth/validadores';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
 import { FichaPersonaComponent } from '../../compartido/ficha-persona/ficha-persona';

@@ -5,6 +5,9 @@
 @use '../settings' as s;
 @use '../tools' as t;
 
+// El bloque .c-config no tiene reglas propias (va en el <main> de la
+// pantalla, sin envoltorio nuevo), solo sus elementos de abajo.
+
 // Fila superior: logo y nombre, cada uno en su tarjeta, del mismo alto.
 .c-config__fila {
   display: grid;

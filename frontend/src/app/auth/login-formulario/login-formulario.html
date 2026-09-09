@@ -1,0 +1,73 @@
+<form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
+  <h1 class="c-formulario__titulo">Iniciar sesión</h1>
+  <p class="c-formulario__descripcion">
+    Los campos marcados con <span class="c-requerido" aria-hidden="true">*</span> son obligatorios.
+  </p>
+
+  @if (error(); as mensaje) {
+    <app-alerta>{{ mensaje }}</app-alerta>
+  }
+
+  <app-campo
+    etiqueta="Correo del centro"
+    icono="correo"
+    para="correo"
+    [requerido]="true"
+    ayuda="Usa la cuenta del centro, no una personal."
+    [control]="form.controls.correo"
+    error="Introduce un correo válido."
+  >
+    <input
+      class="c-campo__entrada"
+      id="correo"
+      type="email"
+      formControlName="correo"
+      autocomplete="email"
+      spellcheck="false"
+      placeholder="nombre@g.educaand.es"
+      aria-describedby="correo-ayuda"
+    />
+  </app-campo>
+
+  <app-campo
+    etiqueta="Contraseña"
+    icono="contrasena"
+    para="contrasena"
+    [requerido]="true"
+    [control]="form.controls.contrasena"
+    error="Introduce la contraseña."
+  >
+    <div class="c-campo__envoltorio">
+      <input
+        class="c-campo__entrada"
+        id="contrasena"
+        [type]="verContrasena() ? 'text' : 'password'"
+        formControlName="contrasena"
+        autocomplete="current-password"
+      />
+      <button
+        class="c-campo__accion"
+        type="button"
+        [attr.aria-label]="verContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+        [attr.aria-pressed]="verContrasena()"
+        (click)="verContrasena.set(!verContrasena())"
+      >
+        <app-icono nombre="ver" />
+      </button>
+    </div>
+  </app-campo>
+
+  <div class="u-honeypot" aria-hidden="true">
+    <label for="web">Web</label>
+    <input id="web" type="text" formControlName="web" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <app-boton tipo="submit" icono="entrar" [cargando]="enviando()" textoCargando="Entrando…">
+    Entrar
+  </app-boton>
+
+  <p class="c-formulario__pie">
+    ¿No tienes cuenta?
+    <button class="c-enlace" type="button" (click)="crearCuenta.emit()">Crea una</button>
+  </p>
+</form>

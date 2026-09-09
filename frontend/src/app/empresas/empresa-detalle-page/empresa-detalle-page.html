@@ -1,51 +1,265 @@
 <main class="o-pagina">
   <app-volver a="/empresas" />
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else if (error(); as mensaje) {
-    <app-alerta>{{ mensaje }}</app-alerta>
-  } @else if (empresa(); as empresa) {
-    <article class="c-ficha-empresa">
-      @if (empresa.imagen) {
-        <img class="c-ficha-empresa__imagen" [src]="empresa.imagen" [alt]="empresa.nombre" />
+  <app-estado [cargando]="cargando()" [error]="error()">
+    @if (empresa(); as empresa) {
+    <article class="c-ficha-empresa" [formGroup]="form">
+      @if (errorGuardado(); as mensaje) {
+        <app-alerta>{{ mensaje }}</app-alerta>
       }
 
-      <app-cabecera [titulo]="empresa.nombre">
-        @if (esVistaProfesor(empresa)) {
-          <app-boton icono="editar" [enlace]="['/empresas', empresa.id, 'editar']"
-            >Editar</app-boton
-          >
-        }
-      </app-cabecera>
-
-      @if (esVistaProfesor(empresa) && !empresa.publicada) {
-        <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
-      }
-
-      <p>{{ empresa.descripcion }}</p>
-      <p>{{ empresa.direccion }}</p>
-
-      <ul class="o-etiquetas">
-        <li class="c-etiqueta">{{ empresa.sector.nombre }}</li>
-        @for (etiqueta of empresa.etiquetas; track etiqueta.id) {
-          <li class="c-etiqueta">{{ etiqueta.nombre }}</li>
-        }
-      </ul>
-
-      @if (tasaContratacion(); as tasa) {
-        <section class="c-ficha-empresa__gestion">
-          <h2 class="c-ficha-empresa__titulo">Tasa de contratación</h2>
-          @if (tasa.asignacionesDecididas === 0) {
-            <p>Sin datos de contratación todavía.</p>
+      <div class="c-ficha-empresa__cabecera">
+        <div class="c-ficha-empresa__foto">
+          @if (empresa.imagen) {
+            <img class="c-ficha-empresa__imagen" [src]="empresa.imagen" [alt]="empresa.nombre" />
           } @else {
-            <p>
-              {{ tasa.tasa | percent }} ({{ tasa.contrataciones }} de
-              {{ tasa.asignacionesDecididas }})
+            <div class="c-ficha-empresa__imagen c-ficha-empresa__imagen--vacia">
+              <app-icono nombre="empresa" />
+            </div>
+          }
+          @if (esVistaProfesor(empresa) && !editandoTodo()) {
+            <button
+              class="c-ficha-empresa__lapiz c-ficha-empresa__lapiz--foto"
+              type="button"
+              [attr.aria-label]="estaEditando('foto') ? 'Cerrar el cambio de foto' : 'Cambiar la foto'"
+              (click)="alternarSeccion('foto')"
+            >
+              <app-icono [nombre]="estaEditando('foto') ? 'guardar' : 'editar'" />
+            </button>
+          }
+        </div>
+
+        <div class="c-ficha-empresa__info">
+          <app-cabecera [titulo]="empresa.nombre">
+            @if (esVistaProfesor(empresa)) {
+              <app-boton
+                [icono]="editandoTodo() ? 'guardar' : 'editar'"
+                [cargando]="guardandoSeccion() === 'todo'"
+                (click)="alternarTodo()"
+              >
+                {{ editandoTodo() ? 'Guardar todo' : 'Editar' }}
+              </app-boton>
+            }
+          </app-cabecera>
+
+          @if (esVistaProfesor(empresa) && !empresa.publicada) {
+            <span class="c-etiqueta c-etiqueta--no-publicada">No publicada</span>
+          }
+
+          <div class="c-ficha-empresa__fila">
+            @if (!estaEditando('info')) {
+              <div class="c-ficha-empresa__lineas">
+                @if (empresa.direccion) {
+                  <p class="c-ficha-empresa__linea">{{ empresa.direccion }}</p>
+                }
+                @if (esVistaProfesor(empresa)) {
+                  <p class="c-ficha-empresa__linea">
+                    {{ empresa.contactoNombre || '—' }} · {{ empresa.contactoTelefono || '—' }} ·
+                    {{ empresa.contactoEmail || '—' }}
+                  </p>
+                }
+              </div>
+            } @else {
+              <div class="c-ficha-empresa__edicion">
+                <app-campo
+                  etiqueta="Nombre"
+                  icono="empresa"
+                  para="nombre"
+                  [control]="form.controls.nombre"
+                  error="Introduce el nombre."
+                >
+                  <input class="c-campo__entrada" id="nombre" type="text" formControlName="nombre" />
+                </app-campo>
+                <app-campo etiqueta="Dirección" icono="ubicacion" para="direccion">
+                  <input
+                    class="c-campo__entrada"
+                    id="direccion"
+                    type="text"
+                    formControlName="direccion"
+                  />
+                </app-campo>
+                <app-campo etiqueta="Contacto: nombre" icono="persona" para="contacto-nombre">
+                  <input
+                    class="c-campo__entrada"
+                    id="contacto-nombre"
+                    type="text"
+                    formControlName="contactoNombre"
+                  />
+                </app-campo>
+                <app-campo etiqueta="Contacto: teléfono" icono="telefono" para="contacto-telefono">
+                  <input
+                    class="c-campo__entrada"
+                    id="contacto-telefono"
+                    type="text"
+                    formControlName="contactoTelefono"
+                  />
+                </app-campo>
+                <app-campo etiqueta="Contacto: email" icono="correo" para="contacto-email">
+                  <input
+                    class="c-campo__entrada"
+                    id="contacto-email"
+                    type="email"
+                    formControlName="contactoEmail"
+                  />
+                </app-campo>
+                <label class="c-checkbox">
+                  <input type="checkbox" formControlName="publicada" />
+                  Publicada
+                </label>
+              </div>
+            }
+            @if (esVistaProfesor(empresa) && !editandoTodo()) {
+              <button
+                class="c-ficha-empresa__lapiz"
+                type="button"
+                [attr.aria-label]="estaEditando('info') ? 'Guardar la información' : 'Editar la información'"
+                (click)="alternarSeccion('info')"
+              >
+                <app-icono [nombre]="estaEditando('info') ? 'guardar' : 'editar'" />
+              </button>
+            }
+          </div>
+
+          <div class="c-ficha-empresa__fila">
+            @if (!estaEditando('etiquetas')) {
+              <ul class="o-etiquetas">
+                <li>
+                  <a
+                    class="c-etiqueta c-etiqueta--enlace"
+                    routerLink="/empresas"
+                    [queryParams]="{ sectorId: empresa.sector.id }"
+                  >
+                    {{ empresa.sector.nombre }}
+                  </a>
+                </li>
+                @for (etiqueta of empresa.etiquetas; track etiqueta.id) {
+                  <li>
+                    <a
+                      class="c-etiqueta c-etiqueta--enlace"
+                      routerLink="/empresas"
+                      [queryParams]="{ etiquetaIds: etiqueta.id }"
+                    >
+                      {{ etiqueta.nombre }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <div class="c-ficha-empresa__edicion">
+                <app-campo
+                  etiqueta="Sector"
+                  icono="etiqueta"
+                  para="sector"
+                  [control]="form.controls.sectorId"
+                  error="Indica el ID de un sector (etiqueta) existente."
+                >
+                  <input
+                    class="c-campo__entrada"
+                    id="sector"
+                    type="number"
+                    formControlName="sectorId"
+                    list="lista-sectores"
+                  />
+                  <datalist id="lista-sectores">
+                    @for (sector of sectores(); track sector.id) {
+                      <option [value]="sector.id">{{ sector.nombre }}</option>
+                    }
+                  </datalist>
+                </app-campo>
+
+                <app-campo etiqueta="Etiquetas" icono="etiqueta" [grupo]="true">
+                  @for (etiqueta of etiquetasDisponibles(); track etiqueta.id) {
+                    <label class="c-checkbox">
+                      <input
+                        type="checkbox"
+                        [checked]="etiquetasSeleccionadas().has(etiqueta.id)"
+                        (change)="toggleEtiqueta(etiqueta.id, $any($event.target).checked)"
+                      />
+                      {{ etiqueta.nombre }}
+                    </label>
+                  }
+                </app-campo>
+
+                <app-campo
+                  etiqueta="IDs adicionales (separados por coma)"
+                  icono="etiqueta"
+                  para="etiquetas-manual"
+                >
+                  <input
+                    class="c-campo__entrada"
+                    id="etiquetas-manual"
+                    type="text"
+                    formControlName="etiquetasManual"
+                  />
+                </app-campo>
+              </div>
+            }
+            @if (esVistaProfesor(empresa) && !editandoTodo()) {
+              <button
+                class="c-ficha-empresa__lapiz"
+                type="button"
+                [attr.aria-label]="estaEditando('etiquetas') ? 'Guardar sector y etiquetas' : 'Editar sector y etiquetas'"
+                (click)="alternarSeccion('etiquetas')"
+              >
+                <app-icono [nombre]="estaEditando('etiquetas') ? 'guardar' : 'editar'" />
+              </button>
+            }
+          </div>
+
+          @if (tasaContratacion(); as tasa) {
+            <p class="c-ficha-empresa__linea">
+              Tasa de contratación:
+              @if (tasa.asignacionesDecididas === 0) {
+                sin datos todavía.
+              } @else {
+                {{ tasa.tasa | percent }} ({{ tasa.contrataciones }} de
+                {{ tasa.asignacionesDecididas }})
+              }
             </p>
           }
-        </section>
+        </div>
+      </div>
+
+      @if (esVistaProfesor(empresa) && estaEditando('foto')) {
+        <div class="c-ficha-empresa__edicion">
+          @if (errorImagen(); as mensaje) {
+            <app-alerta>{{ mensaje }}</app-alerta>
+          }
+          <app-campo etiqueta="Subir imagen" icono="subir" para="imagen-empresa">
+            <input
+              id="imagen-empresa"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              [disabled]="subiendoImagen()"
+              (change)="onArchivoSeleccionado($event)"
+            />
+          </app-campo>
+        </div>
       }
+
+      <div class="c-ficha-empresa__fila">
+        @if (!estaEditando('descripcion')) {
+          <p>{{ empresa.descripcion }}</p>
+        } @else {
+          <app-campo etiqueta="Descripción" icono="nota" para="descripcion" [crecer]="true">
+            <textarea
+              class="c-campo__entrada"
+              id="descripcion"
+              formControlName="descripcion"
+            ></textarea>
+          </app-campo>
+        }
+        @if (esVistaProfesor(empresa) && !editandoTodo()) {
+          <button
+            class="c-ficha-empresa__lapiz"
+            type="button"
+            [attr.aria-label]="estaEditando('descripcion') ? 'Guardar la descripción' : 'Editar la descripción'"
+            (click)="alternarSeccion('descripcion')"
+          >
+            <app-icono [nombre]="estaEditando('descripcion') ? 'guardar' : 'editar'" />
+          </button>
+        }
+      </div>
 
       <section class="c-ficha-empresa__gestion">
         <h2 class="c-ficha-empresa__titulo">Reviews</h2>
@@ -60,21 +274,23 @@
           <ul class="o-lista">
             @for (review of reviews(); track review.id) {
               <li class="c-fila">
-                <p>{{ review.alumnoCorreo }} · {{ review.calificacion }} · {{ review.estado }}</p>
-                <p>{{ review.contenido }}</p>
-                @if (review.estado === 'RECHAZADA' && review.motivoRechazo) {
-                  <app-alerta>Motivo de rechazo: {{ review.motivoRechazo }}</app-alerta>
-                }
-                @if (review.autorCorreo === sesion()?.correo) {
-                  <app-boton
-                    icono="editar"
-                    [secundario]="true"
-                    [enlace]="['/reviews', review.id, 'editar']"
-                    [params]="{ empresaId: empresa.id }"
-                  >
-                    Editar
-                  </app-boton>
-                }
+                <app-review-card
+                  [review]="review"
+                  [maximoEstrellas]="calificacion()?.max ?? null"
+                  [mostrarEmpresa]="false"
+                  [mostrarEstado]="true"
+                >
+                  @if (review.autorCorreo === sesion()?.correo) {
+                    <app-boton
+                      icono="editar"
+                      [secundario]="true"
+                      [enlace]="['/reviews', review.id, 'editar']"
+                      [params]="{ empresaId: empresa.id }"
+                    >
+                      Editar
+                    </app-boton>
+                  }
+                </app-review-card>
               </li>
             }
           </ul>
@@ -104,31 +320,68 @@
       @if (!esVistaProfesor(empresa)) {
         <section class="c-ficha-empresa__gestion">
           <h2 class="c-ficha-empresa__titulo">Interés</h2>
-          @if (errorInteres(); as mensaje) {
-            <app-alerta>{{ mensaje }}</app-alerta>
-          }
-          <app-boton
-            [icono]="interesado() ? 'interesActivo' : 'interes'"
-            [secundario]="interesado()"
-            [deshabilitado]="guardandoInteres()"
-            (click)="alternarInteres(empresa.id)"
-          >
-            {{ interesado() ? 'Quitar interés' : 'Marcar interés' }}
-          </app-boton>
+          <app-interes-boton
+            [interesado]="interesado()"
+            [guardando]="guardandoInteres()"
+            [error]="errorInteres()"
+            (alternar)="alternarInteres(empresa.id)"
+          />
         </section>
       }
 
       @if (esVistaProfesor(empresa)) {
         <section class="c-ficha-empresa__gestion">
-          <h2 class="c-ficha-empresa__titulo">Datos de gestión</h2>
+          <header class="c-cabecera">
+            <h2 class="c-ficha-empresa__titulo">Tutores de empresa</h2>
+            @if (!editandoTodo()) {
+              <button
+                class="c-ficha-empresa__lapiz"
+                type="button"
+                [attr.aria-label]="estaEditando('tutores') ? 'Guardar tutores' : 'Editar tutores'"
+                (click)="alternarSeccion('tutores')"
+              >
+                <app-icono [nombre]="estaEditando('tutores') ? 'guardar' : 'editar'" />
+              </button>
+            }
+          </header>
+
+          @if (!estaEditando('tutores')) {
+            <ul class="o-lista">
+              @for (tutor of empresa.tutores; track tutor.id) {
+                <li class="c-fila">
+                  {{ tutor.nombre }} · {{ tutor.cargo || '—' }} · {{ tutor.telefono || '—' }} ·
+                  {{ tutor.correo || '—' }}
+                </li>
+              }
+            </ul>
+          } @else {
+            <app-tutores-empresa [tutores]="tutores" />
+          }
+        </section>
+
+        <section class="c-ficha-empresa__gestion">
+          <header class="c-cabecera">
+            <h2 class="c-ficha-empresa__titulo">Datos de gestión</h2>
+            @if (!editandoTodo()) {
+              <button
+                class="c-ficha-empresa__lapiz"
+                type="button"
+                [attr.aria-label]="estaEditando('observaciones') ? 'Guardar observaciones' : 'Editar observaciones'"
+                (click)="alternarSeccion('observaciones')"
+              >
+                <app-icono [nombre]="estaEditando('observaciones') ? 'guardar' : 'editar'" />
+              </button>
+            }
+          </header>
           <dl>
-            <dt class="c-ficha-empresa__dato">Contacto</dt>
-            <dd class="c-ficha-empresa__valor">
-              {{ empresa.contactoNombre || '—' }} · {{ empresa.contactoTelefono || '—' }} ·
-              {{ empresa.contactoEmail || '—' }}
-            </dd>
             <dt class="c-ficha-empresa__dato">Observaciones</dt>
-            <dd class="c-ficha-empresa__valor">{{ empresa.observaciones || '—' }}</dd>
+            <dd class="c-ficha-empresa__valor">
+              @if (!estaEditando('observaciones')) {
+                {{ empresa.observaciones || '—' }}
+              } @else {
+                <textarea class="c-campo__entrada" formControlName="observaciones"></textarea>
+              }
+            </dd>
             <dt class="c-ficha-empresa__dato">Creada por</dt>
             <dd class="c-ficha-empresa__valor">{{ empresa.creadaPorCorreo }}</dd>
           </dl>
@@ -136,105 +389,23 @@
 
         <section class="c-ficha-empresa__gestion">
           <h2 class="c-ficha-empresa__titulo">Interesados</h2>
-          <app-estado
+          <app-interesados-empresa
+            [interesados]="interesados()"
             [cargando]="cargandoInteresados()"
             [error]="errorInteresados()"
-            [vacio]="interesados().length === 0"
-            mensajeCargando="Cargando interesados…"
-            mensajeVacio="Todavía no hay alumnos interesados en esta empresa."
-          >
-            <ul class="o-lista">
-              @for (
-                interesado of interesados();
-                track interesado.alumnoId + '-' + interesado.anio
-              ) {
-                <li class="c-fila">
-                  {{ interesado.alumnoCorreo }} · {{ interesado.gradoNombre }} ({{
-                    interesado.anio
-                  }})
-                </li>
-              }
-            </ul>
-          </app-estado>
+          />
         </section>
 
         <section class="c-ficha-empresa__gestion">
           <header class="c-cabecera">
             <h2 class="c-ficha-empresa__titulo">Asignaciones</h2>
-            <app-boton icono="anadir" [enlace]="['/empresas', empresa.id, 'asignaciones', 'nueva']">
-              Crear asignación
+            <app-boton [secundario]="true" [enlace]="['/empresas', empresa.id, 'asignaciones']">
+              Ver asignaciones
             </app-boton>
           </header>
-
-          <app-estado
-            [cargando]="cargandoAsignaciones()"
-            [error]="errorAsignaciones()"
-            [vacio]="asignaciones().length === 0"
-            mensajeCargando="Cargando asignaciones…"
-            mensajeVacio="Todavía no hay asignaciones para esta empresa."
-          >
-            <ul class="o-lista">
-              @for (asignacion of asignaciones(); track asignacion.id) {
-                <li class="c-fila">
-                  <p>
-                    {{ asignacion.alumnoCorreo }} · {{ asignacion.grado.nombre }} ({{
-                      asignacion.anio
-                    }}) · tutor
-                    {{ asignacion.tutorCentroCorreo }}
-                  </p>
-                  <p>
-                    Inicio {{ asignacion.fechaInicio }} · Fin
-                    {{ asignacion.fechaFin || 'abierta' }} · Contratación
-                    {{ textoContratacion(asignacion) }}
-                  </p>
-                  <a [routerLink]="['/alumnos', asignacion.alumnoId, 'asignaciones']">
-                    Ver histórico completo de este alumno
-                  </a>
-
-                  @if (errorCierre()?.id === asignacion.id) {
-                    <app-alerta>{{ errorCierre()?.mensaje }}</app-alerta>
-                  }
-                  <div class="c-acciones">
-                    <app-campo
-                      etiqueta="Fecha fin"
-                      icono="fecha"
-                      [para]="'fecha-fin-' + asignacion.id"
-                    >
-                      <input
-                        class="c-campo__entrada"
-                        type="date"
-                        [id]="'fecha-fin-' + asignacion.id"
-                        [value]="asignacion.fechaFin ?? ''"
-                        #fechaFin
-                        required
-                      />
-                    </app-campo>
-                    <app-campo
-                      etiqueta="Contratación"
-                      icono="aprobar"
-                      [para]="'contratado-' + asignacion.id"
-                    >
-                      <app-desplegable
-                        #contratado
-                        [id]="'contratado-' + asignacion.id"
-                        [valor]="textoContratado(asignacion)"
-                        [opciones]="CONTRATACION"
-                      />
-                    </app-campo>
-                    <app-boton
-                      icono="guardar"
-                      [cargando]="guardandoId() === asignacion.id"
-                      (click)="cerrarAsignacion(asignacion, fechaFin.value, contratado.elegido())"
-                    >
-                      Guardar
-                    </app-boton>
-                  </div>
-                </li>
-              }
-            </ul>
-          </app-estado>
         </section>
       }
     </article>
-  }
+    }
+  </app-estado>
 </main>

@@ -24,7 +24,7 @@ Ya funciona (con margen de mejora):
 - Configuración del centro: nombre, logo y whitelist de correos permitidos, desde la interfaz.
 - Panel diferenciado por rol (alumno/profesor), con navegación propia y contadores del centro (empresas, alumnado).
 
-Lo marcado como "a futuro" o "más adelante" en el [briefing](docs/briefing.md#roadmap) (OTP, 2FA, métricas de contratación, motor de afinidad avanzado, federación entre instancias...) sigue siendo **WIP**. Tampoco hay todavía imágenes publicadas en Docker Hub ni CI/CD configurado: cada instalación construye sus propias imágenes con `docker compose up --build`.
+Lo marcado como "a futuro" o "más adelante" en el [briefing](docs/briefing.md#roadmap) (OTP, 2FA, métricas de contratación, motor de afinidad avanzado, federación entre instancias...) sigue siendo **WIP**. Imágenes de backend y frontend publicadas en [Docker Hub](https://hub.docker.com/u/sdurutr436) y CI/CD con GitHub Actions (tests, Trivy, publicación de imágenes) — ver la [documentación técnica](https://sdurutr436.github.io/practikalia/).
 
 ## Stack
 
@@ -67,9 +67,8 @@ Pantalla de acceso y panel general, en desktop y en móvil. Son las únicas capt
 ```text
 practikalia/
 ├── backend/          # API Spring Boot
-├── frontend/          # Aplicación Angular
+├── frontend/          # Aplicación Angular (imagen final: Nginx + estáticos)
 ├── docs/              # Documentación funcional y técnica
-├── nginx/             # Configuración de nginx para despliegue
 └── docker-compose.yml
 ```
 
@@ -94,26 +93,39 @@ pnpm start
 
 Practikalia está pensado para instalarse en un servidor dentro de la red del propio centro, no en internet público. Cualquier PC de esa red debe poder usar la app sin tocar CORS ni conocer la URL real del backend.
 
+Con las imágenes ya publicadas, sin clonar el repositorio ni compilar nada:
+
+```bash
+curl -O https://raw.githubusercontent.com/sdurutr436/practikalia/main/docker-compose.prod.yml
+curl -O https://raw.githubusercontent.com/sdurutr436/practikalia/main/.env.example
+mv .env.example .env   # ajusta DB_PASSWORD y JWT_SECRET (openssl rand -base64 32)
+docker compose -f docker-compose.prod.yml up -d
+```
+
+O construyendo desde el código (`docker-compose.yml` en vez de `docker-compose.prod.yml`):
+
 ```bash
 git clone <url-del-repo>
 cd practikalia
-cp .env.example .env   # ajusta DB_NAME, DB_USER, DB_PASSWORD
+cp .env.example .env   # ajusta DB_PASSWORD y JWT_SECRET
 docker compose up --build -d
 ```
 
-Esto levanta cuatro servicios (`postgres`, `backend`, `frontend`, `nginx`), pero el único que necesita ser alcanzable desde otros equipos es `nginx`, que escucha en el puerto 80 del servidor y actúa como único punto de entrada:
+`DB_PASSWORD` y `JWT_SECRET` no tienen valor por defecto — falta cualquiera de los dos y `docker compose up` falla con un mensaje claro, en vez de arrancar con un secreto conocido.
+
+Ambas vías levantan tres servicios (`postgres`, `backend`, `frontend`), pero el único que necesita ser alcanzable desde otros equipos es `frontend`, que escucha en el puerto 80 del servidor y actúa como único punto de entrada: es una imagen de Nginx con los estáticos ya compilados dentro (ver [frontend/Dockerfile](frontend/Dockerfile)).
 
 - Sirve el frontend compilado en `/`.
-- Reenvía todo lo que llega a `/api/` hacia el backend interno (ver [nginx/nginx.conf](nginx/nginx.conf)).
+- Reenvía todo lo que llega a `/api/` hacia el backend interno (ver [frontend/nginx.conf](frontend/nginx.conf)).
 
-Así el navegador de cualquier PC solo habla con `nginx`; nunca ve el host ni el puerto reales del backend. Esa es la ruta enmascarada que pide el briefing: da igual desde qué equipo del centro se acceda, todas las peticiones van al mismo origen y no hace falta configurar cada cliente para que sepa dónde está la API.
+Así el navegador de cualquier PC solo habla con `frontend`; nunca ve el host ni el puerto reales del backend. Esa es la ruta enmascarada que pide el briefing: da igual desde qué equipo del centro se acceda, todas las peticiones van al mismo origen y no hace falta configurar cada cliente para que sepa dónde está la API.
 
 ### Para que cualquier PC del centro lo alcance
 
 - El servidor necesita una IP fija (o reservada por DHCP) dentro de la red del centro, con el puerto 80 abierto en su firewall.
 - Cada PC accede simplemente con `http://<ip-del-servidor>/`.
 - Si se prefiere un nombre en vez de una IP (`http://practikalia.local/` o el que decida el centro), hay que resolverlo fuera de la app: entrada en el DNS/router del centro o en el archivo hosts de cada equipo. Practikalia no incluye ni automatiza esa parte — **queda pendiente (WIP)**, depende de la infraestructura de cada centro.
-- `docker-compose.yml` también publica el puerto 8080 del backend para depurar en directo. En un despliegue real conviene cerrarlo en el firewall (o quitar ese mapeo), ya que todo el tráfico de la app pasa por `nginx` en el puerto 80.
+- Solo si construyes desde el código: `docker-compose.yml` también publica el puerto 8080 del backend para depurar en directo (`docker-compose.prod.yml` no lo hace). En un despliegue real conviene cerrarlo en el firewall, ya que todo el tráfico de la app pasa por `frontend` en el puerto 80.
 
 ## Licencia
 

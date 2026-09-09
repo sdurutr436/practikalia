@@ -5,6 +5,7 @@ import { MENSAJES_ASIGNACION, mensajeDeError } from '../../auth/mensajes-error';
 import { AsignacionService } from '../asignacion.service';
 import { Grado, UsuarioResumen } from '../asignacion.model';
 import { VolverComponent } from '../../compartido/volver/volver';
+import { EstadoComponent } from '../../compartido/estado/estado';
 import { AlertaComponent } from '../../compartido/alerta/alerta';
 import { CampoComponent } from '../../compartido/campo/campo';
 import { BotonComponent } from '../../compartido/boton/boton';
@@ -15,6 +16,7 @@ import { DesplegableComponent } from '../../compartido/desplegable/desplegable';
   imports: [
     ReactiveFormsModule,
     VolverComponent,
+    EstadoComponent,
     AlertaComponent,
     CampoComponent,
     BotonComponent,
@@ -94,7 +96,7 @@ export class AsignacionFormularioPage {
         anio: valores.anio,
         fechaInicio: valores.fechaInicio,
       });
-      await this.router.navigate(['/empresas', this.empresaId]);
+      await this.router.navigate(['/empresas', this.empresaId, 'asignaciones']);
     } catch (e) {
       this.error.set(mensajeDeError(e, MENSAJES_ASIGNACION));
     } finally {

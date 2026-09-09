@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en tu .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: sdurutr436/practikalia-backend:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en tu .env}
+      APP_UPLOADS_DIR: /app/uploads
+      ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-practikalia.test}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en tu .env (ver docs)}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    image: sdurutr436/practikalia-frontend:latest
+    volumes:
+      - uploads_data:/usr/share/nginx/uploads:ro
+    ports:
+      - "80:8080"
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  uploads_data:

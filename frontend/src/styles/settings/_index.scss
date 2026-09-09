@@ -101,6 +101,11 @@ $color-error-texto: var(--destructive-foreground);
 $color-borde: var(--border);
 $color-borde-entrada: var(--input);
 $color-anillo: var(--ring);
+$color-borde-suave: color-mix(
+  in srgb,
+  $color-borde 15%,
+  transparent
+); // separador repetido en formulario, marco y reseña
 $radio: var(--radius); // tarjetas
 $radio-m: calc(var(--radius) - 2px); // entradas y botones
 $sombra: var(--shadow-sm);

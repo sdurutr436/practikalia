@@ -30,13 +30,25 @@
                   <span class="c-panel__rotulo">Empresas sin publicar</span>
                 </a>
               </li>
-              <li class="c-panel__contador">
-                <span class="c-panel__cifra">{{ contadores.alumnadoActivo }}</span>
-                <span class="c-panel__rotulo">Alumnado activo</span>
+              <li>
+                <a
+                  class="c-panel__contador c-panel__contador--enlace"
+                  routerLink="/alumnado"
+                  [queryParams]="{ estado: 'confirmados' }"
+                >
+                  <span class="c-panel__cifra">{{ contadores.alumnadoActivo }}</span>
+                  <span class="c-panel__rotulo">Alumnado activo</span>
+                </a>
               </li>
-              <li class="c-panel__contador">
-                <span class="c-panel__cifra">{{ contadores.alumnadoSinAsignar }}</span>
-                <span class="c-panel__rotulo">Alumnado sin asignar</span>
+              <li>
+                <a
+                  class="c-panel__contador c-panel__contador--enlace"
+                  routerLink="/asignaciones"
+                  [queryParams]="{ estado: 'sin-asignar' }"
+                >
+                  <span class="c-panel__cifra">{{ contadores.alumnadoSinAsignar }}</span>
+                  <span class="c-panel__rotulo">Alumnado sin asignar</span>
+                </a>
               </li>
             </ul>
           } @else {
@@ -110,41 +122,32 @@
           } @else {
             <ul class="o-lista">
               @for (review of pendientesResumen(); track review.id) {
-                <li class="c-fila c-resena">
-                  <div class="c-resena__cabecera">
-                    <a class="c-resena__empresa" [routerLink]="['/empresas', review.empresaId]">
-                      {{ nombreEmpresa(review) }}
-                    </a>
-                    @if (calificacion(); as rango) {
-                      <app-estrellas [valor]="review.calificacion" [maximo]="rango.max" />
+                <li class="c-fila">
+                  <app-review-card [review]="review" [maximoEstrellas]="calificacion()?.max ?? null">
+                    @if (errorModeracion()?.id === review.id) {
+                      <app-alerta>{{ errorModeracion()?.mensaje }}</app-alerta>
                     }
-                  </div>
-                  <span class="c-resena__autor">{{ review.alumnoCorreo }}</span>
-                  <blockquote class="c-resena__texto">«{{ review.contenido }}»</blockquote>
 
-                  @if (errorModeracion()?.id === review.id) {
-                    <app-alerta>{{ errorModeracion()?.mensaje }}</app-alerta>
-                  }
-
-                  <div class="c-acciones">
-                    <app-boton
-                      icono="aprobar"
-                      [deshabilitado]="moderandoId() !== null"
-                      (click)="aprobar(review)"
-                    >
-                      Aprobar
-                    </app-boton>
-                    <!-- Rechazar exige motivo, y el motivo se escribe en el modal
-                         de la cola: aquí solo se lleva allí, señalando cuál. -->
-                    <app-boton
-                      icono="rechazar"
-                      [secundario]="true"
-                      enlace="/reviews"
-                      [params]="{ rechazar: review.id }"
-                    >
-                      Rechazar
-                    </app-boton>
-                  </div>
+                    <div class="c-acciones">
+                      <app-boton
+                        icono="aprobar"
+                        [deshabilitado]="moderandoId() !== null"
+                        (click)="aprobar(review)"
+                      >
+                        Aprobar
+                      </app-boton>
+                      <!-- Rechazar exige motivo, y el motivo se escribe en el modal
+                           de la cola: aquí solo se lleva allí, señalando cuál. -->
+                      <app-boton
+                        icono="rechazar"
+                        [secundario]="true"
+                        enlace="/reviews"
+                        [params]="{ rechazar: review.id }"
+                      >
+                        Rechazar
+                      </app-boton>
+                    </div>
+                  </app-review-card>
                 </li>
               }
             </ul>

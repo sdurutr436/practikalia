@@ -1,0 +1,11 @@
+@if (error(); as mensaje) {
+  <app-alerta>{{ mensaje }}</app-alerta>
+}
+<app-boton
+  [icono]="interesado() ? 'interesActivo' : 'interes'"
+  [secundario]="interesado()"
+  [deshabilitado]="guardando()"
+  (click)="alternar.emit()"
+>
+  {{ interesado() ? 'Quitar interés' : 'Marcar interés' }}
+</app-boton>

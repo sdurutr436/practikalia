@@ -14,6 +14,7 @@ import { EmpresasListadoPage } from './empresas/empresas-listado-page/empresas-l
 import { EmpresaDetallePage } from './empresas/empresa-detalle-page/empresa-detalle-page';
 import { EmpresaFormularioPage } from './empresas/empresa-formulario-page/empresa-formulario-page';
 import { AsignacionFormularioPage } from './asignaciones/asignacion-formulario-page/asignacion-formulario-page';
+import { EmpresaAsignacionesPage } from './asignaciones/empresa-asignaciones-page/empresa-asignaciones-page';
 import { AlumnoAsignacionesPage } from './asignaciones/alumno-asignaciones-page/alumno-asignaciones-page';
 import { ReviewFormularioPage } from './reviews/review-formulario-page/review-formulario-page';
 import { ReviewsPage } from './reviews/reviews-page/reviews-page';
@@ -74,15 +75,15 @@ export const routes: Routes = [
     canActivate: [profesorGuard],
   },
   {
-    path: 'empresas/:id/editar',
-    title: 'Editar empresa',
-    component: EmpresaFormularioPage,
-    canActivate: [profesorGuard],
-  },
-  {
     path: 'empresas/:empresaId/asignaciones/nueva',
     title: 'Nueva asignación',
     component: AsignacionFormularioPage,
+    canActivate: [profesorGuard],
+  },
+  {
+    path: 'empresas/:empresaId/asignaciones',
+    title: 'Asignaciones de la empresa',
+    component: EmpresaAsignacionesPage,
     canActivate: [profesorGuard],
   },
   {

@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { EstadoComponent } from '../../compartido/estado/estado';
-import { AuthService, Sesion } from '../../auth/auth.service';
+import { AuthService } from '../../auth/auth.service';
 import { InteresService } from '../interes.service';
 import { Interes } from '../interes.model';
 import { CabeceraComponent } from '../../compartido/cabecera/cabecera';
@@ -26,7 +26,7 @@ export class MisInteresesPage {
 
   private async cargar(): Promise<void> {
     try {
-      const sesion = await this.completarSesionSiHaceFalta();
+      const sesion = await this.authService.completarSesionSiHaceFalta();
       if (sesion === null || sesion.id === null) {
         throw new Error('Sesión sin id');
       }
@@ -36,18 +36,5 @@ export class MisInteresesPage {
     } finally {
       this.cargando.set(false);
     }
-  }
-
-  /**
-   * Tras un login sin recargar la página, la sesión en memoria no trae
-   * id/correo (asimetría documentada de LoginResponse) — mismo patrón
-   * puntual que empresa-detalle-page.ts, sin extraerlo todavía.
-   */
-  private async completarSesionSiHaceFalta(): Promise<Sesion | null> {
-    const sesion = this.authService.sesion();
-    if (sesion && sesion.correo === null) {
-      return this.authService.me();
-    }
-    return sesion;
   }
 }

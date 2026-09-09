@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { AlertaComponent } from '../compartido/alerta/alerta';
+import { CabeceraComponent } from '../compartido/cabecera/cabecera';
 
 /**
  * Destino de las secciones del menú que todavía no tienen pantalla. Una sola
@@ -7,14 +9,13 @@ import { Component } from '@angular/core';
  */
 @Component({
   selector: 'app-proximamente-page',
+  imports: [CabeceraComponent, AlertaComponent],
   template: `
     <main class="o-pagina">
-      <header class="c-cabecera">
-        <h1 class="c-cabecera__titulo">Próximamente</h1>
-      </header>
-      <p class="c-alerta c-alerta--aviso" role="status">
+      <app-cabecera titulo="Próximamente" />
+      <app-alerta tipo="aviso">
         Esta sección todavía no está construida. El acceso ya está en el menú para cuando lo esté.
-      </p>
+      </app-alerta>
     </main>
   `,
 })

@@ -1,0 +1,202 @@
+name: Development CI
+
+on:
+  pull_request:
+    branches: [desarrollo]
+  push:
+    branches: [desarrollo]
+
+concurrency:
+  group: development-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    name: Tests backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configurar JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Ejecutar tests
+        working-directory: backend
+        run: ./mvnw -B test
+
+  frontend-tests:
+    name: Tests frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Ejecutar tests con cobertura
+        working-directory: frontend
+        run: pnpm exec ng test --coverage --coverage-reporters json-summary
+
+      - name: Comprobar cobertura mínima (80% líneas)
+        working-directory: frontend
+        run: |
+          node -e "
+            const pct = require('./coverage/practikalia-frontend/coverage-summary.json').total.lines.pct;
+            console.log('Cobertura de líneas: ' + pct + '%');
+            if (pct < 80) {
+              console.error('Por debajo del mínimo requerido (80%).');
+              process.exit(1);
+            }
+          "
+
+      - name: Build de producción
+        working-directory: frontend
+        run: pnpm build
+
+  trivy-fs:
+    name: "Trivy: dependencias y configuración"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Dependencias del repo (pom.xml, pnpm-lock.yaml) y configuración de
+      # Dockerfiles/compose. Corre dos veces: una con todas las severidades
+      # para dejar constancia en GitHub Security (no bloquea el pipeline), y
+      # otra filtrada a CRITICAL/HIGH que sí lo bloquea si encuentra algo —
+      # así MEDIUM/LOW quedan visibles pero no frenan un PR.
+      - name: "Trivy (repo): informe completo"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,misconfig
+          skip-dirs: node_modules,dist,target,build,.angular,.docusaurus
+          format: sarif
+          output: trivy-fs.sarif
+          exit-code: '0'
+
+      - name: Subir informe de dependencias/configuración a GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs
+
+      - name: "Trivy (repo): bloqueo CRITICAL/HIGH"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,misconfig
+          skip-dirs: node_modules,dist,target,build,.angular,.docusaurus
+          trivyignores: .trivyignore
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+
+  trivy-image:
+    name: "Trivy: imagen ${{ matrix.image }}"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [backend, frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Construir imagen (validación, no se publica)
+        run: docker build -t practikalia-${{ matrix.image }}:ci ./${{ matrix.image }}
+
+      - name: "Trivy: informe completo"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: practikalia-${{ matrix.image }}:ci
+          format: sarif
+          output: trivy-image.sarif
+          exit-code: '0'
+
+      - name: Subir informe de la imagen a GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-image.sarif
+          category: trivy-image-${{ matrix.image }}
+
+      - name: "Trivy: bloqueo CRITICAL/HIGH"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: practikalia-${{ matrix.image }}:ci
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+
+  docker-publish:
+    name: "Publicar imagen beta: ${{ matrix.image }}"
+    if: github.event_name == 'push'
+    needs: [backend-tests, frontend-tests, trivy-fs, trivy-image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        image: [backend, frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configurar Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login en Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Metadatos de la imagen
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/practikalia-${{ matrix.image }}
+          tags: |
+            type=raw,value=beta
+            type=sha,prefix=beta-,format=short
+
+      - name: Build y push
+        uses: docker/build-push-action@v7
+        with:
+          context: ./${{ matrix.image }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

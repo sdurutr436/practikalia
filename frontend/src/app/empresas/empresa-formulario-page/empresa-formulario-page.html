@@ -1,13 +1,9 @@
 <main class="o-pagina">
   <app-volver a="/empresas" />
 
-  @if (cargando()) {
-    <p>Cargando…</p>
-  } @else {
+  <app-estado [cargando]="cargando()">
     <form class="c-formulario" [formGroup]="form" (ngSubmit)="enviar()">
-      <h1 class="c-formulario__titulo">
-        {{ modo() === 'editar' ? 'Editar empresa' : 'Nueva empresa' }}
-      </h1>
+      <h1 class="c-formulario__titulo">Nueva empresa</h1>
 
       @if (error(); as mensaje) {
         <app-alerta>{{ mensaje }}</app-alerta>
@@ -96,53 +92,7 @@
         [grupo]="true"
         ayuda="Quien tutoriza al alumnado dentro de la empresa. Hace falta al menos uno."
       >
-        <div class="c-tutores" formArrayName="tutores">
-          @for (fila of tutores.controls; track fila; let i = $index) {
-            <div class="c-tutores__fila" [formGroupName]="i">
-              <input
-                class="c-campo__entrada"
-                type="text"
-                placeholder="Nombre"
-                aria-label="Nombre del tutor"
-                formControlName="nombre"
-              />
-              <input
-                class="c-campo__entrada"
-                type="text"
-                placeholder="Cargo"
-                aria-label="Cargo del tutor"
-                formControlName="cargo"
-              />
-              <input
-                class="c-campo__entrada"
-                type="text"
-                placeholder="Teléfono"
-                aria-label="Teléfono del tutor"
-                formControlName="telefono"
-              />
-              <input
-                class="c-campo__entrada"
-                type="email"
-                placeholder="Correo"
-                aria-label="Correo del tutor"
-                formControlName="correo"
-              />
-              <button
-                class="c-tutores__quitar"
-                type="button"
-                aria-label="Quitar este tutor"
-                [disabled]="tutores.length === 1"
-                (click)="quitarTutor(i)"
-              >
-                <app-icono nombre="rechazar" />
-              </button>
-            </div>
-          }
-        </div>
-
-        <app-boton icono="anadir" [secundario]="true" (click)="anadirTutor()">
-          Añadir tutor
-        </app-boton>
+        <app-tutores-empresa [tutores]="tutores" />
       </app-campo>
 
       <app-campo etiqueta="Contacto: nombre" icono="persona" para="contacto-nombre">
@@ -172,43 +122,7 @@
         />
       </app-campo>
 
-      @if (modo() === 'editar') {
-        <label class="c-checkbox">
-          <input type="checkbox" formControlName="publicada" />
-          Publicada
-        </label>
-      }
-
-      <app-boton
-        tipo="submit"
-        [icono]="modo() === 'editar' ? 'guardar' : 'anadir'"
-        [cargando]="guardando()"
-      >
-        Guardar
-      </app-boton>
+      <app-boton tipo="submit" icono="anadir" [cargando]="guardando()">Guardar</app-boton>
     </form>
-
-    @if (modo() === 'editar') {
-      <section class="c-formulario">
-        <h2 class="c-formulario__titulo">Imagen</h2>
-        @if (imagenActual(); as imagen) {
-          <img class="c-ficha-empresa__imagen" [src]="imagen" alt="Imagen actual de la empresa" />
-        } @else {
-          <p>Sin imagen todavía.</p>
-        }
-        @if (errorImagen(); as mensaje) {
-          <app-alerta>{{ mensaje }}</app-alerta>
-        }
-        <app-campo etiqueta="Subir imagen" icono="subir" para="imagen-empresa">
-          <input
-            id="imagen-empresa"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            [disabled]="subiendoImagen()"
-            (change)="onArchivoSeleccionado($event)"
-          />
-        </app-campo>
-      </section>
-    }
-  }
+  </app-estado>
 </main>

@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en tu .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,12 +18,15 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en tu .env}
       APP_UPLOADS_DIR: /app/uploads
       # Dominios cuyos correos pueden darse de alta (auto-registro e importación
       # de alumnado). Por defecto el de las cuentas de demostración; cada centro
       # pone el suyo en el .env.
       ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-practikalia.test}
+      # Sin esto, el backend firma los JWT con el valor por defecto de
+      # desarrollo, público en el propio código fuente.
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en tu .env (ver docs)}
     volumes:
       - uploads_data:/app/uploads
     depends_on:
@@ -35,23 +38,13 @@ services:
   frontend:
     build: ./frontend
     volumes:
-      - frontend_dist:/app/dist/practikalia-frontend/browser
-
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - frontend_dist:/usr/share/nginx/html:ro
       - uploads_data:/usr/share/nginx/uploads:ro
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - "80:80"
+      - "80:8080"
     depends_on:
-      frontend:
-        condition: service_completed_successfully
       backend:
         condition: service_started
 
 volumes:
   postgres_data:
-  frontend_dist:
   uploads_data:

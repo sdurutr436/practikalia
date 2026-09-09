@@ -6,30 +6,12 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../app.routes';
 import { AuthService } from '../auth/auth.service';
 import { authInterceptor } from '../auth/auth.interceptor';
-import { Empresa } from '../empresas/empresa.model';
 import { Asignacion } from './asignacion.model';
 import { AsignacionFormularioPage } from './asignacion-formulario-page/asignacion-formulario-page';
 import { AlumnoAsignacionesPage } from './alumno-asignaciones-page/alumno-asignaciones-page';
 import { pagina } from '../pruebas';
 
 const esperarMicrotareas = () => new Promise((resolve) => setTimeout(resolve));
-
-const EMPRESA_PROFESOR: Empresa = {
-  id: 2,
-  nombre: 'Beta',
-  descripcion: 'Una empresa',
-  imagen: null,
-  direccion: 'Calle Falsa 123',
-  sector: { id: 10, nombre: 'Informática' },
-  etiquetas: [],
-  publicada: true,
-  observaciones: '',
-  contactoNombre: '',
-  contactoTelefono: '',
-  contactoEmail: '',
-  creadaPorCorreo: 'profesor@centro.es',
-  fechaCreacion: '2026-01-01T00:00:00Z',
-};
 
 const ASIGNACION_ABIERTA: Asignacion = {
   id: 5,
@@ -46,8 +28,9 @@ const ASIGNACION_ABIERTA: Asignacion = {
   contratadoPosterior: null,
 };
 
-describe('sección de asignaciones en el detalle de empresa', () => {
+describe('página de asignaciones de una empresa', () => {
   let http: HttpTestingController;
+  let router: Router;
   let auth: AuthService;
 
   beforeEach(() => {
@@ -59,6 +42,7 @@ describe('sección de asignaciones en el detalle de empresa', () => {
       ],
     });
     http = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
     auth = TestBed.inject(AuthService);
   });
 
@@ -70,26 +54,25 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     await promesa;
   }
 
-  it('profesor ve el histórico de asignaciones y puede cerrar una inline', async () => {
+  it('un alumno no puede acceder', async () => {
+    await loginComo('ALUMNO');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/empresas/2/asignaciones');
+    // profesorGuard deniega y "/" redirige al listado.
+    http.expectOne((r) => r.url === '/api/empresas').flush(pagina([]));
+    await esperarMicrotareas();
+    expect(router.url).toBe('/empresas');
+  });
+
+  it('profesor ve el histórico paginado y puede cerrar una asignación inline', async () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/empresas/2');
-    http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
-    await esperarMicrotareas();
-    http
-      .expectOne('/api/empresas/2/tasa-contratacion')
-      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
-    http.expectOne('/api/empresas/2/reviews').flush([]);
-    http.expectOne('/api/empresas/2/interesados').flush([]);
-    http.expectOne('/api/auth/me').flush({
-      id: 5,
-      correo: 'profesor@centro.es',
-      rol: 'PROFESOR',
-      esAdmin: false,
-      debeCambiarContrasena: false,
-      etiquetas: [],
-    });
+    await harness.navigateByUrl('/empresas/2/asignaciones');
+
+    const peticion = http.expectOne((r) => r.url === '/api/empresas/2/asignaciones');
+    expect(peticion.request.params.get('pagina')).toBe('0');
+    expect(peticion.request.params.get('tamano')).toBe('10');
+    peticion.flush({ contenido: [ASIGNACION_ABIERTA], pagina: 0, tamano: 1, total: 1, paginas: 1 });
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -98,18 +81,18 @@ describe('sección de asignaciones en el detalle de empresa', () => {
     expect(texto).toContain('DAM');
     expect(texto).toContain('abierta');
 
-    const contenedor = harness.routeNativeElement?.querySelector(
-      '.c-ficha-empresa__gestion:last-of-type',
-    ) as HTMLElement;
-    const inputFecha = contenedor.querySelector('input[type="date"]') as HTMLInputElement;
-    const boton = contenedor.querySelector('button.c-boton') as HTMLButtonElement;
+    const raiz = harness.routeNativeElement as HTMLElement;
+    const inputFecha = raiz.querySelector('input[type="date"]') as HTMLInputElement;
+    const boton = [...raiz.querySelectorAll('button.c-boton')].find((b) =>
+      b.textContent?.includes('Guardar'),
+    ) as HTMLButtonElement;
     inputFecha.value = '2027-06-30';
 
     // El desplegable se abre al enfocarlo y se elige pulsando su opción.
-    const desplegable = contenedor.querySelector('.c-desplegable__entrada') as HTMLInputElement;
+    const desplegable = raiz.querySelector('.c-desplegable__entrada') as HTMLInputElement;
     desplegable.dispatchEvent(new Event('focus'));
     harness.detectChanges();
-    const contratado = [...contenedor.querySelectorAll<HTMLElement>('.c-desplegable__opcion')].find(
+    const contratado = [...raiz.querySelectorAll<HTMLElement>('.c-desplegable__opcion')].find(
       (opcion) => opcion.textContent?.includes('Contratado'),
     )!;
     contratado.click();
@@ -117,10 +100,10 @@ describe('sección de asignaciones en el detalle de empresa', () => {
 
     boton.click();
 
-    const peticion = http.expectOne('/api/asignaciones/5');
-    expect(peticion.request.method).toBe('PUT');
-    expect(peticion.request.body).toEqual({ fechaFin: '2027-06-30', contratadoPosterior: true });
-    peticion.flush({ ...ASIGNACION_ABIERTA, fechaFin: '2027-06-30', contratadoPosterior: true });
+    const cierre = http.expectOne('/api/asignaciones/5');
+    expect(cierre.request.method).toBe('PUT');
+    expect(cierre.request.body).toEqual({ fechaFin: '2027-06-30', contratadoPosterior: true });
+    cierre.flush({ ...ASIGNACION_ABIERTA, fechaFin: '2027-06-30', contratadoPosterior: true });
     await esperarMicrotareas();
     harness.detectChanges();
 
@@ -132,31 +115,18 @@ describe('sección de asignaciones en el detalle de empresa', () => {
   it('un 404 al cerrar deja un mensaje de error legible en la fila', async () => {
     await loginComo('PROFESOR');
     const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/empresas/2');
-    http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
-    await esperarMicrotareas();
+    await harness.navigateByUrl('/empresas/2/asignaciones');
     http
-      .expectOne('/api/empresas/2/tasa-contratacion')
-      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
-    http.expectOne('/api/empresas/2/reviews').flush([]);
-    http.expectOne('/api/empresas/2/interesados').flush([]);
-    http.expectOne('/api/auth/me').flush({
-      id: 5,
-      correo: 'profesor@centro.es',
-      rol: 'PROFESOR',
-      esAdmin: false,
-      debeCambiarContrasena: false,
-      etiquetas: [],
-    });
+      .expectOne((r) => r.url === '/api/empresas/2/asignaciones')
+      .flush({ contenido: [ASIGNACION_ABIERTA], pagina: 0, tamano: 1, total: 1, paginas: 1 });
     await esperarMicrotareas();
     harness.detectChanges();
 
-    const contenedor = harness.routeNativeElement?.querySelector(
-      '.c-ficha-empresa__gestion:last-of-type',
-    ) as HTMLElement;
-    const inputFecha = contenedor.querySelector('input[type="date"]') as HTMLInputElement;
-    const boton = contenedor.querySelector('button.c-boton') as HTMLButtonElement;
+    const raiz = harness.routeNativeElement as HTMLElement;
+    const inputFecha = raiz.querySelector('input[type="date"]') as HTMLInputElement;
+    const boton = [...raiz.querySelectorAll('button.c-boton')].find((b) =>
+      b.textContent?.includes('Guardar'),
+    ) as HTMLButtonElement;
     inputFecha.value = '2027-06-30';
     boton.click();
 
@@ -273,26 +243,14 @@ describe('formulario de crear asignación', () => {
     });
     creacion.flush(ASIGNACION_ABIERTA);
     await envio;
-
-    http.expectOne('/api/empresas/2').flush(EMPRESA_PROFESOR);
-    await esperarMicrotareas();
-    http
-      .expectOne('/api/empresas/2/tasa-contratacion')
-      .flush({ empresaId: 2, asignacionesDecididas: 0, contrataciones: 0, tasa: 0 });
-    http.expectOne('/api/empresas/2/asignaciones').flush([ASIGNACION_ABIERTA]);
-    http.expectOne('/api/empresas/2/reviews').flush([]);
-    http.expectOne('/api/empresas/2/interesados').flush([]);
-    http.expectOne('/api/auth/me').flush({
-      id: 5,
-      correo: 'profesor@centro.es',
-      rol: 'PROFESOR',
-      esAdmin: false,
-      debeCambiarContrasena: false,
-      etiquetas: [],
-    });
     await esperarMicrotareas();
 
-    expect(router.url).toBe('/empresas/2');
+    // La navegación a /empresas/2/asignaciones monta la lista, que pide su propia página.
+    const peticionLista = http.expectOne((r) => r.url === '/api/empresas/2/asignaciones');
+    peticionLista.flush({ contenido: [ASIGNACION_ABIERTA], pagina: 0, tamano: 1, total: 1, paginas: 1 });
+    await esperarMicrotareas();
+
+    expect(router.url).toBe('/empresas/2/asignaciones');
   });
 
   it('un 409 al repetir (alumno, empresa, grado, año) se muestra legible', async () => {
