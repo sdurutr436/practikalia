@@ -4,7 +4,9 @@ sidebar_position: 2
 
 # Imágenes Docker
 
-Publicadas en Docker Hub como `<usuario>/practikalia-backend` y `<usuario>/practikalia-frontend`. Ambas son standalone: no hace falta clonar el repositorio ni compilar nada para usarlas — ver [Docker](../architecture/docker.md) para por qué el frontend también lo es.
+Publicadas en Docker Hub como [`sdurutr436/practikalia-backend`](https://hub.docker.com/r/sdurutr436/practikalia-backend) y [`sdurutr436/practikalia-frontend`](https://hub.docker.com/r/sdurutr436/practikalia-frontend). Ambas son standalone: no hace falta clonar el repositorio ni compilar nada para usarlas — ver [Docker](../architecture/docker.md) para por qué el frontend también lo es.
+
+Para levantar las tres directamente con estas imágenes (sin construir nada), usa [`docker-compose.prod.yml`](https://github.com/sdurutr436/practikalia/blob/main/docker-compose.prod.yml) — ver [Despliegue](deployment.md).
 
 | Rama | Etiquetas | Cuándo se publica |
 |---|---|---|
@@ -14,8 +16,8 @@ Publicadas en Docker Hub como `<usuario>/practikalia-backend` y `<usuario>/pract
 La etiqueta con el SHA corto es la trazable: identifica exactamente de qué commit salió esa imagen, incluso si `latest`/`beta` avanzan.
 
 ```bash
-docker pull <usuario>/practikalia-backend:latest
-docker pull <usuario>/practikalia-frontend:latest
+docker pull sdurutr436/practikalia-backend:latest
+docker pull sdurutr436/practikalia-frontend:latest
 ```
 
 :::info

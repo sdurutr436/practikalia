@@ -6,22 +6,25 @@ sidebar_position: 4
 
 Practikalia está pensado para un servidor dentro de la red de un centro educativo, no en internet público — ver [Arquitectura](../architecture/overview.md) para por qué `frontend` es el único servicio expuesto.
 
+## La vía rápida: solo las imágenes publicadas
+
+Un centro no necesita clonar el repositorio ni tener Java o Node instalados. Con `docker` y `docker compose`, y estos dos archivos:
+
+- [`docker-compose.prod.yml`](https://github.com/sdurutr436/practikalia/blob/main/docker-compose.prod.yml) — usa las imágenes ya publicadas (ver [Imágenes Docker](docker-images.md)) en vez de compilar nada.
+- `.env` — copiado de [`.env.example`](https://github.com/sdurutr436/practikalia/blob/main/.env.example), con `DB_PASSWORD` y `JWT_SECRET` propios (ver [Variables de entorno](../getting-started/environment-variables.md)).
+
+```bash
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Levanta `postgres`, `backend` y `frontend`; solo `frontend` publica un puerto (el 80). Ni `docker-compose.yml` (la variante que compila desde el código, para desarrollo) ni `docker-compose.prod.yml` arrancan si falta `DB_PASSWORD` o `JWT_SECRET` en el `.env` — fallan con un mensaje explícito en vez de arrancar con un secreto por defecto.
+
 ## Requisitos de red
 
-- El servidor necesita una IP fija (o reservada por DHCP) con el **puerto 80** abierto en su firewall. Ningún otro puerto necesita estar abierto hacia el resto de la red.
+- El servidor necesita una IP fija (o reservada por DHCP) con el **puerto 80** abierto en su firewall. Ningún otro puerto necesita estar abierto hacia el resto de la red — `docker-compose.prod.yml` ni siquiera publica el 8080 del backend.
 - Cada equipo del centro accede con `http://<ip-del-servidor>/`. Un nombre en vez de una IP (`http://practikalia.local/`) hay que resolverlo fuera de la app — DNS/router del centro o archivo hosts de cada equipo. **Queda pendiente (WIP)**, depende de la infraestructura de cada centro.
-- `docker-compose.yml` publica también el puerto `8080` del backend, solo para depurar en directo. En un despliegue real, ciérralo en el firewall del servidor.
 
-## Antes de exponerlo a la red del centro
+## Si prefieres construir desde el código
 
-:::danger Cambia el secreto del JWT
-`jwt.secret` tiene un valor por defecto pensado solo para desarrollo (ver [Variables de entorno](../getting-started/environment-variables.md)). Un despliegue real necesita fijar un valor propio antes de dar acceso a nadie — de lo contrario, cualquiera con ese valor por defecto podría firmar tokens válidos.
-:::
-
-## Cómo se instala hoy
-
-La única vía disponible hoy es clonar el repositorio y construir las imágenes en el propio servidor — ver [Instalación](../getting-started/installation.md). El paso de `docker compose build` compila backend y frontend desde el código fuente cada vez.
-
-:::info Pendiente
-Las imágenes ya se publican en Docker Hub (ver [Imágenes Docker](docker-images.md)), pero `docker-compose.yml` todavía usa `build:` en vez de `image:`. Para que un centro pudiera instalar Practikalia con un simple `docker compose pull && docker compose up -d`, sin clonar el repositorio ni tener Node/Java instalados, haría falta una variante de `docker-compose.yml` que referencie las imágenes publicadas. No existe todavía.
-:::
+Sigue siendo posible — ver [Instalación](../getting-started/installation.md) (`docker-compose.yml`, con `build:` en vez de `image:`). Tiene el mismo requisito de `DB_PASSWORD`/`JWT_SECRET`, y además publica el puerto `8080` del backend para depurar en directo — ciérralo en el firewall en un despliegue real.
