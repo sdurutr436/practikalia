@@ -1,0 +1,9 @@
+# image-size@2.0.2 (transitiva de @docusaurus/mdx-loader, docs-site/pnpm-lock.yaml).
+# CVE-2025-71329 y CVE-2025-71330: DoS por imagen manipulada. Sin parche
+# disponible todavía (status "affected" en Trivy a fecha 2026-09-09).
+# Solo se ejecuta en tiempo de build de Docusaurus, procesando los assets
+# propios del repositorio (nunca contenido subido por personas usuarias ni
+# código que llegue a ejecutarse en el sitio ya publicado) — sin superficie
+# de ataque real. Revisar cuando exista una versión con corrección.
+CVE-2025-71329
+CVE-2025-71330

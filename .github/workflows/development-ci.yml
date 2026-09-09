@@ -41,6 +41,8 @@ jobs:
 
       - name: Configurar pnpm
         uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
 
       - name: Configurar Node.js
         uses: actions/setup-node@v7
@@ -112,6 +114,7 @@ jobs:
           scan-ref: .
           scanners: vuln,misconfig
           skip-dirs: node_modules,dist,target,build,.angular,.docusaurus
+          trivyignores: .trivyignore
           format: table
           severity: CRITICAL,HIGH
           exit-code: '1'
