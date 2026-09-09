@@ -85,6 +85,7 @@ jobs:
           scan-type: fs
           scan-ref: .
           scanners: vuln,misconfig
+          skip-dirs: node_modules,dist,target,build,.angular,.docusaurus
           format: sarif
           output: trivy-fs.sarif
           exit-code: '0'
@@ -101,6 +102,7 @@ jobs:
           scan-type: fs
           scan-ref: .
           scanners: vuln,misconfig
+          skip-dirs: node_modules,dist,target,build,.angular,.docusaurus
           format: table
           severity: CRITICAL,HIGH
           exit-code: '1'
