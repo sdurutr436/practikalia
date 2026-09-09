@@ -1,0 +1,121 @@
+name: Main release
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: main-release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  docs-build:
+    name: Build de documentación
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: docs-site/pnpm-lock.yaml
+
+      - name: Instalar dependencias
+        working-directory: docs-site
+        run: pnpm install --frozen-lockfile
+
+      - name: Build de Docusaurus
+        working-directory: docs-site
+        run: pnpm build
+
+      # En pull request esto solo valida que la documentación compila; la
+      # publicación real (configurar Pages y desplegar) queda para el job
+      # docs-deploy, que es el único con permiso pages:write y solo corre en push.
+      - name: Subir artefacto de Pages
+        if: github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs-site/build
+
+  docs-deploy:
+    name: Publicar en GitHub Pages
+    if: github.event_name == 'push'
+    needs: docs-build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Habilita GitHub Pages (origen "GitHub Actions") si el repositorio
+      # todavía no lo tiene configurado; si ya lo está, no hace nada.
+      - name: Preparar Pages
+        uses: actions/configure-pages@v6
+
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  docker-validate:
+    name: "Validar build: ${{ matrix.image }}"
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [backend, frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Construir imagen (validación, no se publica)
+        run: docker build -t practikalia-${{ matrix.image }}:pr ./${{ matrix.image }}
+
+  docker-release:
+    name: "Publicar imagen estable: ${{ matrix.image }}"
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        image: [backend, frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Login en Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Metadatos de la imagen
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/practikalia-${{ matrix.image }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
+
+      - name: Build y push
+        uses: docker/build-push-action@v7
+        with:
+          context: ./${{ matrix.image }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

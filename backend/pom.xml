@@ -30,6 +30,11 @@
 		<java.version>25</java.version>
 		<jjwt.version>0.12.6</jjwt.version>
 		<springdoc.version>2.7.0</springdoc.version>
+		<!-- Overrides puntuales sobre el BOM de Spring Boot para cerrar CVEs
+		     conocidas (CVE-2026-65182 y otras en Tomcat, CVE-2026-54291 en el
+		     driver de postgres) sin tocar la versión de Spring Boot. -->
+		<tomcat.version>11.0.25</tomcat.version>
+		<postgresql.version>42.7.12</postgresql.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -185,6 +190,27 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>test</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

@@ -14,29 +14,22 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    image: sdurutr436/practikalia-backend:latest
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en tu .env}
       APP_UPLOADS_DIR: /app/uploads
-      # Dominios cuyos correos pueden darse de alta (auto-registro e importación
-      # de alumnado). Por defecto el de las cuentas de demostración; cada centro
-      # pone el suyo en el .env.
       ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-practikalia.test}
-      # Sin esto, el backend firma los JWT con el valor por defecto de
-      # desarrollo, público en el propio código fuente.
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en tu .env (ver docs)}
     volumes:
       - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "8080:8080"
 
   frontend:
-    build: ./frontend
+    image: sdurutr436/practikalia-frontend:latest
     volumes:
       - uploads_data:/usr/share/nginx/uploads:ro
     ports:
