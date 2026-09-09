@@ -53,9 +53,21 @@ jobs:
         working-directory: frontend
         run: pnpm install --frozen-lockfile
 
-      - name: Ejecutar tests
+      - name: Ejecutar tests con cobertura
         working-directory: frontend
-        run: pnpm test
+        run: pnpm exec ng test --coverage --coverage-reporters json-summary
+
+      - name: Comprobar cobertura mínima (80% líneas)
+        working-directory: frontend
+        run: |
+          node -e "
+            const pct = require('./coverage/practikalia-frontend/coverage-summary.json').total.lines.pct;
+            console.log('Cobertura de líneas: ' + pct + '%');
+            if (pct < 80) {
+              console.error('Por debajo del mínimo requerido (80%).');
+              process.exit(1);
+            }
+          "
 
       - name: Build de producción
         working-directory: frontend
