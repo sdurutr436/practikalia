@@ -40,7 +40,7 @@ services:
     volumes:
       - uploads_data:/usr/share/nginx/uploads:ro
     ports:
-      - "80:80"
+      - "80:8080"
     depends_on:
       backend:
         condition: service_started
