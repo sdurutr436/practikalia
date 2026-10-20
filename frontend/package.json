@@ -16,7 +16,7 @@
     "@angular/core": "^22.0.0",
     "@angular/forms": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
-    "@angular/router": "^22.0.0",
+    "@angular/router": "^22.2.1",
     "@fluentui/svg-icons": "^1.1.339",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
